@@ -9,6 +9,38 @@
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
 
+const char *vert = R"(
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+void main()
+{
+    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+}
+)";
+
+const char *frag = R"(
+#version 330 core
+out vec4 FragColor;
+
+void main()
+{
+    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+}
+)";
+
+const float vertices[] = {
+     0.5f,  0.5f, 0.0f, // Top right
+     0.5f, -0.5f, 0.0f, // Bottom right
+    -0.5f, -0.5f, 0.0f, // Bottom left
+    -0.5f,  0.5f, 0.0f  // Top left
+};
+
+const unsigned int indices[] = {
+    0, 1, 3,    // First triangle
+    1, 2, 3     // Second triangle
+};
+
 GLlelu::GLlelu(int argc, char *argv[]):
     window(nullptr),
     context(nullptr),
@@ -76,6 +108,87 @@ int GLlelu::run()
     if (!window || !context)
         return EXIT_FAILURE;
 
+    int success;
+    char infoLog[512];
+
+    // Compile vertex shader
+    unsigned int vertexShader;
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+
+    glShaderSource(vertexShader, 1, &vert, NULL);
+    glCompileShader(vertexShader);
+
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        fprintf(stderr, "Failed to compile vertex shader: %s\n", infoLog);
+        return EXIT_FAILURE;
+    }
+
+    // Compile fragment shader
+    unsigned int fragmentShader;
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+
+    glShaderSource(fragmentShader, 1, &frag, NULL);
+    glCompileShader(fragmentShader);
+
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        fprintf(stderr, "Failed to compile fragment shader: %s\n", infoLog);
+        return EXIT_FAILURE;
+    }
+
+    // Create shader program
+    unsigned int shaderProgram;
+    shaderProgram = glCreateProgram();
+
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        fprintf(stderr, "Failed to link shader program: %s\n", infoLog);
+        return EXIT_FAILURE;
+    }
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    // Create vertex array object
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);
+
+    glBindVertexArray(VAO);
+
+    // Create vertex buffer object
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Set vertex attribute pointers
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // Create element buffer object
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // VAO stores the buffer bind calls so unbind it first
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // Draw wireframe
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     bool quit = false;
     SDL_Event event;
 
@@ -92,6 +205,11 @@ int GLlelu::run()
 
         glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
 
         SDL_GL_SwapWindow(window);
 
