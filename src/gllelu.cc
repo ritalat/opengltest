@@ -2,6 +2,7 @@
 
 #include "glad/gl.h"
 #include "SDL.h"
+#include "shader.hh"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,32 +10,6 @@
 
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
-
-const char *vert = R"(
-#version 330 core
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aColor;
-
-out vec3 vertColor;
-
-void main()
-{
-    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-    vertColor = aColor;
-}
-)";
-
-const char *frag = R"(
-#version 330 core
-out vec4 FragColor;
-
-in vec3 vertColor;
-
-void main()
-{
-    FragColor = vec4(vertColor, 1.0);
-}
-)";
 
 const float vertices[] = {
      0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
@@ -109,54 +84,9 @@ int GLlelu::run()
     if (!window || !context)
         return EXIT_FAILURE;
 
-    int success;
-    char infoLog[512];
-
-    // Compile vertex shader
-    unsigned int vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-    glShaderSource(vertexShader, 1, &vert, NULL);
-    glCompileShader(vertexShader);
-
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        fprintf(stderr, "Failed to compile vertex shader: %s\n", infoLog);
+    Shader triangleShader;
+    if (!triangleShader.load("triangle.vert", "triangle.frag"))
         return EXIT_FAILURE;
-    }
-
-    // Compile fragment shader
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-    glShaderSource(fragmentShader, 1, &frag, NULL);
-    glCompileShader(fragmentShader);
-
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        fprintf(stderr, "Failed to compile fragment shader: %s\n", infoLog);
-        return EXIT_FAILURE;
-    }
-
-    // Create shader program
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
-
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        fprintf(stderr, "Failed to link shader program: %s\n", infoLog);
-        return EXIT_FAILURE;
-    }
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
 
     // Create vertex array object
     unsigned int VAO;
@@ -188,7 +118,6 @@ int GLlelu::run()
     SDL_Event event;
 
     while (!quit) {
-        // Handle input
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
@@ -199,19 +128,15 @@ int GLlelu::run()
             }
         }
 
-        // Clear color buffer
         glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Activate shader program
-        glUseProgram(shaderProgram);
+        triangleShader.use();
 
-        // Draw
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
 
-        // Swap buffers
         SDL_GL_SwapWindow(window);
 
         ++frameCount;

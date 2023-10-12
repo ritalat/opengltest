@@ -3,9 +3,11 @@ cmake_minimum_required(VERSION 3.16)
 add_subdirectory(glad)
 
 set(SOURCES main.cc
-            gllelu.cc)
+            gllelu.cc
+            shader.cc)
 
-set(HEADERS gllelu.hh)
+set(HEADERS gllelu.hh
+            shader.hh)
 
 add_executable(opengltest ${SOURCES} ${HEADERS})
 
