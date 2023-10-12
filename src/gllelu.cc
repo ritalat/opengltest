@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
@@ -12,10 +13,14 @@
 const char *vert = R"(
 #version 330 core
 layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
+
+out vec3 vertColor;
 
 void main()
 {
     gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    vertColor = aColor;
 }
 )";
 
@@ -23,22 +28,18 @@ const char *frag = R"(
 #version 330 core
 out vec4 FragColor;
 
+in vec3 vertColor;
+
 void main()
 {
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    FragColor = vec4(vertColor, 1.0);
 }
 )";
 
 const float vertices[] = {
-     0.5f,  0.5f, 0.0f, // Top right
-     0.5f, -0.5f, 0.0f, // Bottom right
-    -0.5f, -0.5f, 0.0f, // Bottom left
-    -0.5f,  0.5f, 0.0f  // Top left
-};
-
-const unsigned int indices[] = {
-    0, 1, 3,    // First triangle
-    1, 2, 3     // Second triangle
+     0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+    -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+     0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
 };
 
 GLlelu::GLlelu(int argc, char *argv[]):
@@ -171,19 +172,13 @@ int GLlelu::run()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // Set vertex attribute pointers
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
-    // Create element buffer object
-    unsigned int EBO;
-    glGenBuffers(1, &EBO);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // VAO stores the buffer bind calls so unbind it first
     glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // Draw wireframe
@@ -193,6 +188,7 @@ int GLlelu::run()
     SDL_Event event;
 
     while (!quit) {
+        // Handle input
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
@@ -203,14 +199,19 @@ int GLlelu::run()
             }
         }
 
+        // Clear color buffer
         glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        // Activate shader program
         glUseProgram(shaderProgram);
+
+        // Draw
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
 
+        // Swap buffers
         SDL_GL_SwapWindow(window);
 
         ++frameCount;
