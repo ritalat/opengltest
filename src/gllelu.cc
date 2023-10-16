@@ -1,20 +1,30 @@
 #include "gllelu.hh"
 
-#include "glad/gl.h"
-#include "SDL.h"
 #include "shader.hh"
 
+#include "glad/gl.h"
+#include "SDL.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
 
 const float vertices[] = {
-     0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-    -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-     0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+    // positions         // colors          // texture coords
+     0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,  // top right
+     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,  // bottom right
+    -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,  // bottom left
+    -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f   // top left
+};
+
+const unsigned int indices[] = {
+    0, 1, 3,  // first triangle
+    1, 2, 3   // second triangle
 };
 
 GLlelu::GLlelu(int argc, char *argv[]):
@@ -84,9 +94,71 @@ int GLlelu::run()
     if (!window || !context)
         return EXIT_FAILURE;
 
-    Shader triangleShader;
-    if (!triangleShader.load("triangle.vert", "triangle.frag"))
+    Shader texturedShader;
+    if (!texturedShader.load("textured.vert", "textured.frag"))
         return EXIT_FAILURE;
+
+    stbi_set_flip_vertically_on_load(true);
+
+    // Create texture object
+    unsigned int texture0;
+    glGenTextures(1, &texture0);
+
+    glBindTexture(GL_TEXTURE_2D, texture0);
+
+    // Set texture wrapping mode
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+    // Set texture filtering
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Load a texture from file
+    int width, height, nrChannels;
+    const char *tex0Path = "../assets/lgl_container.jpg";
+    unsigned char *data = stbi_load(tex0Path, &width, &height, &nrChannels, 0);
+
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        stbi_image_free(data);
+    } else {
+        fprintf(stderr, "Failed to load texture: %s", tex0Path);
+        return EXIT_FAILURE;
+    }
+
+    // Set which texture unit a sampler belongs to
+    texturedShader.use();
+    texturedShader.setInt("texture0", 0);
+
+    unsigned int texture1;
+    glGenTextures(1, &texture1);
+
+    glBindTexture(GL_TEXTURE_2D, texture1);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    const char *tex1Path = "../assets/lgl_awesomeface.png";
+    data = stbi_load(tex1Path, &width, &height, &nrChannels, 0);
+
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        stbi_image_free(data);
+    } else {
+        fprintf(stderr, "Failed to load texture: %s", tex1Path);
+        return EXIT_FAILURE;
+    }
+
+    texturedShader.use();
+    texturedShader.setInt("texture1", 1);
 
     // Create vertex array object
     unsigned int VAO;
@@ -102,14 +174,24 @@ int GLlelu::run()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // Set vertex attribute pointers
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    // Create element buffer object
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     // VAO stores the buffer bind calls so unbind it first
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     // Draw wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -128,13 +210,18 @@ int GLlelu::run()
             }
         }
 
-        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        triangleShader.use();
+        texturedShader.use();
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture0);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture1);
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
         SDL_GL_SwapWindow(window);

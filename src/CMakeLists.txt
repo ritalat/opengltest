@@ -23,4 +23,5 @@ endif()
 target_link_libraries(opengltest glad
                                  SDL2::SDL2
                                  SDL2::SDL2main
-                                 glm::glm)
+                                 glm::glm
+                                 stb)
