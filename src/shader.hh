@@ -14,6 +14,5 @@ public:
     void setInt(const std::string_view name, int value);
     void setFloat(const std::string_view name, float value);
 
-private:
     unsigned int id;
 };
