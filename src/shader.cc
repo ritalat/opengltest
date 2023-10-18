@@ -1,6 +1,7 @@
 #include "shader.hh"
 
 #include "glad/gl.h"
+#include "glm/glm.hpp"
 
 #include <fstream>
 #include <string>
@@ -27,7 +28,6 @@ bool Shader::load(const std::string_view vert, const std::string_view frag)
     int success;
     char infoLog[512];
 
-    // Compile vertex shader
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
@@ -41,7 +41,6 @@ bool Shader::load(const std::string_view vert, const std::string_view frag)
         return false;
     }
 
-    // Compile fragment shader
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
@@ -55,7 +54,6 @@ bool Shader::load(const std::string_view vert, const std::string_view frag)
         return false;
     }
 
-    // Create shader program
     id = glCreateProgram();
 
     glAttachShader(id, vertexShader);
@@ -96,4 +94,58 @@ void Shader::setFloat(const std::string_view name, float value)
 {
     int location = glGetUniformLocation(id, name.data());
     glUniform1i(location, value);
+}
+
+void Shader::setVec2(const std::string_view name, const glm::vec2 &value)
+{
+    int location = glGetUniformLocation(id, name.data());
+    glUniform2fv(location, 1, &value[0]);
+}
+
+void Shader::setVec2(const std::string_view name, float x, float y)
+{
+    int location = glGetUniformLocation(id, name.data());
+    glUniform2f(location, x, y);
+}
+
+void Shader::setVec3(const std::string_view name, const glm::vec3 &value)
+{
+    int location = glGetUniformLocation(id, name.data());
+    glUniform3fv(location, 1, &value[0]);
+}
+
+void Shader::setVec3(const std::string_view name, float x, float y, float z)
+{
+    int location = glGetUniformLocation(id, name.data());
+    glUniform3f(location, x, y, z);
+}
+
+void Shader::setVec4(const std::string_view name, const glm::vec4 &value)
+{
+    int location = glGetUniformLocation(id, name.data());
+    glUniform4fv(location, 1, &value[0]);
+}
+
+void Shader::setVec4(const std::string_view name, float x, float y, float z, float w)
+{
+    int location = glGetUniformLocation(id, name.data());
+    glUniform4f(location, x, y, z, w);
+}
+
+void Shader::setMat2(const std::string_view name, const glm::mat2 &value)
+{
+    int location = glGetUniformLocation(id, name.data());
+    glUniformMatrix2fv(location, 1, GL_FALSE, &value[0][0]);
+}
+
+void Shader::setMat3(const std::string_view name, const glm::mat3 &value)
+{
+    int location = glGetUniformLocation(id, name.data());
+    glUniformMatrix3fv(location, 1, GL_FALSE, &value[0][0]);
+}
+
+void Shader::setMat4(const std::string_view name, const glm::mat4 &value)
+{
+    int location = glGetUniformLocation(id, name.data());
+    glUniformMatrix4fv(location, 1, GL_FALSE, &value[0][0]);
 }
