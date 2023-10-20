@@ -18,5 +18,4 @@ private:
     SDL_Window *window;
     SDL_GLContext context;
     DrawableSize fbSize;
-    int frameCount;
 };
