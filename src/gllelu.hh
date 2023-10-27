@@ -12,9 +12,10 @@ class GLlelu
 {
 public:
     GLlelu(int argc, char *argv[]);
-    ~GLlelu();
+    virtual ~GLlelu();
     int run();
-private:
+    virtual int main_loop() = 0;
+
     SDL_Window *window;
     SDL_GLContext context;
     DrawableSize fbSize;

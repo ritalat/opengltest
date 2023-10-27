@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "..." FORCE)
 endif()
@@ -21,4 +24,5 @@ add_subdirectory(external)
 
 add_subdirectory(src)
 
-install(TARGETS opengltest SDL2 RUNTIME DESTINATION ".")
+#install(TARGETS ${SAMPLES} SDL2 RUNTIME DESTINATION ".")
+#install(DIRECTORY assets shaders DESTINATION ".")
