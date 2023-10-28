@@ -1,25 +1,17 @@
 cmake_minimum_required(VERSION 3.16)
 
-add_subdirectory(glad)
+add_subdirectory(mylly)
 
 set(SAMPLES hello_triangle
-            lgl_1)
+            lgl_1
+            PARENT_SCOPE)
 
 function(create_sample name)
-    set(SOURCES ${name}.cc
-                gllelu.cc
-                path.cc
-                shader.cc)
-
-    set(HEADERS gllelu.hh
-                path.hh
-                shader.hh)
-
-    add_executable(${name} ${SOURCES} ${HEADERS})
+    add_executable(${name} src/${name}.cc)
 
     if(WIN32)
         # This only works with generated VS solutions
-        # When using VS builtin cmake support you must edit launch.vs.json instead
+        # When using VS builtin cmake support you must edit CMakeSettings.json instead
         set(VSENV "GLLELU_DATADIR=${CMAKE_SOURCE_DIR}")
         # Only set the correct subsystem for release builds
         # This way we can easily see console output in debug builds
@@ -32,13 +24,5 @@ function(create_sample name)
         set_target_properties(${name} PROPERTIES INSTALL_RPATH "\${ORIGIN}")
     endif()
 
-    target_link_libraries(${name} glad
-                                  SDL2::SDL2
-                                  SDL2::SDL2main
-                                  glm::glm
-                                  stb)
+    target_link_libraries(${name} mylly)
 endfunction()
-
-foreach(SAMPLE ${SAMPLES})
-    create_sample(${SAMPLE})
-endforeach()

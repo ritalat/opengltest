@@ -24,5 +24,9 @@ add_subdirectory(external)
 
 add_subdirectory(src)
 
-#install(TARGETS ${SAMPLES} SDL2 RUNTIME DESTINATION ".")
-#install(DIRECTORY assets shaders DESTINATION ".")
+foreach(SAMPLE ${SAMPLES})
+    create_sample(${SAMPLE})
+endforeach()
+
+install(TARGETS ${SAMPLES} mylly SDL2 RUNTIME DESTINATION ".")
+install(DIRECTORY assets shaders DESTINATION ".")
