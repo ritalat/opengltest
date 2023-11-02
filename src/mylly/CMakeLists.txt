@@ -4,12 +4,14 @@ set(SOURCES gllelu.cc
             gllelucamera.cc
             path.cc
             shader.cc
+            texture.cc
             glad/src/gl.c)
 
 set(HEADERS gllelu.hh
             gllelucamera.hh
             path.hh
             shader.hh
+            texture.hh
             glad/include/glad/gl.h
             glad/include/KHR/khrplatform.h)
 

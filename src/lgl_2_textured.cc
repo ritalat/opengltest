@@ -1,13 +1,12 @@
 #include "gllelucamera.hh"
 #include "path.hh"
 #include "shader.hh"
+#include "texture.hh"
 
 #include "glad/gl.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "SDL.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -104,37 +103,13 @@ LGL_2_Textured::LGL_2_Textured(int argc, char *argv[]):
         return;
     }
 
-    stbi_set_flip_vertically_on_load(true);
+    if (!load_texture(diffuseMap, "lgl_container2.png")) {
+        quit = true;
+        status = EXIT_FAILURE;
+        return;
+    }
 
-    auto channelsToFormat = [](int n){
-        if (n == 1) {
-            return GL_RED;
-        } else if (n == 3) {
-            return GL_RGB;
-        } else {
-            return GL_RGBA;
-        }
-    };
-
-    glGenTextures(1, &diffuseMap);
-    glBindTexture(GL_TEXTURE_2D, diffuseMap);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    int width, height, nrChannels;
-    Path diffusePath = get_asset_path("lgl_container2.png");
-    unsigned char *data = stbi_load(diffusePath.c_str(), &width, &height, &nrChannels, 0);
-
-    if (data) {
-        GLenum format = channelsToFormat(nrChannels);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        stbi_image_free(data);
-    } else {
-        fprintf(stderr, "Failed to load texture: %s", diffusePath.c_str());
+    if (!load_texture(specularMap, "lgl_container2_specular.png")) {
         quit = true;
         status = EXIT_FAILURE;
         return;
@@ -142,31 +117,6 @@ LGL_2_Textured::LGL_2_Textured(int argc, char *argv[]):
 
     lightingShader.use();
     lightingShader.set_int("material.diffuse", 0);
-
-    glGenTextures(1, &specularMap);
-    glBindTexture(GL_TEXTURE_2D, specularMap);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    Path specularPath = get_asset_path("lgl_container2_specular.png");
-    data = stbi_load(specularPath.c_str(), &width, &height, &nrChannels, 0);
-
-    if (data) {
-        GLenum format = channelsToFormat(nrChannels);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        stbi_image_free(data);
-    } else {
-        fprintf(stderr, "Failed to load texture: %s", specularPath.c_str());
-        quit = true;
-        status = EXIT_FAILURE;
-        return;
-    }
-
-    lightingShader.use();
     lightingShader.set_int("material.specular", 1);
 
     glGenVertexArrays(1, &VAO);
