@@ -11,7 +11,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <string>
 
 const float vertices[] = {
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f,
@@ -126,8 +125,8 @@ LGL_2_Textured::LGL_2_Textured(int argc, char *argv[]):
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, nrChannels;
-    std::string diffusePath = get_asset_path("lgl_container2.png");
-    unsigned char *data = stbi_load(diffusePath.data(), &width, &height, &nrChannels, 0);
+    Path diffusePath = get_asset_path("lgl_container2.png");
+    unsigned char *data = stbi_load(diffusePath.c_str(), &width, &height, &nrChannels, 0);
 
     if (data) {
         GLenum format = channelsToFormat(nrChannels);
@@ -135,7 +134,7 @@ LGL_2_Textured::LGL_2_Textured(int argc, char *argv[]):
         glGenerateMipmap(GL_TEXTURE_2D);
         stbi_image_free(data);
     } else {
-        fprintf(stderr, "Failed to load texture: %s", diffusePath.data());
+        fprintf(stderr, "Failed to load texture: %s", diffusePath.c_str());
         quit = true;
         status = EXIT_FAILURE;
         return;
@@ -152,8 +151,8 @@ LGL_2_Textured::LGL_2_Textured(int argc, char *argv[]):
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    std::string specularPath = get_asset_path("lgl_container2_specular.png");
-    data = stbi_load(specularPath.data(), &width, &height, &nrChannels, 0);
+    Path specularPath = get_asset_path("lgl_container2_specular.png");
+    data = stbi_load(specularPath.c_str(), &width, &height, &nrChannels, 0);
 
     if (data) {
         GLenum format = channelsToFormat(nrChannels);
@@ -161,7 +160,7 @@ LGL_2_Textured::LGL_2_Textured(int argc, char *argv[]):
         glGenerateMipmap(GL_TEXTURE_2D);
         stbi_image_free(data);
     } else {
-        fprintf(stderr, "Failed to load texture: %s", specularPath.data());
+        fprintf(stderr, "Failed to load texture: %s", specularPath.c_str());
         quit = true;
         status = EXIT_FAILURE;
         return;

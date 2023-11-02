@@ -1,9 +1,13 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <string_view>
 
-std::string get_path(std::string_view file);
-std::string get_asset_path(std::string_view file);
-std::string get_shader_path(std::string_view file);
-std::string slurp_file(std::string_view path);
+using Path = std::filesystem::path;
+
+Path datadir();
+Path get_path(std::string_view file);
+Path get_asset_path(std::string_view file);
+Path get_shader_path(std::string_view file);
+std::string slurp_file(Path path);

@@ -1,34 +1,40 @@
 #include "path.hh"
 
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <string_view>
 
-const std::string BASE_DIR = [](){
+const Path BASE_DIR = [](){
     const char *env = getenv("GLLELU_DATADIR");
     if (env)
         return env;
     return ".";
 }();
 
-std::string get_path(std::string_view file)
+Path datadir()
 {
-    return BASE_DIR + "/" + file.data();
+    return BASE_DIR;
 }
 
-std::string get_asset_path(std::string_view file)
+Path get_path(std::string_view file)
 {
-    return BASE_DIR + "/assets/" + file.data();
+    return BASE_DIR / file;
 }
 
-std::string get_shader_path(std::string_view file)
+Path get_asset_path(std::string_view file)
 {
-    return BASE_DIR + "/shaders/" + file.data();
+    return BASE_DIR / "assets" / file;
 }
 
-std::string slurp_file(std::string_view path)
+Path get_shader_path(std::string_view file)
 {
-    std::ifstream stream(path.data());
+    return BASE_DIR / "shaders" / file;
+}
+
+std::string slurp_file(Path path)
+{
+    std::ifstream stream(path);
     return std::string( (std::istreambuf_iterator<char>(stream)),
                         (std::istreambuf_iterator<char>()) );
 }

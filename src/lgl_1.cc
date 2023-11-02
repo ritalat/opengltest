@@ -5,14 +5,12 @@
 #include "glad/gl.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
 #include "SDL.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 #include <cstdio>
 #include <cstdlib>
-#include <string>
 
 const float vertices[] = {
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -107,8 +105,8 @@ LGL_1::LGL_1(int argc, char *argv[]):
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, nrChannels;
-    std::string tex0Path = get_asset_path("lgl_container.jpg");
-    unsigned char *data = stbi_load(tex0Path.data(), &width, &height, &nrChannels, 0);
+    Path tex0Path = get_asset_path("lgl_container.jpg");
+    unsigned char *data = stbi_load(tex0Path.c_str(), &width, &height, &nrChannels, 0);
 
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -116,7 +114,7 @@ LGL_1::LGL_1(int argc, char *argv[]):
 
         stbi_image_free(data);
     } else {
-        fprintf(stderr, "Failed to load texture: %s", tex0Path.data());
+        fprintf(stderr, "Failed to load texture: %s", tex0Path.c_str());
         quit = true;
         status = EXIT_FAILURE;
         return;
@@ -133,8 +131,8 @@ LGL_1::LGL_1(int argc, char *argv[]):
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    std::string tex1Path = get_asset_path("lgl_awesomeface.png");
-    data = stbi_load(tex1Path.data(), &width, &height, &nrChannels, 0);
+    Path tex1Path = get_asset_path("lgl_awesomeface.png");
+    data = stbi_load(tex1Path.c_str(), &width, &height, &nrChannels, 0);
 
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -142,7 +140,7 @@ LGL_1::LGL_1(int argc, char *argv[]):
 
         stbi_image_free(data);
     } else {
-        fprintf(stderr, "Failed to load texture: %s", tex1Path.data());
+        fprintf(stderr, "Failed to load texture: %s", tex1Path.c_str());
         quit = true;
         status = EXIT_FAILURE;
         return;

@@ -6,6 +6,7 @@
 #include "SDL.h"
 
 #include <cstdio>
+#include <filesystem>
 
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
@@ -26,7 +27,13 @@ GLlelu::GLlelu(int argc, char *argv[]):
     fprintf(stderr, "Loaded: SDL %u.%u.%u\n",
                     linked.major, linked.minor, linked.patch);
 
-    fprintf(stderr, "Data directory: %s\n", get_path("").data());
+    Path dataDir = datadir();
+    if (dataDir.is_absolute()) {
+        fprintf(stderr, "Data directory: %s\n", dataDir.c_str());
+    } else {
+        Path absolute = std::filesystem::weakly_canonical(dataDir);
+        fprintf(stderr, "Data directory: %s (%s)\n", dataDir.c_str(), absolute.c_str());
+    }
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         fprintf(stderr, "Failed to init SDL\n");
