@@ -8,6 +8,7 @@
 
 GLleluCamera::GLleluCamera(int argc, char *argv[]):
     GLlelu(argc, argv),
+    cameraPos(0.0f, 0.0f, 3.0f),
     fov(45.0f),
     mouseSensitivity(0.1f),
     cameraSpeed(0.0025f),
@@ -25,7 +26,6 @@ int GLleluCamera::main_loop()
     unsigned int deltaTime = 0;
     unsigned int lastFrame = 0;
 
-    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
     glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 

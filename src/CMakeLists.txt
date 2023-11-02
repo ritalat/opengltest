@@ -4,6 +4,8 @@ add_subdirectory(mylly)
 
 set(SAMPLES hello_triangle
             lgl_1
+            lgl_2_basic
+            lgl_2_textured
             PARENT_SCOPE)
 
 function(create_sample name)

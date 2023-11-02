@@ -17,6 +17,7 @@ public:
     virtual void render() = 0;
 
     glm::mat4 view;
+    glm::vec3 cameraPos;
     float fov;
     float cameraSpeed;
     float mouseSensitivity;
