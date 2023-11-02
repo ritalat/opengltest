@@ -106,7 +106,7 @@ LGL_1::LGL_1(int argc, char *argv[]):
 
     int width, height, nrChannels;
     Path tex0Path = get_asset_path("lgl_container.jpg");
-    unsigned char *data = stbi_load(tex0Path.c_str(), &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load(cpath(tex0Path), &width, &height, &nrChannels, 0);
 
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -114,7 +114,7 @@ LGL_1::LGL_1(int argc, char *argv[]):
 
         stbi_image_free(data);
     } else {
-        fprintf(stderr, "Failed to load texture: %s", tex0Path.c_str());
+        fprintf(stderr, "Failed to load texture: %s", cpath(tex0Path));
         quit = true;
         status = EXIT_FAILURE;
         return;
@@ -132,7 +132,7 @@ LGL_1::LGL_1(int argc, char *argv[]):
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     Path tex1Path = get_asset_path("lgl_awesomeface.png");
-    data = stbi_load(tex1Path.c_str(), &width, &height, &nrChannels, 0);
+    data = stbi_load(cpath(tex1Path), &width, &height, &nrChannels, 0);
 
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -140,7 +140,7 @@ LGL_1::LGL_1(int argc, char *argv[]):
 
         stbi_image_free(data);
     } else {
-        fprintf(stderr, "Failed to load texture: %s", tex1Path.c_str());
+        fprintf(stderr, "Failed to load texture: %s", cpath(tex1Path));
         quit = true;
         status = EXIT_FAILURE;
         return;

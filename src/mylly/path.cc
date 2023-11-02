@@ -32,7 +32,7 @@ Path get_shader_path(std::string_view file)
     return BASE_DIR / "shaders" / file;
 }
 
-std::string slurp_file(Path path)
+std::string slurp_file(const Path &path)
 {
     std::ifstream stream(path);
     return std::string( (std::istreambuf_iterator<char>(stream)),

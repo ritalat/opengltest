@@ -32,7 +32,7 @@ bool load_texture(unsigned int &textureId, std::string_view file)
 
     int width, height, nrChannels;
     Path texturePath = get_asset_path(file);
-    unsigned char *data = stbi_load(texturePath.c_str(), &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load(cpath(texturePath), &width, &height, &nrChannels, 0);
 
     if (data) {
         GLenum format = channelsToFormat(nrChannels);
@@ -41,7 +41,7 @@ bool load_texture(unsigned int &textureId, std::string_view file)
         stbi_image_free(data);
         return true;
     } else {
-        fprintf(stderr, "Failed to load texture: %s\n", texturePath.c_str());
+        fprintf(stderr, "Failed to load texture: %s\n", cpath(texturePath));
         return false;
     }
 }

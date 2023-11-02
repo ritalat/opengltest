@@ -29,10 +29,10 @@ GLlelu::GLlelu(int argc, char *argv[]):
 
     Path dataDir = datadir();
     if (dataDir.is_absolute()) {
-        fprintf(stderr, "Data directory: %s\n", dataDir.c_str());
+        fprintf(stderr, "Data directory: %s\n", cpath(dataDir));
     } else {
         Path absolute = std::filesystem::weakly_canonical(dataDir);
-        fprintf(stderr, "Data directory: %s (%s)\n", dataDir.c_str(), absolute.c_str());
+        fprintf(stderr, "Data directory: %s (%s)\n", cpath(dataDir), cpath(absolute));
     }
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
