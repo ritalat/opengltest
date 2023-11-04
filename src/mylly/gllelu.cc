@@ -11,12 +11,18 @@
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
 
+#define WINDOW_NAME "SDL OpenGL"
+
 GLlelu::GLlelu(int argc, char *argv[]):
     window(nullptr),
     context(nullptr)
 {
-    (void)argc;
-    (void)argv;
+    if (argc > 0) {
+        Path exe = Path(argv[0]).filename();
+        fprintf(stderr, "Starting %s (%s)\n", WINDOW_NAME, cpath(exe));
+    } else {
+        fprintf(stderr, "Starting %s\n", WINDOW_NAME);
+    }
 
     SDL_version compiled;
     SDL_version linked;
@@ -46,7 +52,7 @@ GLlelu::GLlelu(int argc, char *argv[]):
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
                         SDL_GL_CONTEXT_PROFILE_CORE);
 
-    window = SDL_CreateWindow("SDL OpenGL",
+    window = SDL_CreateWindow(WINDOW_NAME,
                               SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED,
                               WINDOW_WIDTH, WINDOW_HEIGHT,
