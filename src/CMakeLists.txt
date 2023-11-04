@@ -6,6 +6,7 @@ set(SAMPLES hello_triangle
             lgl_1
             lgl_2_basic
             lgl_2_textured
+            lgl_2
             PARENT_SCOPE)
 
 function(create_sample name)
