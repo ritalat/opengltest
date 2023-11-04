@@ -177,7 +177,7 @@ LGL_1::~LGL_1()
 
 void LGL_1::render()
 {
-    glm::mat4 projection = glm::perspective(glm::radians(fov), (float)fbSize.width / (float)fbSize.height, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)fbSize.width / (float)fbSize.height, 0.1f, 100.0f);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

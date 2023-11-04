@@ -8,10 +8,6 @@
 
 GLleluCamera::GLleluCamera(int argc, char *argv[]):
     GLlelu(argc, argv),
-    cameraPos(0.0f, 0.0f, 3.0f),
-    fov(45.0f),
-    mouseSensitivity(0.1f),
-    cameraSpeed(0.0025f),
     quit(false),
     status(EXIT_SUCCESS)
 {
@@ -26,19 +22,13 @@ int GLleluCamera::main_loop()
     unsigned int deltaTime = 0;
     unsigned int lastFrame = 0;
 
-    glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
-    float yaw = -90.0f;
-    float pitch = 0.0f;
-
     SDL_Event eventStruct;
 
     while (!quit) {
         unsigned int currentFrame = SDL_GetTicks();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        float cameraSpeedScaled = cameraSpeed * deltaTime;
+        float cameraSpeedScaled = camera.speed * deltaTime;
 
         while (SDL_PollEvent(&eventStruct)) {
             switch (eventStruct.type) {
@@ -51,20 +41,20 @@ int GLleluCamera::main_loop()
                     break;
                 case SDL_MOUSEMOTION:
                     if (SDL_BUTTON_LMASK & eventStruct.motion.state) {
-                        yaw += eventStruct.motion.xrel * mouseSensitivity;
-                        pitch -= eventStruct.motion.yrel * mouseSensitivity;
-                        if (pitch > 89.0f)
-                            pitch = 89.0f;
-                        if (pitch < -89.0f)
-                            pitch = -89.0f;
+                        camera.yaw += eventStruct.motion.xrel * camera.sensitivity;
+                        camera.pitch -= eventStruct.motion.yrel * camera.sensitivity;
+                        if (camera.pitch > 89.0f)
+                            camera.pitch = 89.0f;
+                        if (camera.pitch < -89.0f)
+                            camera.pitch = -89.0f;
                     }
                     break;
                 case SDL_MOUSEWHEEL:
-                    fov -= float(eventStruct.wheel.y);
-                    if (fov < 1.0f)
-                        fov = 1.0f;
-                    if (fov > 100.0f)
-                        fov = 100.0f;
+                    camera.fov -= float(eventStruct.wheel.y);
+                    if (camera.fov < 1.0f)
+                        camera.fov = 1.0f;
+                    if (camera.fov > 100.0f)
+                        camera.fov = 100.0f;
                     break;
                 default:
                     break;
@@ -72,28 +62,28 @@ int GLleluCamera::main_loop()
             event(eventStruct);
         }
 
-        cameraFront = glm::normalize(glm::vec3(
-            cos(glm::radians(yaw) * cos(glm::radians(pitch))),
-            sin(glm::radians(pitch)),
-            sin(glm::radians(yaw)) * cos(glm::radians(pitch))
+        camera.front = glm::normalize(glm::vec3(
+            cos(glm::radians(camera.yaw) * cos(glm::radians(camera.pitch))),
+            sin(glm::radians(camera.pitch)),
+            sin(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch))
         ));
 
         const Uint8 *keystateArray = SDL_GetKeyboardState(NULL);
         if (keystateArray[SDL_SCANCODE_W]) {
-            cameraPos += cameraSpeedScaled * cameraFront;
+            camera.position += cameraSpeedScaled * camera.front;
         }
         if (keystateArray[SDL_SCANCODE_A]) {
-            cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeedScaled;
+            camera.position -= glm::normalize(glm::cross(camera.front, camera.up)) * cameraSpeedScaled;
         }
         if (keystateArray[SDL_SCANCODE_S]) {
-            cameraPos -= cameraSpeedScaled * cameraFront;
+            camera.position -= cameraSpeedScaled * camera.front;
         }
         if (keystateArray[SDL_SCANCODE_D]) {
-            cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeedScaled;
+            camera.position += glm::normalize(glm::cross(camera.front, camera.up)) * cameraSpeedScaled;
         }
         keystate(keystateArray);
 
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        view = glm::lookAt(camera.position, camera.position + camera.front, camera.up);
         
         update(deltaTime);
 

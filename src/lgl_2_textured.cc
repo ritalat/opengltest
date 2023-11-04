@@ -159,7 +159,7 @@ LGL_2_Textured::~LGL_2_Textured()
 
 void LGL_2_Textured::render()
 {
-    glm::mat4 projection = glm::perspective(glm::radians(fov), (float)fbSize.width / (float)fbSize.height, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)fbSize.width / (float)fbSize.height, 0.1f, 100.0f);
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -179,7 +179,7 @@ void LGL_2_Textured::render()
     lightingShader.set_vec3("light.diffuse", 0.5f, 0.5f, 0.5f);
     lightingShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
     lightingShader.set_vec3("light.position", lightPos);
-    lightingShader.set_vec3("viewPos", cameraPos);
+    lightingShader.set_vec3("viewPos", camera.position);
 
     glm::mat4 model = glm::mat4(1.0f);
     lightingShader.set_mat4("model", model);
