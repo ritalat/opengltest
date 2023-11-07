@@ -18,9 +18,9 @@ auto channelsToFormat = [](int n){
     }
 };
 
-bool load_texture(unsigned int &textureId, std::string_view file)
+bool load_texture(unsigned int &textureId, std::string_view file, bool flip)
 {
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(flip);
 
     glGenTextures(1, &textureId);
     glBindTexture(GL_TEXTURE_2D, textureId);

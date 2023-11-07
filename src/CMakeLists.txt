@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 
 add_subdirectory(mylly)
 
-set(SAMPLES hello_triangle
+set(SAMPLES bitmap_font
+            hello_triangle
             lgl_1
             lgl_2_basic
             lgl_2_textured

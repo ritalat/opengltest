@@ -4,6 +4,7 @@ set(SOURCES gllelu.cc
             gllelucamera.cc
             path.cc
             shader.cc
+            text_bitmap.cc
             texture.cc
             glad/src/gl.c)
 
@@ -11,6 +12,7 @@ set(HEADERS gllelu.hh
             gllelucamera.hh
             path.hh
             shader.hh
+            text_bitmap.hh
             texture.hh
             glad/include/glad/gl.h
             glad/include/KHR/khrplatform.h)

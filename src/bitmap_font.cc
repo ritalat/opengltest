@@ -1,0 +1,84 @@
+#include "gllelu.hh"
+#include "shader.hh"
+#include "text_bitmap.hh"
+
+#include "glad/gl.h"
+#include "SDL.h"
+
+#include <cmath>
+#include <cstdlib>
+#include <string>
+
+class BitmapFont: public GLlelu
+{
+public:
+    BitmapFont(int argc, char *argv[]);
+    virtual ~BitmapFont();
+    virtual int main_loop();
+};
+
+BitmapFont::BitmapFont(int argc, char *argv[]):
+    GLlelu(argc, argv)
+{
+}
+
+BitmapFont::~BitmapFont()
+{
+}
+
+int BitmapFont::main_loop()
+{
+    TextRendererLatin1 txt(fbSize.width, fbSize.height);
+    if (!txt.load_font("font8x8.png"))
+        return EXIT_FAILURE;
+
+    std::string fontLoaded = "Loaded font font8x8.png";
+
+    std::string glInfoDump = "OpenGL vendor: " + std::string((char *)glGetString(GL_VENDOR)) + '\n' +
+                             "OpenGL renderer: " + std::string((char *)glGetString(GL_RENDERER)) + '\n' +
+                             "OpenGL version: " + std::string((char *)glGetString(GL_VERSION)) + '\n' +
+                             "OpenGL Shading Language version: " + std::string((char *)glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    std::string aakkosia = "Ääkkösetkin toimii :---DD";
+
+    bool quit = false;
+    SDL_Event event;
+
+    while (!quit) {
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+                case SDL_QUIT:
+                    quit = true;
+                    break;
+                case SDL_KEYUP:
+                    if (SDL_SCANCODE_ESCAPE == event.key.keysym.scancode)
+                        quit = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        txt.set_color(1.0f, 1.0f, 1.0f);
+        txt.set_scale(1.0f);
+        txt.draw_string(0, 0, glInfoDump);
+        txt.draw_string(fbSize.width - fontLoaded.length() * FONT_SIZE, fbSize.height - FONT_SIZE, fontLoaded);
+
+        txt.set_color(1.0f, 0.0f, 0.0f);
+        txt.set_scale(2.5f);
+        txt.draw_string(250 + 100 * sin(SDL_GetTicks() / 1000.0f), fbSize.height / 2.0f, aakkosia);
+
+        SDL_GL_SwapWindow(window);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+int main(int argc, char *argv[])
+{
+    BitmapFont font(argc, argv);
+    return font.run();
+}
