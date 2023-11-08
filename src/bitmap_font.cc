@@ -71,6 +71,21 @@ int BitmapFont::main_loop()
         txt.set_scale(2.5f);
         txt.draw_string(250 + 100 * sin(SDL_GetTicks() / 1000.0f), fbSize.height / 2.0f, aakkosia);
 
+        int x, y;
+        unsigned int buttons = SDL_GetMouseState(&x, &y);
+        if (buttons & SDL_BUTTON(SDL_BUTTON_LEFT)) {
+            txt.set_color(0.0f, 1.0f, 0.0f);
+        } else if (buttons & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
+            txt.set_color(0.0f, 0.0f, 1.0f);
+        } else if (buttons & SDL_BUTTON(SDL_BUTTON_MIDDLE)) {
+            txt.set_color(1.0f, 0.0f, 0.0f);
+        } else {
+            txt.set_color(1.0f, 1.0f, 1.0f);
+        }
+        txt.set_scale(1.0f);
+        std::string mouse = "Mouse state: (" + std::to_string(x) + "," + std::to_string(y) + ")";
+        txt.draw_string(0, fbSize.height - FONT_SIZE, mouse);
+
         SDL_GL_SwapWindow(window);
     }
 

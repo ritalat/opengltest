@@ -123,6 +123,10 @@ bool TextRendererLatin1::load_font(std::string_view fontName)
     if (!load_texture(fontTexture, fontName, false))
         return false;
 
+    glBindTexture(GL_TEXTURE_2D, fontTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     glGenVertexArrays(1, &textVAO);
     glBindVertexArray(textVAO);
 
@@ -168,7 +172,7 @@ void TextRendererLatin1::draw_string(int x, int y, std::string_view str)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glActiveTexture(0);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, fontTexture);
 
     glBindVertexArray(textVAO);
@@ -179,7 +183,7 @@ void TextRendererLatin1::draw_string(int x, int y, std::string_view str)
     textShader.set_int("font", 0);
 
     float curx = x;
-    float cury = windowHeight - y - FONT_SIZE;
+    float cury = windowHeight - y - scale * FONT_SIZE;
     float w = scale * FONT_SIZE;
     float h = scale * FONT_SIZE;
 
