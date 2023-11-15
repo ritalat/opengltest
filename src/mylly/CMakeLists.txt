@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 set(SOURCES gllelu.cc
             gllelucamera.cc
+            model.cc
             path.cc
             shader.cc
             text_bitmap.cc
@@ -10,6 +11,7 @@ set(SOURCES gllelu.cc
 
 set(HEADERS gllelu.hh
             gllelucamera.hh
+            model.hh
             path.hh
             shader.hh
             text_bitmap.hh
@@ -42,4 +44,5 @@ target_include_directories(mylly PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 
 target_link_libraries(mylly SDL2::SDL2
                             glm::glm
-                            stb)
+                            stb
+                            tinyobjloader)

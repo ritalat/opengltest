@@ -8,6 +8,7 @@ set(SAMPLES bitmap_font
             lgl_2_basic
             lgl_2_textured
             lgl_2
+            obj_models
             varjostinlelu
             PARENT_SCOPE)
 
