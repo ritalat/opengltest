@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 set(SOURCES gllelu.cc
             gllelucamera.cc
+            himmeli.cc
             model.cc
             path.cc
             shader.cc
@@ -11,6 +12,7 @@ set(SOURCES gllelu.cc
 
 set(HEADERS gllelu.hh
             gllelucamera.hh
+            himmeli.hh
             model.hh
             path.hh
             shader.hh
