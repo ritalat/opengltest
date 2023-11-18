@@ -1,4 +1,5 @@
 #include "gllelu.hh"
+#include "gllelu_main.hh"
 #include "shader.hh"
 #include "text_bitmap.hh"
 
@@ -29,8 +30,7 @@ BitmapFont::~BitmapFont()
 int BitmapFont::main_loop()
 {
     TextRendererLatin1 txt(fbSize.width, fbSize.height);
-    if (!txt.load_font("font8x8.png"))
-        return EXIT_FAILURE;
+    txt.load_font("font8x8.png");
 
     std::string fontLoaded = "Loaded font font8x8.png";
 
@@ -92,8 +92,4 @@ int BitmapFont::main_loop()
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
-{
-    BitmapFont font(argc, argv);
-    return font.run();
-}
+GLLELU_MAIN_IMPLEMENTATION(BitmapFont)

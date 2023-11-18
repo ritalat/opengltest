@@ -19,7 +19,7 @@ public:
     ~Model();
     Model(const Model &) = delete;
     Model &operator=(const Model &) = delete;
-    bool load_obj(std::string_view file);
+    void load_obj(std::string_view file);
 
     std::vector<Vertex> vertices;
     unsigned int VAO;

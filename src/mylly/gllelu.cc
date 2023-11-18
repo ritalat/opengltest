@@ -7,6 +7,7 @@
 
 #include <cstdio>
 #include <filesystem>
+#include <stdexcept>
 
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
@@ -41,10 +42,8 @@ GLlelu::GLlelu(int argc, char *argv[]):
         fprintf(stderr, "Data directory: %s (%s)\n", cpath(dataDir), cpath(absolute));
     }
 
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        fprintf(stderr, "Failed to init SDL\n");
-        return;
-    }
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+        throw std::runtime_error("Failed to init SDL");
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -57,23 +56,21 @@ GLlelu::GLlelu(int argc, char *argv[]):
                               SDL_WINDOWPOS_UNDEFINED,
                               WINDOW_WIDTH, WINDOW_HEIGHT,
                               SDL_WINDOW_OPENGL);
-    if (!window) {
-        fprintf(stderr, "Failed to create SDL window\n");
-        return;
-    }
+    if (!window)
+        throw std::runtime_error("Failed to create SDL window");
 
     fprintf(stderr, "Window size: %ux%u\n", WINDOW_WIDTH, WINDOW_HEIGHT);
 
     context = SDL_GL_CreateContext(window);
-    if (!context) {
-        fprintf(stderr, "Failed to create OpenGL context\n");
-        return;
-    }
+    if (!context)
+        throw std::runtime_error("Failed to create OpenGL context");
 
     SDL_GL_GetDrawableSize(window, &fbSize.width, &fbSize.height);
     fprintf(stderr, "Drawable size: %ux%u\n", fbSize.width, fbSize.height);
 
-    gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress);
+    if (!gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress))
+        throw std::runtime_error("Failed to load OpenGL functions");
+
     fprintf(stderr, "OpenGL vendor: %s\n", glGetString(GL_VENDOR));
     fprintf(stderr, "OpenGL renderer: %s\n", glGetString(GL_RENDERER));
     fprintf(stderr, "OpenGL version: %s\n", glGetString(GL_VERSION));

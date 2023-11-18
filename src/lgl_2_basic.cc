@@ -1,5 +1,7 @@
 #include "gllelucamera.hh"
+#include "gllelu_main.hh"
 #include "shader.hh"
+#include "shapes.hh"
 
 #include "glad/gl.h"
 #include "glm/glm.hpp"
@@ -8,50 +10,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-
-const float vertices[] = {
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f,
-
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
-
-    -0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,  0.0f, 1.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f
-};
 
 const int numCubes = 10;
 
@@ -146,7 +104,7 @@ class LGL_2_Basic: public GLleluCamera
 public:
     LGL_2_Basic(int argc, char *argv[]);
     virtual ~LGL_2_Basic();
-    virtual void render();
+    virtual Status render();
 
     Shader lightingShader;
     Shader lightShader;
@@ -160,17 +118,8 @@ LGL_2_Basic::LGL_2_Basic(int argc, char *argv[]):
 {
     glEnable(GL_DEPTH_TEST);
 
-    if (!lightingShader.load("lighting.vert", "lighting_basic.frag")) {
-        quit = true;
-        status = EXIT_FAILURE;
-        return;
-    }
-
-    if (!lightShader.load("lighting.vert", "lighting_light.frag")) {
-        quit = true;
-        status = EXIT_FAILURE;
-        return;
-    }
+    lightingShader.load("lighting.vert", "lighting_basic.frag");
+    lightShader.load("lighting.vert", "lighting_light.frag");
 
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -178,7 +127,7 @@ LGL_2_Basic::LGL_2_Basic(int argc, char *argv[]):
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -208,7 +157,7 @@ LGL_2_Basic::~LGL_2_Basic()
     glDeleteBuffers(1, &VBO);
 }
 
-void LGL_2_Basic::render()
+Status LGL_2_Basic::render()
 {
     glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)fbSize.width / (float)fbSize.height, 0.1f, 100.0f);
 
@@ -259,10 +208,8 @@ void LGL_2_Basic::render()
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     SDL_GL_SwapWindow(window);
+
+    return Status::Ok;
 }
 
-int main(int argc, char *argv[])
-{
-    LGL_2_Basic lgl_2_basic(argc, argv);
-    return lgl_2_basic.run();
-}
+GLLELU_MAIN_IMPLEMENTATION(LGL_2_Basic)

@@ -5,6 +5,13 @@
 #include "glm/glm.hpp"
 #include "SDL.h"
 
+enum class Status
+{
+    QuitFailure = -1,
+    Ok = 0,
+    QuitSuccess = 1
+};
+
 struct Camera
 {
     glm::vec3 position = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -23,13 +30,11 @@ public:
     GLleluCamera(int argc, char *argv[]);
     virtual ~GLleluCamera();
     virtual int main_loop() final;
-    virtual void event(SDL_Event &event);
-    virtual void keystate(const Uint8 *keystate);
-    virtual void update(unsigned int deltaTime);
-    virtual void render() = 0;
+    virtual Status event(SDL_Event &event);
+    virtual Status keystate(const Uint8 *keystate);
+    virtual Status update(unsigned int deltaTime);
+    virtual Status render() = 0;
 
     glm::mat4 view;
     Camera camera;
-    bool quit;
-    int status;
 };

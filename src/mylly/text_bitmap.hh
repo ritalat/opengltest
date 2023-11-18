@@ -18,7 +18,7 @@ public:
     ~TextRendererLatin1();
     TextRendererLatin1(const TextRendererLatin1 &) = delete;
     TextRendererLatin1 &operator=(const TextRendererLatin1 &) = delete;
-    bool load_font(std::string_view fontName);
+    void load_font(std::string_view fontName);
     void set_window_size(int w, int h);
     void set_scale(float scale);
     void set_color(glm::vec3 color);

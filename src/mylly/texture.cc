@@ -6,6 +6,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include <stdexcept>
 #include <string_view>
 
 Texture::Texture():
@@ -53,7 +54,7 @@ auto channelsToFormat = [](int n){
     }
 };
 
-bool Texture::load(std::string_view file, bool flip)
+void Texture::load(std::string_view file, bool flip)
 {
     stbi_set_flip_vertically_on_load(flip);
 
@@ -69,14 +70,11 @@ bool Texture::load(std::string_view file, bool flip)
     Path texturePath = get_asset_path(file);
     unsigned char *data = stbi_load(cpath(texturePath), &width, &height, &nrChannels, 0);
 
-    if (data) {
-        GLenum format = channelsToFormat(nrChannels);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        stbi_image_free(data);
-        return true;
-    } else {
-        fprintf(stderr, "Failed to load texture: %s\n", cpath(texturePath));
-        return false;
-    }
+    if (!data)
+        throw std::runtime_error("Failed to load texture: " + texturePath.string() + FILE_ERROR_HINT);
+
+    GLenum format = channelsToFormat(nrChannels);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(data);
 }

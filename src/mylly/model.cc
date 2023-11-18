@@ -7,6 +7,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -26,7 +27,7 @@ Model::~Model()
         glDeleteBuffers(1, &VBO);
 }
 
-bool Model::load_obj(std::string_view file)
+void Model::load_obj(std::string_view file)
 {
     Path objPath = get_asset_path(file);
 
@@ -37,15 +38,13 @@ bool Model::load_obj(std::string_view file)
     std::string warn;
     std::string err;
 
-    tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, cpath(objPath), cpath(get_asset_path("")));
+    tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, cpath(objPath), cpath(assetdir()));
 
     if (!warn.empty())
         fprintf(stderr, "TinyObj warn: %s\n", warn.c_str());
 
-    if (!err.empty()) {
-        fprintf(stderr, "TinyObj err: %s\n", err.c_str());
-        return false;
-    }
+    if (!err.empty())
+        throw std::runtime_error("TinyObj err: " + err + FILE_ERROR_HINT);
 
     for (tinyobj::shape_t &shape : shapes) {
         for (tinyobj::index_t index : shape.mesh.indices) {
@@ -89,6 +88,4 @@ bool Model::load_obj(std::string_view file)
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    return true;
 }

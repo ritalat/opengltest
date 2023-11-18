@@ -1,4 +1,5 @@
 #include "gllelu.hh"
+#include "gllelu_main.hh"
 #include "shader.hh"
 
 #include "glad/gl.h"
@@ -35,8 +36,7 @@ HelloTriangle::~HelloTriangle()
 int HelloTriangle::main_loop()
 {
     Shader triangleShader;
-    if (!triangleShader.load("triangle.vert", "triangle.frag"))
-        return EXIT_FAILURE;
+    triangleShader.load("triangle.vert", "triangle.frag");
 
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);
@@ -90,8 +90,4 @@ int HelloTriangle::main_loop()
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
-{
-    HelloTriangle hello(argc, argv);
-    return hello.run();
-}
+GLLELU_MAIN_IMPLEMENTATION(HelloTriangle)

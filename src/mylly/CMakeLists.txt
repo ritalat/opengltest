@@ -11,11 +11,13 @@ set(SOURCES gllelu.cc
             glad/src/gl.c)
 
 set(HEADERS gllelu.hh
+            gllelu_main.hh
             gllelucamera.hh
             himmeli.hh
             model.hh
             path.hh
             shader.hh
+            shapes.hh
             text_bitmap.hh
             texture.hh
             glad/include/glad/gl.h

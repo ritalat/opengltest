@@ -5,7 +5,9 @@
 #include "glad/gl.h"
 #include "glm/glm.hpp"
 
+#include <cstdio>
 #include <fstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -20,12 +22,16 @@ Shader::~Shader()
         glDeleteProgram(id);
 }
 
-bool Shader::load(const std::string_view vert, const std::string_view frag)
+void Shader::load(const std::string_view vert, const std::string_view frag)
 {
     std::string vertCode = slurp_file(get_shader_path(vert));
+    if (vertCode.empty())
+        throw std::runtime_error("Failed to read shader file: " + std::string(vert) + FILE_ERROR_HINT);
     const char *vertCodeStr = vertCode.data();
 
     std::string fragCode = slurp_file(get_shader_path(frag));
+    if (fragCode.empty())
+        throw std::runtime_error("Failed to read shader file: " + std::string(frag) + FILE_ERROR_HINT);
     const char *fragCodeStr = fragCode.data();
 
     int success;
@@ -40,8 +46,7 @@ bool Shader::load(const std::string_view vert, const std::string_view frag)
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        fprintf(stderr, "Failed to compile vertex shader: %s\n", infoLog);
-        return false;
+        throw std::runtime_error("Failed to compile vertex shader: " + std::string(infoLog));
     }
 
     unsigned int fragmentShader;
@@ -53,8 +58,7 @@ bool Shader::load(const std::string_view vert, const std::string_view frag)
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        fprintf(stderr, "Failed to compile fragment shader: %s\n", infoLog);
-        return false;
+        throw std::runtime_error("Failed to compile fragment shader: " + std::string(infoLog));
     }
 
     id = glCreateProgram();
@@ -66,14 +70,11 @@ bool Shader::load(const std::string_view vert, const std::string_view frag)
     glGetProgramiv(id, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(id, 512, NULL, infoLog);
-        fprintf(stderr, "Failed to link shader program: %s\n", infoLog);
-        return false;
+        throw std::runtime_error("Failed to link shader program: " + std::string(infoLog));
     }
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-
-    return true;
 }
 
 void Shader::use()

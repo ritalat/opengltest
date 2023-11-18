@@ -12,7 +12,7 @@ public:
     Shader(const Shader &) = delete;
     Shader &operator=(const Shader &) = delete;
 
-    bool load(const std::string_view vert, const std::string_view frag);
+    void load(const std::string_view vert, const std::string_view frag);
     void use();
 
     void set_bool(const std::string_view name, bool value);

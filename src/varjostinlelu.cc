@@ -1,11 +1,14 @@
 #include "gllelu.hh"
+#include "gllelu_main.hh"
 #include "shader.hh"
 #include "text_bitmap.hh"
 
 #include "glad/gl.h"
 #include "SDL.h"
 
+#include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <string>
 
 const float vertices[] = {
@@ -45,11 +48,13 @@ int VarjostinLelu::main_loop()
     unsigned int notificationExpiration = 0;
 
     TextRendererLatin1 txt(fbSize.width, fbSize.height);
-    if (!txt.load_font("font8x8.png"))
-        return EXIT_FAILURE;
+    txt.load_font("font8x8.png");
 
     Shader leluShader;
-    if (!leluShader.load("varjostinlelu.vert", "varjostinlelu.frag")) {
+    try {
+        leluShader.load("varjostinlelu.vert", "varjostinlelu.frag");
+    } catch (const std::exception &e) {
+        fprintf(stderr, "%s\n", e.what());
         shaderCompiled = false;
         error = "Failed to compile varjostinlelu shaders!\n"
                 "See the console log for more details.";
@@ -139,8 +144,4 @@ int VarjostinLelu::main_loop()
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
-{
-    VarjostinLelu lelu(argc, argv);
-    return lelu.run();
-}
+GLLELU_MAIN_IMPLEMENTATION(VarjostinLelu)

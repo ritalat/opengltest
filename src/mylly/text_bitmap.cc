@@ -121,15 +121,12 @@ TextRendererLatin1::~TextRendererLatin1()
         glDeleteBuffers(1, &textVBO);
 }
 
-bool TextRendererLatin1::load_font(std::string_view fontName)
+void TextRendererLatin1::load_font(std::string_view fontName)
 {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    if (!textShader.load("text_bitmap.vert", "text_bitmap.frag"))
-        return false;
+    textShader.load("text_bitmap.vert", "text_bitmap.frag");
 
-    if (!fontTexture.load(fontName, false))
-        return false;
-
+    fontTexture.load(fontName, false);
     fontTexture.filtering(GL_NEAREST);
 
     glGenVertexArrays(1, &textVAO);
@@ -145,8 +142,6 @@ bool TextRendererLatin1::load_font(std::string_view fontName)
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
-    return true;
 }
 
 void TextRendererLatin1::set_window_size(int w, int h)

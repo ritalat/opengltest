@@ -1,16 +1,17 @@
 #include "gllelucamera.hh"
+#include "gllelu_main.hh"
 #include "path.hh"
 #include "shader.hh"
+#include "texture.hh"
 
 #include "glad/gl.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "SDL.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
 #include <cstdio>
 #include <cstdlib>
+#include <stdexcept>
 
 const float vertices[] = {
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -74,11 +75,11 @@ class LGL_1: public GLleluCamera
 public:
     LGL_1(int argc, char *argv[]);
     virtual ~LGL_1();
-    virtual void render();
+    virtual Status render();
 
     Shader texturedShader;
-    unsigned int texture0;
-    unsigned int texture1;
+    Texture texture0;
+    Texture texture1;
     unsigned int VAO;
     unsigned int VBO;
 };
@@ -88,65 +89,13 @@ LGL_1::LGL_1(int argc, char *argv[]):
 {
     glEnable(GL_DEPTH_TEST);
 
-    if (!texturedShader.load("textured.vert", "textured.frag")) {
-        quit = true;
-        status = EXIT_FAILURE;
-        return;
-    }
+    texturedShader.load("textured.vert", "textured.frag");
 
-    stbi_set_flip_vertically_on_load(true);
-
-    glGenTextures(1, &texture0);
-    glBindTexture(GL_TEXTURE_2D, texture0);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    int width, height, nrChannels;
-    Path tex0Path = get_asset_path("lgl_container.jpg");
-    unsigned char *data = stbi_load(cpath(tex0Path), &width, &height, &nrChannels, 0);
-
-    if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        stbi_image_free(data);
-    } else {
-        fprintf(stderr, "Failed to load texture: %s", cpath(tex0Path));
-        quit = true;
-        status = EXIT_FAILURE;
-        return;
-    }
+    texture0.load("lgl_container.jpg");
+    texture1.load("lgl_awesomeface.png");
 
     texturedShader.use();
     texturedShader.set_int("texture0", 0);
-
-    glGenTextures(1, &texture1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    Path tex1Path = get_asset_path("lgl_awesomeface.png");
-    data = stbi_load(cpath(tex1Path), &width, &height, &nrChannels, 0);
-
-    if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        stbi_image_free(data);
-    } else {
-        fprintf(stderr, "Failed to load texture: %s", cpath(tex1Path));
-        quit = true;
-        status = EXIT_FAILURE;
-        return;
-    }
-
-    texturedShader.use();
     texturedShader.set_int("texture1", 1);
 
     glGenVertexArrays(1, &VAO);
@@ -169,23 +118,19 @@ LGL_1::LGL_1(int argc, char *argv[]):
 
 LGL_1::~LGL_1()
 {
-    glDeleteTextures(1, &texture0);
-    glDeleteTextures(1, &texture1);
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
 }
 
-void LGL_1::render()
+Status LGL_1::render()
 {
     glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)fbSize.width / (float)fbSize.height, 0.1f, 100.0f);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture0);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
+    texture0.activate(0);
+    texture1.activate(1);
 
     texturedShader.use();
 
@@ -206,10 +151,8 @@ void LGL_1::render()
     }
 
     SDL_GL_SwapWindow(window);
+
+    return Status::Ok;
 }
 
-int main(int argc, char *argv[])
-{
-    LGL_1 lgl_1(argc, argv);
-    return lgl_1.run();
-}
+GLLELU_MAIN_IMPLEMENTATION(LGL_1)

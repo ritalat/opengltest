@@ -1,6 +1,8 @@
 #include "gllelucamera.hh"
+#include "gllelu_main.hh"
 #include "path.hh"
 #include "shader.hh"
+#include "shapes.hh"
 #include "texture.hh"
 
 #include "glad/gl.h"
@@ -10,50 +12,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-
-const float vertices[] = {
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f,
-
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
-
-    -0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,  0.0f, 1.0f,
-
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f
-};
 
 const glm::vec3 cubePositions[] = {
     glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -80,8 +38,8 @@ class LGL_2: public GLleluCamera
 public:
     LGL_2(int argc, char *argv[]);
     virtual ~LGL_2();
-    virtual void event(SDL_Event &event);
-    virtual void render();
+    virtual Status event(SDL_Event &event);
+    virtual Status render();
 
     Shader lightingShader;
     Shader lightShader;
@@ -99,29 +57,11 @@ LGL_2::LGL_2(int argc, char *argv[]):
 {
     glEnable(GL_DEPTH_TEST);
 
-    if (!lightingShader.load("lighting.vert", "lighting.frag")) {
-        quit = true;
-        status = EXIT_FAILURE;
-        return;
-    }
+    lightingShader.load("lighting.vert", "lighting.frag");
+    lightShader.load("lighting.vert", "lighting_light.frag");
 
-    if (!lightShader.load("lighting.vert", "lighting_light.frag")) {
-        quit = true;
-        status = EXIT_FAILURE;
-        return;
-    }
-
-    if (!diffuseMap.load("lgl_container2.png")) {
-        quit = true;
-        status = EXIT_FAILURE;
-        return;
-    }
-
-    if (!specularMap.load("lgl_container2_specular.png")) {
-        quit = true;
-        status = EXIT_FAILURE;
-        return;
-    }
+    diffuseMap.load("lgl_container2.png");
+    specularMap.load("lgl_container2_specular.png");
 
     lightingShader.use();
     lightingShader.set_int("material.diffuse", 0);
@@ -133,7 +73,7 @@ LGL_2::LGL_2(int argc, char *argv[]):
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -163,7 +103,7 @@ LGL_2::~LGL_2()
     glDeleteBuffers(1, &VBO);
 }
 
-void LGL_2::event(SDL_Event &event)
+Status LGL_2::event(SDL_Event &event)
 {
     switch (event.type) {
         case SDL_KEYUP:
@@ -173,9 +113,10 @@ void LGL_2::event(SDL_Event &event)
         default:
             break;
     }
+    return Status::Ok;
 }
 
-void LGL_2::render()
+Status LGL_2::render()
 {
     glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)fbSize.width / (float)fbSize.height, 0.1f, 100.0f);
 
@@ -280,10 +221,8 @@ void LGL_2::render()
     }
 
     SDL_GL_SwapWindow(window);
+
+    return Status::Ok;
 }
 
-int main(int argc, char *argv[])
-{
-    LGL_2 lgl_2(argc, argv);
-    return lgl_2.run();
-}
+GLLELU_MAIN_IMPLEMENTATION(LGL_2)

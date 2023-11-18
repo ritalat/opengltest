@@ -5,11 +5,10 @@
 #include "SDL.h"
 
 #include <cmath>
+#include <cstdlib>
 
 GLleluCamera::GLleluCamera(int argc, char *argv[]):
-    GLlelu(argc, argv),
-    quit(false),
-    status(EXIT_SUCCESS)
+    GLlelu(argc, argv)
 {
 }
 
@@ -22,6 +21,7 @@ int GLleluCamera::main_loop()
     unsigned int deltaTime = 0;
     unsigned int lastFrame = 0;
 
+    bool quit = false;
     SDL_Event eventStruct;
 
     while (!quit) {
@@ -59,7 +59,9 @@ int GLleluCamera::main_loop()
                 default:
                     break;
             }
-            event(eventStruct);
+            Status ret = event(eventStruct);
+            if (ret != Status::Ok)
+                return ret == Status::QuitSuccess ? EXIT_SUCCESS : EXIT_FAILURE;
         }
 
         camera.front = glm::normalize(glm::vec3(
@@ -81,29 +83,38 @@ int GLleluCamera::main_loop()
         if (keystateArray[SDL_SCANCODE_D]) {
             camera.position += glm::normalize(glm::cross(camera.front, camera.up)) * cameraSpeedScaled;
         }
-        keystate(keystateArray);
+        Status ret = keystate(keystateArray);
+        if (ret != Status::Ok)
+            return ret == Status::QuitSuccess ? EXIT_SUCCESS : EXIT_FAILURE;
 
         view = glm::lookAt(camera.position, camera.position + camera.front, camera.up);
         
-        update(deltaTime);
+        ret = update(deltaTime);
+        if (ret != Status::Ok)
+            return ret == Status::QuitSuccess ? EXIT_SUCCESS : EXIT_FAILURE;
 
-        render();
+        ret = render();
+        if (ret != Status::Ok)
+            return ret == Status::QuitSuccess ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
-    return status;
+    return EXIT_SUCCESS;
 }
 
-void GLleluCamera::event(SDL_Event &event)
+Status GLleluCamera::event(SDL_Event &event)
 {
     (void)event;
+    return Status::Ok;
 }
 
-void GLleluCamera::keystate(const Uint8 *keystate)
+Status GLleluCamera::keystate(const Uint8 *keystate)
 {
     (void)keystate;
+    return Status::Ok;
 }
 
-void GLleluCamera::update(unsigned int deltaTime)
+Status GLleluCamera::update(unsigned int deltaTime)
 {
     (void)deltaTime;
+    return Status::Ok;
 }
