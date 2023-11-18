@@ -7,7 +7,10 @@
 class Shader
 {
 public:
-    Shader() = default;
+    Shader();
+    ~Shader();
+    Shader(const Shader &) = delete;
+    Shader &operator=(const Shader &) = delete;
 
     bool load(const std::string_view vert, const std::string_view frag);
     void use();

@@ -9,6 +9,17 @@
 #include <string>
 #include <string_view>
 
+Shader::Shader():
+    id(0)
+{
+}
+
+Shader::~Shader()
+{
+    if (id)
+        glDeleteProgram(id);
+}
+
 bool Shader::load(const std::string_view vert, const std::string_view frag)
 {
     std::string vertCode = slurp_file(get_shader_path(vert));

@@ -11,7 +11,22 @@
 #include <string_view>
 #include <vector>
 
-bool load_obj(Model &model, std::string_view file)
+Model::Model():
+    VAO(0),
+    VBO(0)
+{
+}
+
+Model::~Model()
+{
+    if (VAO)
+        glDeleteVertexArrays(1, &VAO);
+
+    if (VBO)
+        glDeleteBuffers(1, &VBO);
+}
+
+bool Model::load_obj(std::string_view file)
 {
     Path objPath = get_asset_path(file);
 
@@ -53,17 +68,17 @@ bool load_obj(Model &model, std::string_view file)
             vert.texcoord.x = tx;
             vert.texcoord.y = ty;
 
-            model.vertices.push_back(vert);
+            vertices.push_back(vert);
         }
     }
 
-    glGenVertexArrays(1, &model.VAO);
-    glBindVertexArray(model.VAO);
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
 
-    glGenBuffers(1, &model.VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, model.VBO);
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, model.vertices.size() * sizeof(Vertex), model.vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
     glEnableVertexAttribArray(0);

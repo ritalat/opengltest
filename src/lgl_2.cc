@@ -85,8 +85,8 @@ public:
 
     Shader lightingShader;
     Shader lightShader;
-    unsigned int diffuseMap;
-    unsigned int specularMap;
+    Texture diffuseMap;
+    Texture specularMap;
     unsigned int VAO;
     unsigned int lightVAO;
     unsigned int VBO;
@@ -111,13 +111,13 @@ LGL_2::LGL_2(int argc, char *argv[]):
         return;
     }
 
-    if (!load_texture(diffuseMap, "lgl_container2.png")) {
+    if (!diffuseMap.load("lgl_container2.png")) {
         quit = true;
         status = EXIT_FAILURE;
         return;
     }
 
-    if (!load_texture(specularMap, "lgl_container2_specular.png")) {
+    if (!specularMap.load("lgl_container2_specular.png")) {
         quit = true;
         status = EXIT_FAILURE;
         return;
@@ -158,8 +158,6 @@ LGL_2::LGL_2(int argc, char *argv[]):
 
 LGL_2::~LGL_2()
 {
-    glDeleteTextures(1, &diffuseMap);
-    glDeleteTextures(1, &specularMap);
     glDeleteVertexArrays(1, &VAO);
     glDeleteVertexArrays(1, &lightVAO);
     glDeleteBuffers(1, &VBO);
@@ -184,10 +182,8 @@ void LGL_2::render()
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, diffuseMap);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, specularMap);
+    diffuseMap.activate(0);
+    specularMap.activate(1);
 
     lightingShader.use();
 

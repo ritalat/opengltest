@@ -1,6 +1,7 @@
 #pragma once
 
 #include "shader.hh"
+#include "texture.hh"
 
 #include "glm/glm.hpp"
 
@@ -15,6 +16,8 @@ class TextRendererLatin1
 public:
     TextRendererLatin1(int w, int h);
     ~TextRendererLatin1();
+    TextRendererLatin1(const TextRendererLatin1 &) = delete;
+    TextRendererLatin1 &operator=(const TextRendererLatin1 &) = delete;
     bool load_font(std::string_view fontName);
     void set_window_size(int w, int h);
     void set_scale(float scale);
@@ -26,7 +29,7 @@ private:
     Shader textShader;
     unsigned int textVBO;
     unsigned int textVAO;
-    unsigned int fontTexture;
+    Texture fontTexture;
     glm::mat4 projection;
     glm::vec3 color;
     float scale;

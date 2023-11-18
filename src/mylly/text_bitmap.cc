@@ -105,13 +105,20 @@ TextRendererLatin1::TextRendererLatin1(int w, int h):
     windowWidth(w),
     windowHeight(h),
     scale(1.0f),
-    color(1.0f, 1.0f, 1.0f)
+    color(1.0f, 1.0f, 1.0f),
+    textVAO(0),
+    textVBO(0)
 {
     projection = glm::ortho(0.0f, (float)w, 0.0f, (float)h);
 }
 
 TextRendererLatin1::~TextRendererLatin1()
 {
+    if (textVAO)
+        glDeleteVertexArrays(1, &textVAO);
+
+    if (textVBO)
+        glDeleteBuffers(1, &textVBO);
 }
 
 bool TextRendererLatin1::load_font(std::string_view fontName)
@@ -120,12 +127,10 @@ bool TextRendererLatin1::load_font(std::string_view fontName)
     if (!textShader.load("text_bitmap.vert", "text_bitmap.frag"))
         return false;
 
-    if (!load_texture(fontTexture, fontName, false))
+    if (!fontTexture.load(fontName, false))
         return false;
 
-    glBindTexture(GL_TEXTURE_2D, fontTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    fontTexture.filtering(GL_NEAREST);
 
     glGenVertexArrays(1, &textVAO);
     glBindVertexArray(textVAO);
@@ -172,8 +177,7 @@ void TextRendererLatin1::draw_string(int x, int y, std::string_view str)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, fontTexture);
+    fontTexture.activate(0);
 
     glBindVertexArray(textVAO);
 

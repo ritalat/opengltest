@@ -8,6 +8,41 @@
 
 #include <string_view>
 
+Texture::Texture():
+    id(0)
+{
+}
+
+Texture::~Texture()
+{
+    if (id)
+        glDeleteTextures(1, &id);
+}
+
+void Texture::activate(int unit)
+{
+    if (unit < 48) {
+        glActiveTexture(GL_TEXTURE0 + unit);
+        glBindTexture(GL_TEXTURE_2D, id);
+    }
+}
+
+void Texture::filtering(int mag, int min)
+{
+    glBindTexture(GL_TEXTURE_2D, id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Texture::wrapping(int s, int t)
+{
+    glBindTexture(GL_TEXTURE_2D, id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, s);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, t);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 auto channelsToFormat = [](int n){
     if (n == 1) {
         return GL_RED;
@@ -18,12 +53,12 @@ auto channelsToFormat = [](int n){
     }
 };
 
-bool load_texture(unsigned int &textureId, std::string_view file, bool flip)
+bool Texture::load(std::string_view file, bool flip)
 {
     stbi_set_flip_vertically_on_load(flip);
 
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_2D, textureId);
+    glGenTextures(1, &id);
+    glBindTexture(GL_TEXTURE_2D, id);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);

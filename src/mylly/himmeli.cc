@@ -19,22 +19,14 @@ Himmeli::Himmeli():
 
 Himmeli::~Himmeli()
 {
-    if (texture)
-        glDeleteTextures(1, &texture);
-
-    if (model.VAO)
-        glDeleteVertexArrays(1, &model.VAO);
-
-    if (model.VBO)
-        glDeleteBuffers(1, &model.VBO);
 }
 
 bool Himmeli::load(std::string_view modelFile, std::string_view textureFile)
 {
-    if (!load_obj(model, modelFile))
+    if (!model.load_obj(modelFile))
         return false;
 
-    if (!load_texture(texture, textureFile))
+    if (!texture.load(textureFile))
         return false;
 
     return true;
@@ -48,8 +40,7 @@ void Himmeli::draw(Shader &shader)
     shader.set_int("material.specular", 0);
     shader.set_float("material.shininess", shininess);
     shader.set_mat4("model", translate * rotate * scale);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    texture.activate(0);
     glBindVertexArray(model.VAO);
     glDrawArrays(GL_TRIANGLES, 0, model.vertices.size());
 }

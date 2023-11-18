@@ -12,11 +12,16 @@ struct Vertex
     glm::vec2 texcoord;
 };
 
-struct Model
+class Model
 {
+public:
+    Model();
+    ~Model();
+    Model(const Model &) = delete;
+    Model &operator=(const Model &) = delete;
+    bool load_obj(std::string_view file);
+
     std::vector<Vertex> vertices;
     unsigned int VAO;
     unsigned int VBO;
 };
-
-bool load_obj(Model &model, std::string_view file);
