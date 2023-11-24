@@ -14,11 +14,10 @@
 class TextRendererLatin1
 {
 public:
-    TextRendererLatin1(int w, int h);
+    TextRendererLatin1(int w, int h, std::string_view fontName);
     ~TextRendererLatin1();
     TextRendererLatin1(const TextRendererLatin1 &) = delete;
     TextRendererLatin1 &operator=(const TextRendererLatin1 &) = delete;
-    void load_font(std::string_view fontName);
     void set_window_size(int w, int h);
     void set_scale(float scale);
     void set_color(glm::vec3 color);
@@ -26,13 +25,13 @@ public:
     void draw_string(int x, int y, std::string_view str);
 
 private:
-    Shader textShader;
-    unsigned int textVBO;
-    unsigned int textVAO;
-    Texture fontTexture;
-    glm::mat4 projection;
-    glm::vec3 color;
-    float scale;
-    int windowWidth;
-    int windowHeight;
+    Shader m_textShader;
+    Texture m_fontTexture;
+    unsigned int m_textVAO;
+    unsigned int m_textVBO;
+    glm::vec3 m_color;
+    float m_scale;
+    int m_windowWidth;
+    int m_windowHeight;
+    glm::mat4 m_projection;
 };

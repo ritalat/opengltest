@@ -11,18 +11,8 @@
 #include <string>
 #include <string_view>
 
-Shader::Shader():
-    id(0)
-{
-}
-
-Shader::~Shader()
-{
-    if (id)
-        glDeleteProgram(id);
-}
-
-void Shader::load(const std::string_view vert, const std::string_view frag)
+Shader::Shader(const std::string_view vert, const std::string_view frag):
+    m_id(0)
 {
     std::string vertCode = slurp_file(get_shader_path(vert));
     if (vertCode.empty())
@@ -61,15 +51,15 @@ void Shader::load(const std::string_view vert, const std::string_view frag)
         throw std::runtime_error("Failed to compile fragment shader: " + std::string(infoLog));
     }
 
-    id = glCreateProgram();
+    m_id = glCreateProgram();
 
-    glAttachShader(id, vertexShader);
-    glAttachShader(id, fragmentShader);
-    glLinkProgram(id);
+    glAttachShader(m_id, vertexShader);
+    glAttachShader(m_id, fragmentShader);
+    glLinkProgram(m_id);
 
-    glGetProgramiv(id, GL_LINK_STATUS, &success);
+    glGetProgramiv(m_id, GL_LINK_STATUS, &success);
     if (!success) {
-        glGetProgramInfoLog(id, 512, NULL, infoLog);
+        glGetProgramInfoLog(m_id, 512, NULL, infoLog);
         throw std::runtime_error("Failed to link shader program: " + std::string(infoLog));
     }
 
@@ -77,79 +67,85 @@ void Shader::load(const std::string_view vert, const std::string_view frag)
     glDeleteShader(fragmentShader);
 }
 
+Shader::~Shader()
+{
+    if (m_id)
+        glDeleteProgram(m_id);
+}
+
 void Shader::use()
 {
-    glUseProgram(id);
+    glUseProgram(m_id);
 }
 
 void Shader::set_bool(const std::string_view name, bool value)
 {
-    int location = glGetUniformLocation(id, name.data());
+    int location = glGetUniformLocation(m_id, name.data());
     glUniform1i(location, (int)value);
 }
 
 void Shader::set_int(const std::string_view name, int value)
 {
-    int location = glGetUniformLocation(id, name.data());
+    int location = glGetUniformLocation(m_id, name.data());
     glUniform1i(location, value);
 }
 
 void Shader::set_float(const std::string_view name, float value)
 {
-    int location = glGetUniformLocation(id, name.data());
+    int location = glGetUniformLocation(m_id, name.data());
     glUniform1f(location, value);
 }
 
 void Shader::set_vec2(const std::string_view name, const glm::vec2 &value)
 {
-    int location = glGetUniformLocation(id, name.data());
+    int location = glGetUniformLocation(m_id, name.data());
     glUniform2fv(location, 1, &value[0]);
 }
 
 void Shader::set_vec2(const std::string_view name, float x, float y)
 {
-    int location = glGetUniformLocation(id, name.data());
+    int location = glGetUniformLocation(m_id, name.data());
     glUniform2f(location, x, y);
 }
 
 void Shader::set_vec3(const std::string_view name, const glm::vec3 &value)
 {
-    int location = glGetUniformLocation(id, name.data());
+    int location = glGetUniformLocation(m_id, name.data());
     glUniform3fv(location, 1, &value[0]);
 }
 
 void Shader::set_vec3(const std::string_view name, float x, float y, float z)
 {
-    int location = glGetUniformLocation(id, name.data());
+    int location = glGetUniformLocation(m_id, name.data());
     glUniform3f(location, x, y, z);
 }
 
 void Shader::set_vec4(const std::string_view name, const glm::vec4 &value)
 {
-    int location = glGetUniformLocation(id, name.data());
+    int location = glGetUniformLocation(m_id, name.data());
     glUniform4fv(location, 1, &value[0]);
 }
 
 void Shader::set_vec4(const std::string_view name, float x, float y, float z, float w)
 {
-    int location = glGetUniformLocation(id, name.data());
+    int location = glGetUniformLocation(m_id, name.data());
     glUniform4f(location, x, y, z, w);
 }
 
 void Shader::set_mat2(const std::string_view name, const glm::mat2 &value)
 {
-    int location = glGetUniformLocation(id, name.data());
+    int location = glGetUniformLocation(m_id, name.data());
     glUniformMatrix2fv(location, 1, GL_FALSE, &value[0][0]);
 }
 
 void Shader::set_mat3(const std::string_view name, const glm::mat3 &value)
 {
-    int location = glGetUniformLocation(id, name.data());
+    int location = glGetUniformLocation(m_id, name.data());
     glUniformMatrix3fv(location, 1, GL_FALSE, &value[0][0]);
 }
 
 void Shader::set_mat4(const std::string_view name, const glm::mat4 &value)
 {
-    int location = glGetUniformLocation(id, name.data());
+    int location = glGetUniformLocation(m_id, name.data());
     glUniformMatrix4fv(location, 1, GL_FALSE, &value[0][0]);
 }

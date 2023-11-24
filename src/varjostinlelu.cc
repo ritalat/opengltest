@@ -8,7 +8,8 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <exception>
+#include <optional>
+#include <stdexcept>
 #include <string>
 
 const float vertices[] = {
@@ -29,6 +30,10 @@ public:
     VarjostinLelu(int argc, char *argv[]);
     virtual ~VarjostinLelu();
     virtual int main_loop();
+    void load_shaders();
+
+    std::optional<Shader> m_leluShader;
+    std::string m_error;
 };
 
 VarjostinLelu::VarjostinLelu(int argc, char *argv[]):
@@ -42,23 +47,12 @@ VarjostinLelu::~VarjostinLelu()
 
 int VarjostinLelu::main_loop()
 {
-    std::string error;
-    bool shaderCompiled = true;
     std::string notification;
     unsigned int notificationExpiration = 0;
 
-    TextRendererLatin1 txt(fbSize.width, fbSize.height);
-    txt.load_font("font8x8.png");
+    TextRendererLatin1 txt(m_fbSize.width, m_fbSize.height, "font8x8.png");
 
-    Shader leluShader;
-    try {
-        leluShader.load("varjostinlelu.vert", "varjostinlelu.frag");
-    } catch (const std::exception &e) {
-        fprintf(stderr, "%s\n", e.what());
-        shaderCompiled = false;
-        error = "Failed to compile varjostinlelu shaders!\n"
-                "See the console log for more details.";
-    }
+    load_shaders();
 
     unsigned int leluVAO;
     glGenVertexArrays(1, &leluVAO);
@@ -95,8 +89,9 @@ int VarjostinLelu::main_loop()
                         quit = true;
 
                     if (SDL_SCANCODE_RETURN == event.key.keysym.scancode) {
-                        notification = "Shader reloading not yet implemented :^)";
-                        notificationExpiration = SDL_GetTicks() + 5000;
+                        notification = "Reloading shaders...";
+                        notificationExpiration = SDL_GetTicks() + 2000;
+                        load_shaders();
                     }
                     break;
                 default:
@@ -107,34 +102,34 @@ int VarjostinLelu::main_loop()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        if (shaderCompiled) {
-            leluShader.use();
+        if (m_leluShader) {
+            m_leluShader->use();
 
-            leluShader.set_vec2("u_resolution", (float)fbSize.width, (float)fbSize.height);
+            m_leluShader->set_vec2("u_resolution", (float)m_fbSize.width, (float)m_fbSize.height);
             int x, y;
             SDL_GetMouseState(&x, &y);
-            leluShader.set_vec2("u_mouse", (float)x, (float)(fbSize.height - y));
-            leluShader.set_float("u_time", (float)(SDL_GetTicks() / 1000.0f));
+            m_leluShader->set_vec2("u_mouse", (float)x, (float)(m_fbSize.height - y));
+            m_leluShader->set_float("u_time", (float)(SDL_GetTicks() / 1000.0f));
 
             glBindVertexArray(leluVAO);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
             glBindVertexArray(0);
         }
 
-        if (!error.empty()) {
+        if (!m_error.empty()) {
             txt.set_scale(1.0f);
             txt.set_color(1.0f, 0.0f, 0.0f);
-            txt.draw_string(0, 0, error);
+            txt.draw_string(0, 0, m_error);
         }
 
         if (notificationExpiration > SDL_GetTicks()) {
             float scale = 3.0f;
             txt.set_scale(scale);
             txt.set_color(0.0f, 1.0f, 0.0f);
-            txt.draw_string(0, fbSize.height - scale * FONT_SIZE, notification);
+            txt.draw_string(0, m_fbSize.height - scale * FONT_SIZE, notification);
         }
 
-        SDL_GL_SwapWindow(window);
+        SDL_GL_SwapWindow(m_window);
     }
 
     glDeleteBuffers(1, &leluEBO);
@@ -142,6 +137,21 @@ int VarjostinLelu::main_loop()
     glDeleteVertexArrays(1, &leluVAO);
 
     return EXIT_SUCCESS;
+}
+
+void VarjostinLelu::load_shaders()
+{
+    try {
+        m_leluShader.emplace("varjostinlelu.vert", "varjostinlelu.frag");
+        fprintf(stderr, "Varjostinlelu shaders loaded successfully\n");
+        m_error.clear();
+    } catch (const std::runtime_error &e) {
+        fprintf(stderr, "Failed to load varjostinlelu shaders: %s\n", e.what());
+        m_error = "Failed to compile varjostinlelu shaders!\n"
+                  "\nException:\n"
+                  + std::string(e.what()) +
+                  "\nPress enter to reload.";
+    }
 }
 
 GLLELU_MAIN_IMPLEMENTATION(VarjostinLelu)

@@ -29,8 +29,7 @@ BitmapFont::~BitmapFont()
 
 int BitmapFont::main_loop()
 {
-    TextRendererLatin1 txt(fbSize.width, fbSize.height);
-    txt.load_font("font8x8.png");
+    TextRendererLatin1 txt(m_fbSize.width, m_fbSize.height, "font8x8.png");
 
     std::string fontLoaded = "Loaded font font8x8.png";
 
@@ -65,11 +64,11 @@ int BitmapFont::main_loop()
         txt.set_color(1.0f, 1.0f, 1.0f);
         txt.set_scale(1.0f);
         txt.draw_string(0, 0, glInfoDump);
-        txt.draw_string(fbSize.width - fontLoaded.length() * FONT_SIZE, fbSize.height - FONT_SIZE, fontLoaded);
+        txt.draw_string(m_fbSize.width - fontLoaded.length() * FONT_SIZE, m_fbSize.height - FONT_SIZE, fontLoaded);
 
         txt.set_color(1.0f, 0.0f, 0.0f);
         txt.set_scale(2.5f);
-        txt.draw_string(250 + 100 * sin(SDL_GetTicks() / 1000.0f), fbSize.height / 2.0f, aakkosia);
+        txt.draw_string(250 + 100 * sin(SDL_GetTicks() / 1000.0f), m_fbSize.height / 2.0f, aakkosia);
 
         int x, y;
         unsigned int buttons = SDL_GetMouseState(&x, &y);
@@ -84,9 +83,9 @@ int BitmapFont::main_loop()
         }
         txt.set_scale(1.0f);
         std::string mouse = "Mouse state: (" + std::to_string(x) + "," + std::to_string(y) + ")";
-        txt.draw_string(0, fbSize.height - FONT_SIZE, mouse);
+        txt.draw_string(0, m_fbSize.height - FONT_SIZE, mouse);
 
-        SDL_GL_SwapWindow(window);
+        SDL_GL_SwapWindow(m_window);
     }
 
     return EXIT_SUCCESS;

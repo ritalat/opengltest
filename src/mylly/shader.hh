@@ -7,12 +7,11 @@
 class Shader
 {
 public:
-    Shader();
+    Shader(const std::string_view vert, const std::string_view frag);
     ~Shader();
     Shader(const Shader &) = delete;
     Shader &operator=(const Shader &) = delete;
 
-    void load(const std::string_view vert, const std::string_view frag);
     void use();
 
     void set_bool(const std::string_view name, bool value);
@@ -30,5 +29,5 @@ public:
     void set_mat3(const std::string_view name, const glm::mat3 &value);
     void set_mat4(const std::string_view name, const glm::mat4 &value);
 
-    unsigned int id;
+    unsigned int m_id;
 };

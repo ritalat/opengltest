@@ -106,26 +106,28 @@ public:
     virtual ~LGL_2_Basic();
     virtual Status render();
 
-    Shader lightingShader;
-    Shader lightShader;
-    unsigned int VAO;
-    unsigned int lightVAO;
-    unsigned int VBO;
+    Shader m_lightingShader;
+    Shader m_lightShader;
+    unsigned int m_VAO;
+    unsigned int m_lightVAO;
+    unsigned int m_VBO;
 };
 
 LGL_2_Basic::LGL_2_Basic(int argc, char *argv[]):
-    GLleluCamera(argc, argv)
+    GLleluCamera(argc, argv),
+    m_lightingShader("lighting.vert", "lighting_basic.frag"),
+    m_lightShader("lighting.vert", "lighting_light.frag"),
+    m_VAO(0),
+    m_lightVAO(0),
+    m_VBO(0)
 {
     glEnable(GL_DEPTH_TEST);
 
-    lightingShader.load("lighting.vert", "lighting_basic.frag");
-    lightShader.load("lighting.vert", "lighting_light.frag");
+    glGenVertexArrays(1, &m_VAO);
+    glBindVertexArray(m_VAO);
 
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glGenBuffers(1, &m_VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
 
@@ -139,10 +141,10 @@ LGL_2_Basic::LGL_2_Basic(int argc, char *argv[]):
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glGenVertexArrays(1, &lightVAO);
-    glBindVertexArray(lightVAO);
+    glGenVertexArrays(1, &m_lightVAO);
+    glBindVertexArray(m_lightVAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
@@ -152,62 +154,60 @@ LGL_2_Basic::LGL_2_Basic(int argc, char *argv[]):
 
 LGL_2_Basic::~LGL_2_Basic()
 {
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteVertexArrays(1, &lightVAO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &m_VAO);
+    glDeleteVertexArrays(1, &m_lightVAO);
+    glDeleteBuffers(1, &m_VBO);
 }
 
 Status LGL_2_Basic::render()
 {
-    glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)fbSize.width / (float)fbSize.height, 0.1f, 100.0f);
-
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    lightingShader.use();
+    m_lightingShader.use();
 
-    lightingShader.set_mat4("projection", projection);
-    lightingShader.set_mat4("view", view);
+    m_lightingShader.set_mat4("view", m_view);
+    m_lightingShader.set_mat4("projection", m_projection);
 
-    lightingShader.set_vec3("light.ambient", 1.0f, 1.0f, 1.0f);
-    lightingShader.set_vec3("light.diffuse", 1.0f, 1.0f, 1.0f);
-    lightingShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
-    lightingShader.set_vec3("light.position", lightPos);
+    m_lightingShader.set_vec3("light.ambient", 1.0f, 1.0f, 1.0f);
+    m_lightingShader.set_vec3("light.diffuse", 1.0f, 1.0f, 1.0f);
+    m_lightingShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
+    m_lightingShader.set_vec3("light.position", lightPos);
 
-    lightingShader.set_vec3("viewPos", camera.position);
+    m_lightingShader.set_vec3("viewPos", m_camera.position);
 
     glm::mat4 model = glm::mat4(1.0f);
 
-    glBindVertexArray(VAO);
+    glBindVertexArray(m_VAO);
     for (int i = 0; i < numCubes; ++i) {
         model = glm::mat4(1.0f);
         model = glm::translate(model, cubePositions[i]);
         float angle = 20.0f * i;
         model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-        lightingShader.set_mat4("model", model);
+        m_lightingShader.set_mat4("model", model);
 
-        lightingShader.set_vec3("material.ambient", cubeMaterials[i].ambient);
-        lightingShader.set_vec3("material.diffuse", cubeMaterials[i].diffuse);
-        lightingShader.set_vec3("material.specular", cubeMaterials[i].specular);
-        lightingShader.set_float("material.shininess", cubeMaterials[i].shininess);
+        m_lightingShader.set_vec3("material.ambient", cubeMaterials[i].ambient);
+        m_lightingShader.set_vec3("material.diffuse", cubeMaterials[i].diffuse);
+        m_lightingShader.set_vec3("material.specular", cubeMaterials[i].specular);
+        m_lightingShader.set_float("material.shininess", cubeMaterials[i].shininess);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
-    lightShader.use();
+    m_lightShader.use();
 
-    lightShader.set_mat4("projection", projection);
-    lightShader.set_mat4("view", view);
+    m_lightShader.set_mat4("view", m_view);
+    m_lightShader.set_mat4("projection", m_projection);
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, lightPos);
     model = glm::scale(model, glm::vec3(0.2f));
-    lightShader.set_mat4("model", model);
+    m_lightShader.set_mat4("model", model);
 
-    glBindVertexArray(lightVAO);
+    glBindVertexArray(m_lightVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    SDL_GL_SwapWindow(window);
+    SDL_GL_SwapWindow(m_window);
 
     return Status::Ok;
 }

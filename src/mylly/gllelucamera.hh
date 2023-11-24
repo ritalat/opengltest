@@ -27,7 +27,7 @@ struct Camera
 class GLleluCamera: public GLlelu
 {
 public:
-    GLleluCamera(int argc, char *argv[]);
+    GLleluCamera(int argc, char *argv[], GLVersion glVersion = GLVersion::GL33);
     virtual ~GLleluCamera();
     virtual int main_loop() final;
     virtual Status event(SDL_Event &event);
@@ -35,6 +35,7 @@ public:
     virtual Status update(unsigned int deltaTime);
     virtual Status render() = 0;
 
-    glm::mat4 view;
-    Camera camera;
+    glm::mat4 m_view;
+    glm::mat4 m_projection;
+    Camera m_camera;
 };

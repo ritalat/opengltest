@@ -11,18 +11,17 @@
 class Himmeli
 {
 public:
-    Himmeli();
+    Himmeli(std::string_view modelFile, std::string_view textureFile);
     Himmeli(const Himmeli &) = delete;
     Himmeli &operator=(const Himmeli &) = delete;
-    void load(std::string_view modelFile, std::string_view textureFile);
     void draw(Shader &shader);
 
-    Model model;
-    Texture texture;
-    float shininess;
-    glm::mat4 scale;
-    glm::mat4 rotate;
-    glm::mat4 translate;
+    Model m_model;
+    Texture m_texture;
+    float m_shininess;
+    glm::mat4 m_scale;
+    glm::mat4 m_rotate;
+    glm::mat4 m_translate;
 };
 
 struct BasicMaterial {
@@ -35,15 +34,14 @@ struct BasicMaterial {
 class BasicHimmeli
 {
 public:
-    BasicHimmeli();
+    BasicHimmeli(std::string_view modelFile, BasicMaterial material);
     BasicHimmeli(const Himmeli &) = delete;
     BasicHimmeli &operator=(const Himmeli &) = delete;
-    void load(std::string_view modelFile, BasicMaterial material);
     void draw(Shader &shader);
 
-    Model model;
-    BasicMaterial material;
-    glm::mat4 scale;
-    glm::mat4 rotate;
-    glm::mat4 translate;
+    Model m_model;
+    BasicMaterial m_material;
+    glm::mat4 m_scale;
+    glm::mat4 m_rotate;
+    glm::mat4 m_translate;
 };

@@ -35,8 +35,7 @@ HelloTriangle::~HelloTriangle()
 
 int HelloTriangle::main_loop()
 {
-    Shader triangleShader;
-    triangleShader.load("triangle.vert", "triangle.frag");
+    Shader triangleShader("triangle.vert", "triangle.frag");
 
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);
@@ -81,7 +80,7 @@ int HelloTriangle::main_loop()
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        SDL_GL_SwapWindow(window);
+        SDL_GL_SwapWindow(m_window);
     }
 
     glDeleteVertexArrays(1, &VAO);

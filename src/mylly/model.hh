@@ -15,13 +15,12 @@ struct Vertex
 class Model
 {
 public:
-    Model();
+    Model(std::string_view file);
     ~Model();
     Model(const Model &) = delete;
     Model &operator=(const Model &) = delete;
-    void load_obj(std::string_view file);
 
-    std::vector<Vertex> vertices;
-    unsigned int VAO;
-    unsigned int VBO;
+    std::vector<Vertex> m_vertices;
+    unsigned int m_VAO;
+    unsigned int m_VBO;
 };

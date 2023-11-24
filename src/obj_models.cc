@@ -25,46 +25,46 @@ public:
     virtual ~ObjFiles();
     virtual Status render();
 
-    Shader lightingShader;
-    Shader lightingShaderBasic;
-    Shader lightShader;
-    Himmeli room;
-    Himmeli monkey;
-    BasicHimmeli teapot;
-    unsigned int lightVAO;
-    unsigned int lightVBO;
+    Shader m_lightingShader;
+    Shader m_lightingShaderBasic;
+    Shader m_lightShader;
+    Himmeli m_room;
+    Himmeli m_monkey;
+    BasicHimmeli m_teapot;
+    unsigned int m_lightVAO;
+    unsigned int m_lightVBO;
 };
 
 ObjFiles::ObjFiles(int argc, char *argv[]):
-    GLleluCamera(argc, argv)
+    GLleluCamera(argc, argv),
+    m_lightingShader("lighting.vert", "lighting_textured.frag"),
+    m_lightingShaderBasic("lighting.vert", "lighting_basic.frag"),
+    m_lightShader("lighting.vert", "lighting_light.frag"),
+    m_room("vt_viking_room.obj", "vt_viking_room.png"),
+    m_monkey("kultainenapina.obj", "kultainenapina.jpg"),
+    m_teapot("teapot.obj", emerald),
+    m_lightVAO(0),
+    m_lightVBO(0)
 {
     glEnable(GL_DEPTH_TEST);
 
-    lightingShader.load("lighting.vert", "lighting_textured.frag");
-    lightingShaderBasic.load("lighting.vert", "lighting_basic.frag");
-    lightShader.load("lighting.vert", "lighting_light.frag");
+    m_room.m_rotate = glm::rotate(m_room.m_rotate, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    m_room.m_rotate = glm::rotate(m_room.m_rotate, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    m_room.m_translate = glm::translate(m_room.m_translate, glm::vec3(0.0f, -0.5f, 0.0f));
 
-    room.load("vt_viking_room.obj", "vt_viking_room.png");
-    monkey.load("kultainenapina.obj", "kultainenapina.jpg");
-    teapot.load("teapot.obj", emerald);
+    m_monkey.m_scale = glm::scale(m_monkey.m_scale, glm::vec3(0.1f, 0.1f, 0.1f));
+    m_monkey.m_rotate = glm::rotate(m_monkey.m_rotate, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    m_monkey.m_rotate = glm::rotate(m_monkey.m_rotate, glm::radians(-45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    m_monkey.m_translate = glm::translate(m_monkey.m_translate, glm::vec3(0.475f, -0.3f, 0.0f));
 
-    room.rotate = glm::rotate(room.rotate, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    room.rotate = glm::rotate(room.rotate, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    room.translate = glm::translate(room.translate, glm::vec3(0.0f, -0.5f, 0.0f));
+    m_teapot.m_scale = glm::scale(m_teapot.m_scale, glm::vec3(0.1f, 0.1f, 0.1f));
+    m_teapot.m_translate = glm::translate(m_teapot.m_translate, glm::vec3(0.0f, 0.5f, 0.0f));
 
-    monkey.scale = glm::scale(monkey.scale, glm::vec3(0.1f, 0.1f, 0.1f));
-    monkey.rotate = glm::rotate(monkey.rotate, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    monkey.rotate = glm::rotate(monkey.rotate, glm::radians(-45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    monkey.translate = glm::translate(monkey.translate, glm::vec3(0.475f, -0.3f, 0.0f));
+    glGenVertexArrays(1, &m_lightVAO);
+    glBindVertexArray(m_lightVAO);
 
-    teapot.scale = glm::scale(teapot.scale, glm::vec3(0.1f, 0.1f, 0.1f));
-    teapot.translate = glm::translate(teapot.translate, glm::vec3(0.0f, 0.5f, 0.0f));
-
-    glGenVertexArrays(1, &lightVAO);
-    glBindVertexArray(lightVAO);
-
-    glGenBuffers(1, &lightVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
+    glGenBuffers(1, &m_lightVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_lightVBO);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
 
@@ -77,56 +77,54 @@ ObjFiles::ObjFiles(int argc, char *argv[]):
 
 ObjFiles::~ObjFiles()
 {
-    glDeleteVertexArrays(1, &lightVAO);
-    glDeleteBuffers(1, &lightVBO);
+    glDeleteVertexArrays(1, &m_lightVAO);
+    glDeleteBuffers(1, &m_lightVBO);
 }
 
 Status ObjFiles::render()
 {
-    glm::mat4 projection = glm::perspective(glm::radians(camera.fov), (float)fbSize.width / (float)fbSize.height, 0.1f, 100.0f);
-
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    lightingShader.use();
-    lightingShader.set_mat4("projection", projection);
-    lightingShader.set_mat4("view", view);
+    m_lightingShader.use();
+    m_lightingShader.set_mat4("view", m_view);
+    m_lightingShader.set_mat4("projection", m_projection);
 
-    lightingShader.set_vec3("light.ambient", 0.2f, 0.2f, 0.2f);
-    lightingShader.set_vec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-    lightingShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
-    lightingShader.set_vec3("light.position", lightPos);
-    lightingShader.set_vec3("viewPos", camera.position);
+    m_lightingShader.set_vec3("light.ambient", 0.2f, 0.2f, 0.2f);
+    m_lightingShader.set_vec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+    m_lightingShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
+    m_lightingShader.set_vec3("light.position", lightPos);
+    m_lightingShader.set_vec3("viewPos", m_camera.position);
 
-    room.draw(lightingShader);
-    monkey.draw(lightingShader);
+    m_room.draw(m_lightingShader);
+    m_monkey.draw(m_lightingShader);
 
-    lightingShaderBasic.use();
-    lightingShaderBasic.set_mat4("projection", projection);
-    lightingShaderBasic.set_mat4("view", view);
+    m_lightingShaderBasic.use();
+    m_lightingShaderBasic.set_mat4("view", m_view);
+    m_lightingShaderBasic.set_mat4("projection", m_projection);
 
-    lightingShaderBasic.set_vec3("light.ambient", 1.0f, 1.0f, 1.0f);
-    lightingShaderBasic.set_vec3("light.diffuse", 1.0f, 1.0f, 1.0f);
-    lightingShaderBasic.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
-    lightingShaderBasic.set_vec3("light.position", lightPos);
-    lightingShaderBasic.set_vec3("viewPos", camera.position);
+    m_lightingShaderBasic.set_vec3("light.ambient", 1.0f, 1.0f, 1.0f);
+    m_lightingShaderBasic.set_vec3("light.diffuse", 1.0f, 1.0f, 1.0f);
+    m_lightingShaderBasic.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
+    m_lightingShaderBasic.set_vec3("light.position", lightPos);
+    m_lightingShaderBasic.set_vec3("viewPos", m_camera.position);
 
-    teapot.rotate = glm::rotate(glm::mat4(1.0f), glm::radians(SDL_GetTicks() / 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    teapot.draw(lightingShaderBasic);
+    m_teapot.m_rotate = glm::rotate(glm::mat4(1.0f), glm::radians(SDL_GetTicks() / 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    m_teapot.draw(m_lightingShaderBasic);
 
-    lightShader.use();
-    lightShader.set_mat4("projection", projection);
-    lightShader.set_mat4("view", view);
+    m_lightShader.use();
+    m_lightShader.set_mat4("view", m_view);
+    m_lightShader.set_mat4("projection", m_projection);
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, lightPos);
     model = glm::scale(model, glm::vec3(0.2f));
-    lightShader.set_mat4("model", model);
+    m_lightShader.set_mat4("model", model);
 
-    glBindVertexArray(lightVAO);
+    glBindVertexArray(m_lightVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    SDL_GL_SwapWindow(window);
+    SDL_GL_SwapWindow(m_window);
 
     return Status::Ok;
 }
