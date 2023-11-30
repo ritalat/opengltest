@@ -38,9 +38,13 @@ int GLleluCamera::main_loop()
                 case SDL_KEYUP:
                     if (SDL_SCANCODE_ESCAPE == eventStruct.key.keysym.scancode)
                         quit = true;
+                    if (SDL_SCANCODE_F == eventStruct.key.keysym.scancode)
+                        window_fullscreen(!m_fullscreen);
+                    if (SDL_SCANCODE_G == eventStruct.key.keysym.scancode)
+                        window_grab(!m_mouseGrab);
                     break;
                 case SDL_MOUSEMOTION:
-                    if (SDL_BUTTON_LMASK & eventStruct.motion.state) {
+                    if (m_mouseGrab || SDL_BUTTON_LMASK & eventStruct.motion.state) {
                         m_camera.yaw += eventStruct.motion.xrel * m_camera.sensitivity;
                         m_camera.pitch -= eventStruct.motion.yrel * m_camera.sensitivity;
                         if (m_camera.pitch > 89.0f)
@@ -65,23 +69,25 @@ int GLleluCamera::main_loop()
         }
 
         m_camera.front = glm::normalize(glm::vec3(
-            cos(glm::radians(m_camera.yaw) * cos(glm::radians(m_camera.pitch))),
+            cos(glm::radians(m_camera.yaw)) * cos(glm::radians(m_camera.pitch)),
             sin(glm::radians(m_camera.pitch)),
             sin(glm::radians(m_camera.yaw)) * cos(glm::radians(m_camera.pitch))
         ));
+        m_camera.right = glm::normalize(glm::cross(m_camera.front, m_camera.worldUp));
+        m_camera.up = glm::normalize(glm::cross(m_camera.right, m_camera.front));
 
         const Uint8 *keystateArray = SDL_GetKeyboardState(NULL);
         if (keystateArray[SDL_SCANCODE_W]) {
             m_camera.position += cameraSpeedScaled * m_camera.front;
         }
         if (keystateArray[SDL_SCANCODE_A]) {
-            m_camera.position -= glm::normalize(glm::cross(m_camera.front, m_camera.up)) * cameraSpeedScaled;
+            m_camera.position -= cameraSpeedScaled * m_camera.right;
         }
         if (keystateArray[SDL_SCANCODE_S]) {
             m_camera.position -= cameraSpeedScaled * m_camera.front;
         }
         if (keystateArray[SDL_SCANCODE_D]) {
-            m_camera.position += glm::normalize(glm::cross(m_camera.front, m_camera.up)) * cameraSpeedScaled;
+            m_camera.position += cameraSpeedScaled * m_camera.right;
         }
         Status ret = keystate(keystateArray);
         if (ret != Status::Ok)

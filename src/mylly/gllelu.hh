@@ -38,6 +38,8 @@ public:
     virtual ~GLlelu();
     void window_name(std::string_view name);
     void window_size(int w, int h);
+    void window_fullscreen(bool fullscreen);
+    void window_grab(bool grabMouse);
     int run();
     virtual int main_loop() = 0;
 
@@ -45,4 +47,7 @@ public:
     SDL_GLContext m_context;
     Size m_windowSize;
     Size m_fbSize;
+    bool m_fullscreen;
+    bool m_mouseGrab;
+    bool m_windowedMouseGrab;
 };

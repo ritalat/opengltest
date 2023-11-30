@@ -17,7 +17,11 @@
 
 GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
     m_window(nullptr),
-    m_context(nullptr)
+    m_context(nullptr),
+    m_windowSize({ WINDOW_WIDTH, WINDOW_HEIGHT }),
+    m_fullscreen(false),
+    m_mouseGrab(false),
+    m_windowedMouseGrab(false)
 {
     if (argc > 0) {
         Path exe = Path(argv[0]).filename();
@@ -51,9 +55,6 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GLVERSIONMINOR(glVersion));
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
                         SDL_GL_CONTEXT_PROFILE_CORE);
-
-    m_windowSize.width = WINDOW_WIDTH;
-    m_windowSize.height = WINDOW_HEIGHT;
 
     m_window = SDL_CreateWindow(WINDOW_NAME,
                                 SDL_WINDOWPOS_UNDEFINED,
@@ -94,11 +95,36 @@ void GLlelu::window_name(std::string_view name)
 
 void GLlelu::window_size(int w, int h)
 {
-    m_windowSize.width = w;
-    m_windowSize.height = h;
-    SDL_SetWindowSize(m_window, m_windowSize.width, m_windowSize.height);
+    if (!m_fullscreen) {
+        m_windowSize.width = w;
+        m_windowSize.height = h;
+        SDL_SetWindowSize(m_window, m_windowSize.width, m_windowSize.height);
+        SDL_GL_GetDrawableSize(m_window, &m_fbSize.width, &m_fbSize.height);
+        glViewport(0, 0, m_fbSize.width, m_fbSize.height);
+    }
+}
+
+void GLlelu::window_fullscreen(bool fullscreen)
+{
+    if (fullscreen != m_fullscreen) {
+        if (fullscreen) {
+            SDL_ShowWindow(m_window);
+            m_windowedMouseGrab = m_mouseGrab;
+            window_grab(true);
+        } else {
+            window_grab(m_windowedMouseGrab);
+        }
+    }
+    m_fullscreen = fullscreen;
+    SDL_SetWindowFullscreen(m_window, m_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
     SDL_GL_GetDrawableSize(m_window, &m_fbSize.width, &m_fbSize.height);
     glViewport(0, 0, m_fbSize.width, m_fbSize.height);
+}
+
+void GLlelu::window_grab(bool grabMouse)
+{
+    m_mouseGrab = grabMouse;
+    SDL_SetRelativeMouseMode(m_mouseGrab ? SDL_TRUE : SDL_FALSE);
 }
 
 int GLlelu::run()
@@ -106,7 +132,11 @@ int GLlelu::run()
     if (!m_window || !m_context)
         return EXIT_FAILURE;
 
-    fprintf(stderr, "Window size: %dx%d\n", m_windowSize.width, m_windowSize.height);
+    if (m_fullscreen) {
+        fprintf(stderr, "Window size: fullscreen\n");
+    } else {
+        fprintf(stderr, "Window size: %dx%d\n", m_windowSize.width, m_windowSize.height);
+    }
     fprintf(stderr, "Drawable size: %dx%d\n", m_fbSize.width, m_fbSize.height);
 
     fprintf(stderr, "OpenGL vendor: %s\n", glGetString(GL_VENDOR));
