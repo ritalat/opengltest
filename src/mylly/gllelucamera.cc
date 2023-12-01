@@ -77,6 +77,9 @@ int GLleluCamera::main_loop()
         m_camera.up = glm::normalize(glm::cross(m_camera.right, m_camera.front));
 
         const Uint8 *keystateArray = SDL_GetKeyboardState(NULL);
+        if (keystateArray[SDL_SCANCODE_LSHIFT]) {
+            cameraSpeedScaled *= 2.0f;
+        }
         if (keystateArray[SDL_SCANCODE_W]) {
             m_camera.position += cameraSpeedScaled * m_camera.front;
         }
@@ -88,6 +91,12 @@ int GLleluCamera::main_loop()
         }
         if (keystateArray[SDL_SCANCODE_D]) {
             m_camera.position += cameraSpeedScaled * m_camera.right;
+        }
+        if (keystateArray[SDL_SCANCODE_SPACE]) {
+            m_camera.position += cameraSpeedScaled * m_camera.worldUp;
+        }
+        if (keystateArray[SDL_SCANCODE_LCTRL]) {
+            m_camera.position -= cameraSpeedScaled * m_camera.worldUp;
         }
         Status ret = keystate(keystateArray);
         if (ret != Status::Ok)

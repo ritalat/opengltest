@@ -51,6 +51,7 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
         throw std::runtime_error("Failed to init SDL");
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GLVERSIONMAJOR(glVersion));
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GLVERSIONMINOR(glVersion));
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
