@@ -54,8 +54,6 @@ LGL_2_Textured::LGL_2_Textured(int argc, char *argv[]):
     m_lightVAO(0),
     m_VBO(0)
 {
-    glEnable(GL_DEPTH_TEST);
-
     m_lightingShader.use();
     m_lightingShader.set_int("material.diffuse", 0);
     m_lightingShader.set_int("material.specular", 1);

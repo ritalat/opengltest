@@ -46,19 +46,17 @@ ObjFiles::ObjFiles(int argc, char *argv[]):
     m_lightVAO(0),
     m_lightVBO(0)
 {
-    glEnable(GL_DEPTH_TEST);
-
+    m_room.m_translate = glm::translate(m_room.m_translate, glm::vec3(0.0f, -0.5f, 0.0f));
     m_room.m_rotate = glm::rotate(m_room.m_rotate, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     m_room.m_rotate = glm::rotate(m_room.m_rotate, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    m_room.m_translate = glm::translate(m_room.m_translate, glm::vec3(0.0f, -0.5f, 0.0f));
 
-    m_monkey.m_scale = glm::scale(m_monkey.m_scale, glm::vec3(0.1f, 0.1f, 0.1f));
+    m_monkey.m_translate = glm::translate(m_monkey.m_translate, glm::vec3(0.475f, -0.3f, 0.0f));
     m_monkey.m_rotate = glm::rotate(m_monkey.m_rotate, glm::radians(-45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     m_monkey.m_rotate = glm::rotate(m_monkey.m_rotate, glm::radians(-45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    m_monkey.m_translate = glm::translate(m_monkey.m_translate, glm::vec3(0.475f, -0.3f, 0.0f));
+    m_monkey.m_scale = glm::scale(m_monkey.m_scale, glm::vec3(0.1f, 0.1f, 0.1f));
 
-    m_teapot.m_scale = glm::scale(m_teapot.m_scale, glm::vec3(0.1f, 0.1f, 0.1f));
     m_teapot.m_translate = glm::translate(m_teapot.m_translate, glm::vec3(0.0f, 0.5f, 0.0f));
+    m_teapot.m_scale = glm::scale(m_teapot.m_scale, glm::vec3(0.1f, 0.1f, 0.1f));
 
     glGenVertexArrays(1, &m_lightVAO);
     glBindVertexArray(m_lightVAO);

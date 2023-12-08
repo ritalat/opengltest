@@ -62,8 +62,6 @@ LGL_2::LGL_2(int argc, char *argv[]):
     m_VBO(0),
     m_enableSpotLight(true)
 {
-    glEnable(GL_DEPTH_TEST);
-
     m_lightingShader.use();
     m_lightingShader.set_int("material.diffuse", 0);
     m_lightingShader.set_int("material.specular", 1);

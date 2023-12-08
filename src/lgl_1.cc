@@ -15,11 +15,11 @@
 
 const float vertices[] = {
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
      0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
      0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
 
     -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
      0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
@@ -36,11 +36,11 @@ const float vertices[] = {
     -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 
      0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
      0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
      0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
      0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
 
     -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
      0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
@@ -50,11 +50,11 @@ const float vertices[] = {
     -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
 
     -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
      0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
      0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f
 };
 
 const glm::vec3 cubePositions[] = {
@@ -92,8 +92,6 @@ LGL_1::LGL_1(int argc, char *argv[]):
     m_VAO(0),
     m_VBO(0)
 {
-    glEnable(GL_DEPTH_TEST);
-
     m_texturedShader.use();
     m_texturedShader.set_int("texture0", 0);
     m_texturedShader.set_int("texture1", 1);

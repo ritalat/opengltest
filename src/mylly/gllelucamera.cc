@@ -1,5 +1,6 @@
 #include "gllelucamera.hh"
 
+#include "glad/gl.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "SDL.h"
@@ -18,6 +19,9 @@ GLleluCamera::~GLleluCamera()
 
 int GLleluCamera::main_loop()
 {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
     unsigned int deltaTime = 0;
     unsigned int lastFrame = 0;
 

@@ -121,8 +121,6 @@ LGL_2_Basic::LGL_2_Basic(int argc, char *argv[]):
     m_lightVAO(0),
     m_VBO(0)
 {
-    glEnable(GL_DEPTH_TEST);
-
     glGenVertexArrays(1, &m_VAO);
     glBindVertexArray(m_VAO);
 

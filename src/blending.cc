@@ -56,7 +56,6 @@ Blending::Blending(int argc, char *argv[]):
     m_cubeVAO(0),
     m_cubeVBO(0)
 {
-    glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -148,6 +147,7 @@ Status Blending::render()
     m_blendingShader.set_mat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
+    glDisable(GL_CULL_FACE);
     if (m_simpleAlphaDiscard) {
         m_alphaShader.use();
         m_alphaShader.set_mat4("view", m_view);
@@ -186,6 +186,7 @@ Status Blending::render()
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
     }
+    glEnable(GL_CULL_FACE);
 
     SDL_GL_SwapWindow(m_window);
 
