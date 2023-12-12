@@ -7,9 +7,13 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-#include <cmath>
 #include <cstdint>
+#include <cstring>
 #include <string_view>
+#include <vector>
+
+#define MAX_STRING_LENGTH 1000
+#define QUAD_SIZE 4 * 6
 
 // UTF8_getch function taken from SDL2's SDL_test_font.c
 // The included font data based on Marcel Sondaar's font8_8.asm was dumped to font8x8.png
@@ -110,7 +114,9 @@ TextRendererLatin1::TextRendererLatin1(int w, int h, std::string_view fontName):
     m_scale(1.0f),
     m_windowWidth(w),
     m_windowHeight(h),
-    m_projection(glm::ortho(0.0f, (float)w, 0.0f, (float)h))
+    m_projection(glm::ortho(0.0f, (float)w, 0.0f, (float)h)),
+    m_texScale({ 1.0f / ATLAS_SIZE, 0.0f, 0.0f, 1.0f / ATLAS_SIZE }),
+    m_strVerts(QUAD_SIZE * MAX_STRING_LENGTH)
 {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     m_fontTexture.filtering(GL_NEAREST);
@@ -120,10 +126,12 @@ TextRendererLatin1::TextRendererLatin1(int w, int h, std::string_view fontName):
 
     glGenBuffers(1, &m_textVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_textVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * QUAD_SIZE * MAX_STRING_LENGTH, NULL, GL_DYNAMIC_DRAW);
 
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -173,6 +181,7 @@ void TextRendererLatin1::draw_string(int x, int y, std::string_view str)
 
     m_textShader.use();
     m_textShader.set_mat4("projection", m_projection);
+    m_textShader.set_mat2("texScale", m_texScale);
     m_textShader.set_vec3("color", m_color);
     m_textShader.set_int("font", 0);
 
@@ -183,6 +192,7 @@ void TextRendererLatin1::draw_string(int x, int y, std::string_view str)
 
     const char *s = str.data();
     size_t len = str.length();
+    int quadIndex = 0;
 
     while (len > 0) {
         int advance = 0;
@@ -199,36 +209,48 @@ void TextRendererLatin1::draw_string(int x, int y, std::string_view str)
             // Space
             curx += m_scale * FONT_SIZE;
         } else if (ch <= 0xFF) {
+            float toffx = ch % ATLAS_SIZE;
+            float toffy = ch / ATLAS_SIZE;
+
             float vertices[6][4] = {
-                { curx,     cury + h,  0.0f, 0.0f },
-                { curx,     cury,      0.0f, 1.0f },
-                { curx + w, cury,      1.0f, 1.0f },
-                { curx,     cury + h,  0.0f, 0.0f },
-                { curx + w, cury,      1.0f, 1.0f },
-                { curx + w, cury + h,  1.0f, 0.0f }
+                { curx,     cury + h,  toffx,        toffy        },
+                { curx,     cury,      toffx,        toffy + 1.0f },
+                { curx + w, cury,      toffx + 1.0f, toffy + 1.0f },
+                { curx,     cury + h,  toffx,        toffy        },
+                { curx + w, cury,      toffx + 1.0f, toffy + 1.0f },
+                { curx + w, cury + h,  toffx + 1.0f, toffy        }
             };
 
-            glBindBuffer(GL_ARRAY_BUFFER, m_textVBO);
-            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-            float offx = floor(ch % ATLAS_SIZE) / ATLAS_SIZE;
-            float offy = floor(ch / ATLAS_SIZE) / ATLAS_SIZE;
-            float scalex = 1.0f / ATLAS_SIZE;
-            float scaley = 1.0f / ATLAS_SIZE;
-            m_textShader.set_vec2("offset", offx, offy);
-            m_textShader.set_vec2("scale", scalex, scaley);
-
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            memcpy(&m_strVerts[QUAD_SIZE * quadIndex], &vertices, sizeof(vertices));
 
             curx += m_scale * FONT_SIZE;
+            ++quadIndex;
+
+            if (quadIndex == MAX_STRING_LENGTH) {
+                draw_batch(MAX_STRING_LENGTH);
+                quadIndex = 0;
+            }
         }
 
         s += advance;
         len -= advance;
     }
 
+    draw_batch(quadIndex);
+
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_BLEND);
+}
+
+void TextRendererLatin1::draw_batch(int size)
+{
+    if (size < 1)
+        return;
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_textVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * QUAD_SIZE * size, &m_strVerts[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6 * size);
 }

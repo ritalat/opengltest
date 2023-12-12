@@ -6,6 +6,7 @@
 #include "glm/glm.hpp"
 
 #include <string_view>
+#include <vector>
 
 #define FONT_NAME "font8x8.png"
 #define FONT_SIZE 8
@@ -25,6 +26,8 @@ public:
     void draw_string(int x, int y, std::string_view str);
 
 private:
+    void draw_batch(int size);
+
     Shader m_textShader;
     Texture m_fontTexture;
     unsigned int m_textVAO;
@@ -34,4 +37,6 @@ private:
     int m_windowWidth;
     int m_windowHeight;
     glm::mat4 m_projection;
+    glm::mat2 m_texScale;
+    std::vector<float> m_strVerts;
 };
