@@ -6,6 +6,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include <array>
 #include <stdexcept>
 #include <string_view>
 
@@ -73,4 +74,67 @@ void Texture::wrapping(int s, int t)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, s);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, t);
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+// Cubemap face order:
+// 1. Right  (POSITIVE_X)
+// 2. Left   (NEGATIVE_X)
+// 3. Top    (POSITIVE_Y)
+// 4. Bottom (NEGATIVE_Y)
+// 5. Back   (POSITIVE_Z)
+// 6. front  (NEGATIVE_Z)
+Cubemap::Cubemap(const std::array<std::string_view, 6> &files):
+    m_id(0)
+{
+    glGenTextures(1, &m_id);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_id);
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    for (int i = 0; i < files.size(); ++i) {
+        int width, height, nrChannels;
+        Path texturePath = get_asset_path(files[i]);
+        unsigned char *data = stbi_load(cpath(texturePath), &width, &height, &nrChannels, 0);
+
+        if (!data)
+            throw std::runtime_error("Failed to load texture: " + texturePath.string() + FILE_ERROR_HINT);
+
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        stbi_image_free(data);
+    }
+}
+
+Cubemap::~Cubemap()
+{
+    if (m_id)
+        glDeleteTextures(1, &m_id);
+}
+
+void Cubemap::activate(int unit)
+{
+    if (unit < 48) {
+        glActiveTexture(GL_TEXTURE0 + unit);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, m_id);
+    }
+}
+
+void Cubemap::filtering(int mag, int min)
+{
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_id);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, mag);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, min);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+}
+
+void Cubemap::wrapping(int s, int t, int r)
+{
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_id);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, s);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, t);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, r);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }

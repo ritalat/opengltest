@@ -4,6 +4,7 @@ add_subdirectory(mylly)
 
 set(SAMPLES bitmap_font
             blending
+            cubemaps
             hello_triangle
             lgl_1
             lgl_2_basic
