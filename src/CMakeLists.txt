@@ -12,6 +12,7 @@ set(SAMPLES bitmap_font
             lgl_2
             obj_models
             postprocessing
+            shadowmap
             stencil
             varjostinlelu
             PARENT_SCOPE)
