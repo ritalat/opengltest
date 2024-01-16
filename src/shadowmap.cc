@@ -9,11 +9,10 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "SDL.h"
 
+#include <cmath>
 #include <stdexcept>
 
 #define SHADOWMAP_SIZE 2048
-
-const glm::vec3 lightPos = glm::vec3(-2.0f, 4.0f, -2.0f);
 
 const float floorPlane[] = {
     -1.0f, 0.0f, -1.0f,   0.0f, 1.0f, 0.0f,   0.0f, 2.5f,
@@ -149,10 +148,12 @@ Status ShadowMap::event(SDL_Event &event)
 
 Status ShadowMap::render()
 {
+    glm::vec3 lightPos = glm::vec3(-2 * sin(SDL_GetTicks() / 500.0f), 4.0f, 2 * cos(SDL_GetTicks() / 500.0f));
+    glm::vec3 lightTarget = glm::vec3(0.0f);
     glm::mat4 lightProjection = glm::ortho(-10.f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f);
     glm::mat4 lightView = glm::lookAt(lightPos,
-                                    glm::vec3(0.0f, 0.0f, 0.0f),
-                                    glm::vec3(0.0f, 1.0f, 0.0f));
+                                      lightTarget,
+                                      glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
     if (m_shadowMapping) {
@@ -184,7 +185,7 @@ Status ShadowMap::render()
     m_sceneShader.set_vec3("light.ambient", 0.2f, 0.2f, 0.2f);
     m_sceneShader.set_vec3("light.diffuse", 0.5f, 0.5f, 0.5f);
     m_sceneShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
-    m_sceneShader.set_vec3("light.position", lightPos);
+    m_sceneShader.set_vec3("light.direction", lightTarget - lightPos);
     m_sceneShader.set_vec3("viewPos", m_camera.position);
 
     glActiveTexture(GL_TEXTURE0 + 10);
