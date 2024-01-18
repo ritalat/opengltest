@@ -40,4 +40,6 @@ public:
     glm::mat4 m_view;
     glm::mat4 m_projection;
     Camera m_camera;
+    SDL_GameController *gamepad;
+    SDL_JoystickID gamepadId;
 };

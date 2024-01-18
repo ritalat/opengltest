@@ -47,7 +47,7 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
         fprintf(stderr, "Data directory: %s (%s)\n", cpath(dataDir), cpath(absolute));
     }
 
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) != 0)
         throw std::runtime_error("Failed to init SDL");
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
