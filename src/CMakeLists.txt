@@ -13,6 +13,7 @@ set(SAMPLES bitmap_font
             obj_models
             postprocessing
             shadowmap
+            shadowmap_omni
             stencil
             varjostinlelu
             PARENT_SCOPE)
