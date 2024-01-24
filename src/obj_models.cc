@@ -18,6 +18,13 @@ const BasicMaterial emerald {
     128 * 0.6
 };
 
+const BasicMaterial gold {
+    glm::vec3( 0.24725f,  0.1995f,  0.0745f),
+    glm::vec3( 0.75164f,  0.60648f,  0.22648f),
+    glm::vec3( 0.628281f,  0.555802f,  0.366065f),
+    128 * 0.4
+};
+
 class ObjFiles: public GLleluCamera
 {
 public:
@@ -29,7 +36,7 @@ public:
     Shader m_lightingShaderBasic;
     Shader m_lightShader;
     Himmeli m_room;
-    Himmeli m_monkey;
+    BasicHimmeli m_monkey;
     BasicHimmeli m_teapot;
     unsigned int m_lightVAO;
     unsigned int m_lightVBO;
@@ -41,7 +48,7 @@ ObjFiles::ObjFiles(int argc, char *argv[]):
     m_lightingShaderBasic("lighting.vert", "lighting_basic.frag"),
     m_lightShader("lighting.vert", "lighting_light.frag"),
     m_room("vt_viking_room.obj", "vt_viking_room.png"),
-    m_monkey("kultainenapina.obj", "kultainenapina.jpg"),
+    m_monkey("suzanne.obj", gold),
     m_teapot("teapot.obj", emerald),
     m_lightVAO(0),
     m_lightVBO(0)
@@ -95,7 +102,6 @@ Status ObjFiles::render()
     m_lightingShader.set_vec3("viewPos", m_camera.position);
 
     m_room.draw(m_lightingShader);
-    m_monkey.draw(m_lightingShader);
 
     m_lightingShaderBasic.use();
     m_lightingShaderBasic.set_mat4("view", m_view);
@@ -107,6 +113,7 @@ Status ObjFiles::render()
     m_lightingShaderBasic.set_vec3("light.position", lightPos);
     m_lightingShaderBasic.set_vec3("viewPos", m_camera.position);
 
+    m_monkey.draw(m_lightingShaderBasic);
     m_teapot.m_rotate = glm::rotate(glm::mat4(1.0f), glm::radians(SDL_GetTicks() / 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     m_teapot.draw(m_lightingShaderBasic);
 

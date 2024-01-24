@@ -24,6 +24,7 @@ struct Camera
     float speed = 0.0025f;
     float yaw = -90.0f;
     float pitch = 0.0f;
+    int deadzone = 2000;
 };
 
 class GLleluCamera: public GLlelu
@@ -33,13 +34,13 @@ public:
     virtual ~GLleluCamera();
     virtual int main_loop() final;
     virtual Status event(SDL_Event &event);
-    virtual Status keystate(const Uint8 *keystate);
     virtual Status update(unsigned int deltaTime);
     virtual Status render() = 0;
+    void find_gamepad();
 
     glm::mat4 m_view;
     glm::mat4 m_projection;
     Camera m_camera;
-    SDL_GameController *gamepad;
-    SDL_JoystickID gamepadId;
+    SDL_GameController *m_gamepad;
+    SDL_JoystickID m_gamepadId;
 };
