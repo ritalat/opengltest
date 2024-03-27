@@ -1,6 +1,10 @@
 #include "gllelucamera.hh"
 
+#if defined(__EMSCRIPTEN__) || defined(USE_GLES)
+#include "glad/gles2.h"
+#else
 #include "glad/gl.h"
+#endif
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "SDL.h"

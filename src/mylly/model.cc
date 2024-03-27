@@ -2,7 +2,11 @@
 
 #include "path.hh"
 
+#if defined(__EMSCRIPTEN__) || defined(USE_GLES)
+#include "glad/gles2.h"
+#else
 #include "glad/gl.h"
+#endif
 #include "glm/glm.hpp"
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"

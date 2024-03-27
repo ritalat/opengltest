@@ -7,8 +7,7 @@ set(SOURCES gllelu.cc
             path.cc
             shader.cc
             text_bitmap.cc
-            texture.cc
-            glad/src/gl.c)
+            texture.cc)
 
 set(HEADERS gllelu.hh
             gllelu_main.hh
@@ -19,9 +18,17 @@ set(HEADERS gllelu.hh
             shader.hh
             shapes.hh
             text_bitmap.hh
-            texture.hh
-            glad/include/glad/gl.h
-            glad/include/KHR/khrplatform.h)
+            texture.hh)
+
+if(EMSCRIPTEN OR USE_GLES)
+    list(APPEND SOURCES glad/src/gles2.c)
+    list(APPEND HEADERS glad/include/glad/gles2.h
+                        glad/include/KHR/khrplatform.h)
+else()
+    list(APPEND SOURCES glad/src/gl.c)
+    list(APPEND HEADERS glad/include/glad/gl.h
+                        glad/include/KHR/khrplatform.h)
+endif()
 
 add_library(mylly SHARED ${SOURCES} ${HEADERS})
 
@@ -35,7 +42,7 @@ if(WIN32)
     endif()
 endif()
 
-if(UNIX)
+if(UNIX AND NOT EMSCRIPTEN)
     target_link_options(mylly PUBLIC "-Wl,--enable-new-dtags")
     set_target_properties(mylly PROPERTIES INSTALL_RPATH "\${ORIGIN}")
 endif()

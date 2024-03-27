@@ -18,6 +18,9 @@ set(SAMPLES bitmap_font
             varjostinlelu
             PARENT_SCOPE)
 
+set(ES3_SAMPLES es3_triangle
+                PARENT_SCOPE)
+
 function(create_sample name)
     add_executable(${name} src/${name}.cc)
 
@@ -31,7 +34,7 @@ function(create_sample name)
                                                  VS_DEBUGGER_ENVIRONMENT "${VSENV}")
     endif()
 
-    if(UNIX)
+    if(UNIX AND NOT EMSCRIPTEN)
         target_link_options(${name} PUBLIC "-Wl,--enable-new-dtags")
         set_target_properties(${name} PROPERTIES INSTALL_RPATH "\${ORIGIN}")
     endif()

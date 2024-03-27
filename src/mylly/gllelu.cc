@@ -2,7 +2,11 @@
 
 #include "path.hh"
 
+#if defined(__EMSCRIPTEN__) || defined(USE_GLES)
+#include "glad/gles2.h"
+#else
 #include "glad/gl.h"
+#endif
 #include "SDL.h"
 
 #include <cstdio>
@@ -52,11 +56,17 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+#if defined(__EMSCRIPTEN__) || defined(USE_GLES)
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+                        SDL_GL_CONTEXT_PROFILE_ES);
+#else
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GLVERSIONMAJOR(glVersion));
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GLVERSIONMINOR(glVersion));
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
                         SDL_GL_CONTEXT_PROFILE_CORE);
-
+#endif
     m_window = SDL_CreateWindow(WINDOW_NAME,
                                 SDL_WINDOWPOS_UNDEFINED,
                                 SDL_WINDOWPOS_UNDEFINED,
@@ -69,8 +79,13 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
     if (!m_context)
         throw std::runtime_error("Failed to create OpenGL context");
 
+#if defined(__EMSCRIPTEN__) || defined(USE_GLES)
+    if (!gladLoadGLES2((GLADloadfunc) SDL_GL_GetProcAddress))
+        throw std::runtime_error("Failed to load OpenGL functions");
+#else
     if (!gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress))
         throw std::runtime_error("Failed to load OpenGL functions");
+#endif
 
     SDL_GL_GetDrawableSize(m_window, &m_fbSize.width, &m_fbSize.height);
     glViewport(0, 0, m_fbSize.width, m_fbSize.height);
