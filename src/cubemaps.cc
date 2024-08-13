@@ -134,7 +134,7 @@ Status Cubemaps::render()
     m_environmentMapShader.set_mat4("model", model);
 
     glBindVertexArray(m_teapot.m_VAO);
-    glDrawArrays(GL_TRIANGLES, 0, m_teapot.m_vertices.size());;
+    glDrawElements(GL_TRIANGLES, m_teapot.m_indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
     glDepthFunc(GL_LEQUAL);

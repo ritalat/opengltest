@@ -38,7 +38,12 @@ void Himmeli::draw(Shader &shader)
     m_specular.activate(1);
     m_normal.activate(2);
     glBindVertexArray(m_model.m_VAO);
-    glDrawArrays(GL_TRIANGLES, 0, m_model.m_vertices.size());
+    if (!m_model.m_indices.empty()) {
+        glDrawElements(GL_TRIANGLES, m_model.m_indices.size(), GL_UNSIGNED_INT, 0);
+    } else {
+        glDrawArrays(GL_TRIANGLES, 0, m_model.m_vertices.size());
+    }
+    glBindVertexArray(0);
 }
 
 BasicHimmeli::BasicHimmeli(std::string_view model, BasicMaterial material):
@@ -60,5 +65,10 @@ void BasicHimmeli::draw(Shader &shader)
     shader.set_float("material.shininess", m_material.shininess);
     shader.set_mat4("model", m_translate * m_rotate * m_scale);
     glBindVertexArray(m_model.m_VAO);
-    glDrawArrays(GL_TRIANGLES, 0, m_model.m_vertices.size());
+    if (!m_model.m_indices.empty()) {
+        glDrawElements(GL_TRIANGLES, m_model.m_indices.size(), GL_UNSIGNED_INT, 0);
+    } else {
+        glDrawArrays(GL_TRIANGLES, 0, m_model.m_vertices.size());
+    }
+    glBindVertexArray(0);
 }

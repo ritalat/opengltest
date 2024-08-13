@@ -7,18 +7,34 @@
 #else
 #include "glad/gl.h"
 #endif
+#define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm.hpp"
+#include "glm/gtx/hash.hpp"
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
+
+bool Vertex::operator==(const Vertex &other) const {
+    return position == other.position &&
+           normal == other.normal &&
+           texcoord == other.texcoord;
+}
+
+size_t std::hash<Vertex>::operator()(const Vertex &vertex) const {
+    return hash<glm::vec3>()(vertex.position) ^
+           (hash<glm::vec3>()(vertex.normal) << 1) ^
+           (hash<glm::vec2>()(vertex.texcoord) << 2);
+}
 
 Model::Model(std::string_view file):
     m_VAO(0),
-    m_VBO(0)
+    m_VBO(0),
+    m_EBO(0)
 {
     Path objPath = get_asset_path(file);
 
@@ -37,30 +53,38 @@ Model::Model(std::string_view file):
     if (!err.empty())
         throw std::runtime_error("TinyObj err: " + err + FILE_ERROR_HINT);
 
-    for (tinyobj::shape_t &shape : shapes) {
-        for (tinyobj::index_t index : shape.mesh.indices) {
-            tinyobj::real_t vx = attrib.vertices[3 * index.vertex_index + 0];
-            tinyobj::real_t vy = attrib.vertices[3 * index.vertex_index + 1];
-            tinyobj::real_t vz = attrib.vertices[3 * index.vertex_index + 2];
-            tinyobj::real_t nx = attrib.normals[3 * index.normal_index + 0];
-            tinyobj::real_t ny = attrib.normals[3 * index.normal_index + 1];
-            tinyobj::real_t nz = attrib.normals[3 * index.normal_index + 2];
-            tinyobj::real_t tx = attrib.texcoords[2 * index.texcoord_index + 0];
-            tinyobj::real_t ty = attrib.texcoords[2 * index.texcoord_index + 1];
+    std::unordered_map<Vertex, unsigned int> uniqueVertices;
+    int cvert = 0;
+    int cuvert = 0;
 
+    for (const tinyobj::shape_t &shape : shapes) {
+        for (const tinyobj::index_t &index : shape.mesh.indices) {
             Vertex vert;
-            vert.position.x = vx;
-            vert.position.y = vy;
-            vert.position.z = vz;
-            vert.normal.x = nx;
-            vert.normal.y = ny;
-            vert.normal.z = nz;
-            vert.texcoord.x = tx;
-            vert.texcoord.y = ty;
+            vert.position.x = attrib.vertices[3 * index.vertex_index + 0];
+            vert.position.y = attrib.vertices[3 * index.vertex_index + 1];
+            vert.position.z = attrib.vertices[3 * index.vertex_index + 2];
+            vert.normal.x = attrib.normals[3 * index.normal_index + 0];
+            vert.normal.y = attrib.normals[3 * index.normal_index + 1];
+            vert.normal.z = attrib.normals[3 * index.normal_index + 2];
+            vert.texcoord.x = attrib.texcoords[2 * index.texcoord_index + 0];
+            vert.texcoord.y = attrib.texcoords[2 * index.texcoord_index + 1];
 
+#if 0
             m_vertices.push_back(vert);
+            ++cvert;
+#else
+            if (uniqueVertices.count(vert) == 0) {
+                uniqueVertices[vert] = m_vertices.size();
+                m_vertices.push_back(vert);
+                ++cuvert;
+            }
+            m_indices.push_back(uniqueVertices[vert]);
+            ++cvert;
+#endif
         }
     }
+
+    //fprintf(stderr, "Loaded model: %s\n\tTotal vertices: %d\n\tUnique vertices: %d\n", file.data(), cvert, cuvert);
 
     glGenVertexArrays(1, &m_VAO);
     glBindVertexArray(m_VAO);
@@ -77,8 +101,14 @@ Model::Model(std::string_view file):
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texcoord));
     glEnableVertexAttribArray(2);
 
+    glGenBuffers(1, &m_EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), m_indices.data(), GL_STATIC_DRAW);
+
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 Model::~Model()
@@ -88,4 +118,7 @@ Model::~Model()
 
     if (m_VBO)
         glDeleteBuffers(1, &m_VBO);
+
+    if (m_EBO)
+        glDeleteBuffers(1, &m_EBO);
 }
