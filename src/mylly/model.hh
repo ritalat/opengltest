@@ -3,7 +3,6 @@
 #include "glm/glm.hpp"
 
 #include <string_view>
-#include <vector>
 
 struct Vertex
 {
@@ -26,8 +25,8 @@ public:
     Model(const Model &) = delete;
     Model &operator=(const Model &) = delete;
 
-    std::vector<Vertex> m_vertices;
-    std::vector<unsigned int> m_indices;
+    unsigned int m_numVertices;
+    unsigned int m_numIndices;
     unsigned int m_VAO;
     unsigned int m_VBO;
     unsigned int m_EBO;

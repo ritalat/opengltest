@@ -8,6 +8,13 @@
 
 #include <string_view>
 
+struct Material {
+    Texture diffuse;
+    Texture specular;
+    Texture normal;
+    float shininess;
+};
+
 class Himmeli
 {
 public:
@@ -19,10 +26,7 @@ public:
     void draw(Shader &shader);
 
     Model m_model;
-    Texture m_diffuse;
-    Texture m_specular;
-    Texture m_normal;
-    float m_shininess;
+    Material m_material;
     glm::mat4 m_scale;
     glm::mat4 m_rotate;
     glm::mat4 m_translate;

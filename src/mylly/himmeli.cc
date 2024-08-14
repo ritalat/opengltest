@@ -15,10 +15,7 @@
 
 Himmeli::Himmeli(std::string_view model, std::string_view diffuse, std::string_view specular, std::string_view normal):
     m_model(model),
-    m_diffuse(diffuse),
-    m_specular(specular),
-    m_normal(normal),
-    m_shininess(64.0f),
+    m_material({diffuse, specular, normal, 64.0f}),
     m_scale(1.0f),
     m_rotate(1.0f),
     m_translate(1.0f)
@@ -32,16 +29,16 @@ void Himmeli::draw(Shader &shader)
     shader.set_int("material.diffuse", 0);
     shader.set_int("material.specular", 1);
     shader.set_int("material.normal", 2);
-    shader.set_float("material.shininess", m_shininess);
+    shader.set_float("material.shininess", m_material.shininess);
     shader.set_mat4("model", m_translate * m_rotate * m_scale);
-    m_diffuse.activate(0);
-    m_specular.activate(1);
-    m_normal.activate(2);
+    m_material.diffuse.activate(0);
+    m_material.specular.activate(1);
+    m_material.normal.activate(2);
     glBindVertexArray(m_model.m_VAO);
-    if (!m_model.m_indices.empty()) {
-        glDrawElements(GL_TRIANGLES, m_model.m_indices.size(), GL_UNSIGNED_INT, 0);
+    if (m_model.m_numIndices > 0) {
+        glDrawElements(GL_TRIANGLES, m_model.m_numIndices, GL_UNSIGNED_INT, 0);
     } else {
-        glDrawArrays(GL_TRIANGLES, 0, m_model.m_vertices.size());
+        glDrawArrays(GL_TRIANGLES, 0, m_model.m_numVertices);
     }
     glBindVertexArray(0);
 }
@@ -65,10 +62,10 @@ void BasicHimmeli::draw(Shader &shader)
     shader.set_float("material.shininess", m_material.shininess);
     shader.set_mat4("model", m_translate * m_rotate * m_scale);
     glBindVertexArray(m_model.m_VAO);
-    if (!m_model.m_indices.empty()) {
-        glDrawElements(GL_TRIANGLES, m_model.m_indices.size(), GL_UNSIGNED_INT, 0);
+    if (m_model.m_numIndices > 0) {
+        glDrawElements(GL_TRIANGLES, m_model.m_numIndices, GL_UNSIGNED_INT, 0);
     } else {
-        glDrawArrays(GL_TRIANGLES, 0, m_model.m_vertices.size());
+        glDrawArrays(GL_TRIANGLES, 0, m_model.m_numVertices);
     }
     glBindVertexArray(0);
 }

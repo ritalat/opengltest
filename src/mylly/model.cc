@@ -32,6 +32,8 @@ size_t std::hash<Vertex>::operator()(const Vertex &vertex) const {
 }
 
 Model::Model(std::string_view file):
+    m_numVertices(0),
+    m_numIndices(0),
     m_VAO(0),
     m_VBO(0),
     m_EBO(0)
@@ -53,6 +55,8 @@ Model::Model(std::string_view file):
     if (!err.empty())
         throw std::runtime_error("TinyObj err: " + err + FILE_ERROR_HINT);
 
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
     std::unordered_map<Vertex, unsigned int> uniqueVertices;
     int cvert = 0;
     int cuvert = 0;
@@ -70,19 +74,22 @@ Model::Model(std::string_view file):
             vert.texcoord.y = attrib.texcoords[2 * index.texcoord_index + 1];
 
 #if 0
-            m_vertices.push_back(vert);
+            vertices.push_back(vert);
             ++cvert;
 #else
             if (uniqueVertices.count(vert) == 0) {
-                uniqueVertices[vert] = m_vertices.size();
-                m_vertices.push_back(vert);
+                uniqueVertices[vert] = vertices.size();
+                vertices.push_back(vert);
                 ++cuvert;
             }
-            m_indices.push_back(uniqueVertices[vert]);
+            indices.push_back(uniqueVertices[vert]);
             ++cvert;
 #endif
         }
     }
+
+    m_numVertices = vertices.size();
+    m_numIndices = indices.size();
 
     //fprintf(stderr, "Loaded model: %s\n\tTotal vertices: %d\n\tUnique vertices: %d\n", file.data(), cvert, cuvert);
 
@@ -92,7 +99,7 @@ Model::Model(std::string_view file):
     glGenBuffers(1, &m_VBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
-    glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_numVertices * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
     glEnableVertexAttribArray(0);
@@ -104,7 +111,7 @@ Model::Model(std::string_view file):
     glGenBuffers(1, &m_EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
 
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), m_indices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_numIndices * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
