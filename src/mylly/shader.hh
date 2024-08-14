@@ -2,12 +2,15 @@
 
 #include "glm/glm.hpp"
 
+#include <string>
 #include <string_view>
+#include <unordered_map>
 
 class Shader
 {
 public:
     Shader(const std::string_view vert, const std::string_view frag);
+    Shader(const std::string_view comp);
     ~Shader();
     Shader(const Shader &) = delete;
     Shader &operator=(const Shader &) = delete;
@@ -29,5 +32,8 @@ public:
     void set_mat3(const std::string_view name, const glm::mat3 &value);
     void set_mat4(const std::string_view name, const glm::mat4 &value);
 
+    int get_uniform_location(const std::string_view name);
+
     unsigned int m_id;
+    std::unordered_map<std::string, int> m_uniformLocations;
 };

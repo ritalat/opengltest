@@ -1,0 +1,38 @@
+#version 430 core
+
+struct Particle {
+    vec2 position;
+    vec2 velocity;
+};
+
+layout(std430, binding = 0) buffer InParticleBuffer {
+    Particle inParticles[];
+};
+
+layout(std430, binding = 1) buffer OutParticleBuffer {
+    Particle outParticles[];
+};
+
+layout(std140, binding = 0) uniform Uniforms {
+    float dt;
+    float scale;
+};
+
+layout(local_size_x = 100) in;
+
+void main()
+{
+    uint index = gl_GlobalInvocationID.x;
+    Particle particle = inParticles[index];
+
+    particle.position = particle.position + particle.velocity * (dt * scale);
+
+    if ((particle.position.x <= -1.0) || (particle.position.x >= 1.0)) {
+        particle.velocity.x = -particle.velocity.x;
+    }
+    if ((particle.position.y <= -1.0) || (particle.position.y >= 1.0)) {
+        particle.velocity.y = -particle.velocity.y;
+    }
+
+    outParticles[index] = particle;
+}

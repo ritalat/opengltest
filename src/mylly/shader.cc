@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 
 Shader::Shader(const std::string_view vert, const std::string_view frag):
     m_id(0)
@@ -40,7 +41,7 @@ Shader::Shader(const std::string_view vert, const std::string_view frag):
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        throw std::runtime_error("Failed to compile vertex shader: " + std::string(infoLog));
+        throw std::runtime_error("Failed to compile vertex shader: " + std::string(vert) + "\n" + std::string(infoLog));
     }
 
     unsigned int fragmentShader;
@@ -52,7 +53,7 @@ Shader::Shader(const std::string_view vert, const std::string_view frag):
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        throw std::runtime_error("Failed to compile fragment shader: " + std::string(infoLog));
+        throw std::runtime_error("Failed to compile fragment shader: " + std::string(frag) + "\n" + std::string(infoLog));
     }
 
     m_id = glCreateProgram();
@@ -64,11 +65,49 @@ Shader::Shader(const std::string_view vert, const std::string_view frag):
     glGetProgramiv(m_id, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(m_id, 512, NULL, infoLog);
-        throw std::runtime_error("Failed to link shader program: " + std::string(infoLog));
+        throw std::runtime_error("Failed to link shader program: "
+                                 + std::string(vert) + ", " + std::string(frag) + "\n"  + std::string(infoLog));
     }
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+}
+
+Shader::Shader(const std::string_view comp):
+    m_id(0)
+{
+    std::string compCode = slurp_file(get_shader_path(comp));
+    if (compCode.empty())
+        throw std::runtime_error("Failed to read shader file: " + std::string(comp) + FILE_ERROR_HINT);
+    const char *compCodeStr = compCode.data();
+
+    int success;
+    char infoLog[512];
+
+    unsigned int computeShader;
+    computeShader = glCreateShader(GL_COMPUTE_SHADER);
+
+    glShaderSource(computeShader, 1, &compCodeStr, NULL);
+    glCompileShader(computeShader);
+
+    glGetShaderiv(computeShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(computeShader, 512, NULL, infoLog);
+        throw std::runtime_error("Failed to compile compute shader: " + std::string(comp) + "\n" + std::string(infoLog));
+    }
+
+    m_id = glCreateProgram();
+
+    glAttachShader(m_id, computeShader);
+    glLinkProgram(m_id);
+
+    glGetProgramiv(m_id, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(m_id, 512, NULL, infoLog);
+        throw std::runtime_error("Failed to link shader program: " + std::string(comp) + "\n" + std::string(infoLog));
+    }
+
+    glDeleteShader(computeShader);
 }
 
 Shader::~Shader()
@@ -84,72 +123,85 @@ void Shader::use()
 
 void Shader::set_bool(const std::string_view name, bool value)
 {
-    int location = glGetUniformLocation(m_id, name.data());
+    int location = get_uniform_location(name);
     glUniform1i(location, (int)value);
 }
 
 void Shader::set_int(const std::string_view name, int value)
 {
-    int location = glGetUniformLocation(m_id, name.data());
+    int location = get_uniform_location(name);
     glUniform1i(location, value);
 }
 
 void Shader::set_float(const std::string_view name, float value)
 {
-    int location = glGetUniformLocation(m_id, name.data());
+    int location = get_uniform_location(name);
     glUniform1f(location, value);
 }
 
 void Shader::set_vec2(const std::string_view name, const glm::vec2 &value)
 {
-    int location = glGetUniformLocation(m_id, name.data());
+    int location = get_uniform_location(name);
     glUniform2fv(location, 1, &value[0]);
 }
 
 void Shader::set_vec2(const std::string_view name, float x, float y)
 {
-    int location = glGetUniformLocation(m_id, name.data());
+    int location = get_uniform_location(name);
     glUniform2f(location, x, y);
 }
 
 void Shader::set_vec3(const std::string_view name, const glm::vec3 &value)
 {
-    int location = glGetUniformLocation(m_id, name.data());
+    int location = get_uniform_location(name);
     glUniform3fv(location, 1, &value[0]);
 }
 
 void Shader::set_vec3(const std::string_view name, float x, float y, float z)
 {
-    int location = glGetUniformLocation(m_id, name.data());
+    int location = get_uniform_location(name);
     glUniform3f(location, x, y, z);
 }
 
 void Shader::set_vec4(const std::string_view name, const glm::vec4 &value)
 {
-    int location = glGetUniformLocation(m_id, name.data());
+    int location = get_uniform_location(name);
     glUniform4fv(location, 1, &value[0]);
 }
 
 void Shader::set_vec4(const std::string_view name, float x, float y, float z, float w)
 {
-    int location = glGetUniformLocation(m_id, name.data());
+    int location = get_uniform_location(name);
     glUniform4f(location, x, y, z, w);
 }
 
 void Shader::set_mat2(const std::string_view name, const glm::mat2 &value)
 {
-    int location = glGetUniformLocation(m_id, name.data());
+    int location = get_uniform_location(name);
     glUniformMatrix2fv(location, 1, GL_FALSE, &value[0][0]);
 }
 
 void Shader::set_mat3(const std::string_view name, const glm::mat3 &value)
 {
-    int location = glGetUniformLocation(m_id, name.data());
+    int location = get_uniform_location(name);
     glUniformMatrix3fv(location, 1, GL_FALSE, &value[0][0]);
 }
 
 void Shader::set_mat4(const std::string_view name, const glm::mat4 &value)
 {
-    int location = glGetUniformLocation(m_id, name.data());
+    int location = get_uniform_location(name);
     glUniformMatrix4fv(location, 1, GL_FALSE, &value[0][0]);
+}
+
+int Shader::get_uniform_location(const std::string_view name)
+{
+    int location = 0;
+    std::string nameStr(name);
+    if (m_uniformLocations.count(nameStr) == 0) {
+        location = glGetUniformLocation(m_id, name.data());
+        m_uniformLocations[nameStr] = location;
+    } else {
+        location = m_uniformLocations[nameStr];
+    }
+    return location;
 }
