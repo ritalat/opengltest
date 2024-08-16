@@ -13,9 +13,18 @@
 
 #include <string_view>
 
+Material::Material(std::string_view diffuse, std::string_view specular, std::string_view normal):
+    diffuse(diffuse),
+    specular(specular),
+    normal(normal),
+    shininess(64.0f)
+{
+}
+
+
 Himmeli::Himmeli(std::string_view model, std::string_view diffuse, std::string_view specular, std::string_view normal):
     m_model(model),
-    m_material({diffuse, specular, normal, 64.0f}),
+    m_material(diffuse, specular, normal),
     m_scale(1.0f),
     m_rotate(1.0f),
     m_translate(1.0f)

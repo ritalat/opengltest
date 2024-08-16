@@ -9,6 +9,9 @@
 #include <string_view>
 
 struct Material {
+    Material(std::string_view diffuse,
+             std::string_view specular,
+             std::string_view normal);
     Texture diffuse;
     Texture specular;
     Texture normal;
