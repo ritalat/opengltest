@@ -197,11 +197,12 @@ int Shader::get_uniform_location(const std::string_view name)
 {
     int location = 0;
     std::string nameStr(name);
-    if (m_uniformLocations.count(nameStr) == 0) {
+    auto iter = m_uniformLocations.find(nameStr);
+    if (iter == m_uniformLocations.end()) {
         location = glGetUniformLocation(m_id, name.data());
         m_uniformLocations[nameStr] = location;
     } else {
-        location = m_uniformLocations[nameStr];
+        location = iter->second;
     }
     return location;
 }
