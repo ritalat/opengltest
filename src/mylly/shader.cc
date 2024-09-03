@@ -73,6 +73,7 @@ Shader::Shader(const std::string_view vert, const std::string_view frag):
     glDeleteShader(fragmentShader);
 }
 
+#if !(defined(__EMSCRIPTEN__) || defined(USE_GLES))
 Shader::Shader(const std::string_view comp):
     m_id(0)
 {
@@ -109,6 +110,7 @@ Shader::Shader(const std::string_view comp):
 
     glDeleteShader(computeShader);
 }
+#endif
 
 Shader::~Shader()
 {
