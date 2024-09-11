@@ -105,11 +105,11 @@ int VarjostinLelu::main_loop()
         if (m_leluShader) {
             m_leluShader->use();
 
-            m_leluShader->set_vec2("u_resolution", (float)m_fbSize.width, (float)m_fbSize.height);
+            m_leluShader->set_vec2("u_resolution", static_cast<float>(m_fbSize.width), static_cast<float>(m_fbSize.height));
             int x, y;
             SDL_GetMouseState(&x, &y);
-            m_leluShader->set_vec2("u_mouse", (float)x, (float)(m_fbSize.height - y));
-            m_leluShader->set_float("u_time", (float)(SDL_GetTicks() / 1000.0f));
+            m_leluShader->set_vec2("u_mouse", static_cast<float>(x), static_cast<float>(m_fbSize.height - y));
+            m_leluShader->set_float("u_time", static_cast<float>(SDL_GetTicks()) / 1000.0f);
 
             glBindVertexArray(leluVAO);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -126,7 +126,7 @@ int VarjostinLelu::main_loop()
             float scale = 3.0f;
             txt.set_scale(scale);
             txt.set_color(0.0f, 1.0f, 0.0f);
-            txt.draw_string(0, m_fbSize.height - scale * FONT_SIZE, notification);
+            txt.draw_string(0, m_fbSize.height - static_cast<int>(scale) * FONT_SIZE, notification);
         }
 
         SDL_GL_SwapWindow(m_window);

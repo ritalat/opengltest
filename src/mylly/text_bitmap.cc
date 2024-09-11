@@ -16,6 +16,8 @@
 #include <string_view>
 #include <vector>
 
+#define FONT_SIZEF static_cast<float>(FONT_SIZE)
+#define ATLAS_SIZEF static_cast<float>(ATLAS_SIZE)
 #define MAX_STRING_LENGTH 1000
 #define QUAD_SIZE 4 * 6
 
@@ -116,10 +118,10 @@ TextRendererLatin1::TextRendererLatin1(int w, int h, std::string_view fontName):
     m_textVBO(0),
     m_color(1.0f, 1.0f, 1.0f),
     m_scale(1.0f),
-    m_windowWidth(w),
-    m_windowHeight(h),
-    m_projection(glm::ortho(0.0f, (float)w, 0.0f, (float)h)),
-    m_texScale({ 1.0f / ATLAS_SIZE, 0.0f, 0.0f, 1.0f / ATLAS_SIZE }),
+    m_windowWidth(static_cast<float>(w)),
+    m_windowHeight(static_cast<float>(h)),
+    m_projection(glm::ortho(0.0f, m_windowWidth, 0.0f, m_windowHeight)),
+    m_texScale({ 1.0f / ATLAS_SIZEF, 0.0f, 0.0f, 1.0f / ATLAS_SIZEF }),
     m_strVerts(QUAD_SIZE * MAX_STRING_LENGTH)
 {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -153,9 +155,9 @@ TextRendererLatin1::~TextRendererLatin1()
 
 void TextRendererLatin1::set_window_size(int w, int h)
 {
-    m_windowWidth = w;
-    m_windowHeight = h;
-    m_projection = glm::ortho(0.0f, (float)w, 0.0f, (float)h);
+    m_windowWidth = static_cast<float>(w);
+    m_windowHeight = static_cast<float>(h);
+    m_projection = glm::ortho(0.0f, m_windowWidth, 0.0f, m_windowHeight);
 }
 
 void TextRendererLatin1::set_scale(float scale)
@@ -189,10 +191,10 @@ void TextRendererLatin1::draw_string(int x, int y, std::string_view str)
     m_textShader.set_vec3("color", m_color);
     m_textShader.set_int("font", 0);
 
-    float curx = x;
-    float cury = m_windowHeight - y - m_scale * FONT_SIZE;
-    float w = m_scale * FONT_SIZE;
-    float h = m_scale * FONT_SIZE;
+    float curx = static_cast<float>(x);
+    float cury = m_windowHeight - static_cast<float>(y) - m_scale * FONT_SIZEF;
+    float w = m_scale * FONT_SIZEF;
+    float h = m_scale * FONT_SIZEF;
 
     const char *s = str.data();
     size_t len = str.length();
@@ -204,17 +206,17 @@ void TextRendererLatin1::draw_string(int x, int y, std::string_view str)
 
         if (ch == 0x0A) {
             // Newline
-            curx = x;
-            cury -= m_scale * FONT_SIZE;
+            curx = static_cast<float>(x);
+            cury -= m_scale * FONT_SIZEF;
         } else if (ch == 0x09) {
             // Tab
-            curx += m_scale * FONT_SIZE * 4;
+            curx += m_scale * FONT_SIZEF * 4.0f;
         } else if (ch == 0x20) {
             // Space
-            curx += m_scale * FONT_SIZE;
+            curx += m_scale * FONT_SIZEF;
         } else if (ch <= 0xFF) {
-            float toffx = ch % ATLAS_SIZE;
-            float toffy = ch / ATLAS_SIZE;
+            float toffx = static_cast<float>(ch % ATLAS_SIZE);
+            float toffy = static_cast<float>(ch / ATLAS_SIZE);
 
             float vertices[6][4] = {
                 { curx,     cury + h,  toffx,        toffy        },

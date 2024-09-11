@@ -148,7 +148,9 @@ Status ShadowMap::event(SDL_Event &event)
 
 Status ShadowMap::render()
 {
-    glm::vec3 lightPos = glm::vec3(-2 * sin(SDL_GetTicks() / 500.0f), 4.0f, 2 * cos(SDL_GetTicks() / 500.0f));
+    glm::vec3 lightPos = glm::vec3(-2.0f * sin(static_cast<float>(SDL_GetTicks()) / 500.0f),
+                                   4.0f,
+                                   2.0f * cos(static_cast<float>(SDL_GetTicks()) / 500.0f));
     glm::vec3 lightTarget = glm::vec3(0.0f);
     glm::mat4 lightProjection = glm::ortho(-10.f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f);
     glm::mat4 lightView = glm::lookAt(lightPos,
@@ -228,7 +230,9 @@ void ShadowMap::draw_scene(Shader &shader)
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(SDL_GetTicks() / 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model,
+                        glm::radians(static_cast<float>(SDL_GetTicks()) / 10.0f),
+                        glm::vec3(0.0f, 1.0f, 0.0f));
     shader.set_mat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }

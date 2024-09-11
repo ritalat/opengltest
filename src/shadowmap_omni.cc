@@ -134,7 +134,7 @@ ShadowMapOmni::~ShadowMapOmni()
     glDeleteBuffers(1, &m_planeVBO);
     glDeleteVertexArrays(1, &m_cubeVAO);
     glDeleteBuffers(1, &m_cubeVBO);
-    glDeleteFramebuffers(m_shadowMapFBOs.size(), m_shadowMapFBOs.data());
+    glDeleteFramebuffers(static_cast<int>(m_shadowMapFBOs.size()), m_shadowMapFBOs.data());
     glDeleteTextures(1, &m_shadowMap);
 }
 
@@ -154,7 +154,7 @@ Status ShadowMapOmni::event(SDL_Event &event)
 
 Status ShadowMapOmni::render()
 {
-    glm::vec3 lightPos = glm::vec3(4 * sin(SDL_GetTicks() / 1000.0f), 1.0f, 0.0f);
+    glm::vec3 lightPos = glm::vec3(4 * sin(static_cast<float>(SDL_GetTicks()) / 1000.0f), 1.0f, 0.0f);
     float aspect = 1.0f;
     float near = 1.0f;
     float far = 25.0f;

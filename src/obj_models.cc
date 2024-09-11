@@ -15,14 +15,14 @@ const BasicMaterial emerald {
     glm::vec3( 0.0215f,  0.1745f,  0.0215f),
     glm::vec3( 0.07568f,  0.61424f,  0.07568f),
     glm::vec3( 0.633f,  0.727811f,  0.633f),
-    128 * 0.6
+    128.0f * 0.6f
 };
 
 const BasicMaterial gold {
     glm::vec3( 0.24725f,  0.1995f,  0.0745f),
     glm::vec3( 0.75164f,  0.60648f,  0.22648f),
     glm::vec3( 0.628281f,  0.555802f,  0.366065f),
-    128 * 0.4
+    128.0f * 0.4f
 };
 
 class ObjFiles: public GLleluCamera
@@ -114,7 +114,9 @@ Status ObjFiles::render()
     m_lightingShaderBasic.set_vec3("viewPos", m_camera.position);
 
     m_monkey.draw(m_lightingShaderBasic);
-    m_teapot.m_rotate = glm::rotate(glm::mat4(1.0f), glm::radians(SDL_GetTicks() / 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    m_teapot.m_rotate = glm::rotate(glm::mat4(1.0f),
+                                    glm::radians(static_cast<float>(SDL_GetTicks()) / 10.0f),
+                                    glm::vec3(0.0f, 1.0f, 0.0f));
     m_teapot.draw(m_lightingShaderBasic);
 
     m_lightShader.use();

@@ -98,7 +98,7 @@ Cubemap::Cubemap(const std::array<std::string_view, 6> &files):
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    for (int i = 0; i < files.size(); ++i) {
+    for (size_t i = 0; i < files.size(); ++i) {
         int width, height, nrChannels;
         Path texturePath = get_asset_path(files[i]);
         unsigned char *data = stbi_load(cpath(texturePath), &width, &height, &nrChannels, 0);
@@ -106,7 +106,7 @@ Cubemap::Cubemap(const std::array<std::string_view, 6> &files):
         if (!data)
             throw std::runtime_error("Failed to load texture: " + texturePath.string() + FILE_ERROR_HINT);
 
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + static_cast<int>(i), 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         stbi_image_free(data);
     }
 }

@@ -77,7 +77,7 @@ Model::Model(std::string_view file):
             ++cvert;
 #else
             if (uniqueVertices.count(vert) == 0) {
-                uniqueVertices[vert] = vertices.size();
+                uniqueVertices[vert] = static_cast<unsigned int>(vertices.size());
                 vertices.push_back(vert);
                 ++cuvert;
             }
@@ -87,8 +87,8 @@ Model::Model(std::string_view file):
         }
     }
 
-    m_numVertices = vertices.size();
-    m_numIndices = indices.size();
+    m_numVertices = static_cast<unsigned int>(vertices.size());
+    m_numIndices = static_cast<unsigned int>(indices.size());
 
     //fprintf(stderr, "Loaded model: %s\n\tTotal vertices: %d\n\tUnique vertices: %d\n", file.data(), cvert, cuvert);
 

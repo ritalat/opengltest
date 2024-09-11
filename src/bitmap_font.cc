@@ -64,11 +64,13 @@ int BitmapFont::main_loop()
         txt.set_color(1.0f, 1.0f, 1.0f);
         txt.set_scale(1.0f);
         txt.draw_string(0, 0, glInfoDump);
-        txt.draw_string(m_fbSize.width - fontLoaded.length() * FONT_SIZE, m_fbSize.height - FONT_SIZE, fontLoaded);
+        txt.draw_string(m_fbSize.width - static_cast<int>(fontLoaded.length()) * FONT_SIZE,
+                        m_fbSize.height - FONT_SIZE, fontLoaded);
 
         txt.set_color(1.0f, 0.0f, 0.0f);
         txt.set_scale(2.5f);
-        txt.draw_string(250 + 100 * sin(SDL_GetTicks() / 1000.0f), m_fbSize.height / 2.0f, aakkosia);
+        txt.draw_string(250 + static_cast<int>(100.0f * sin(static_cast<float>(SDL_GetTicks()) / 1000.0f)),
+                        m_fbSize.height / 2, aakkosia);
 
         int x, y;
         unsigned int buttons = SDL_GetMouseState(&x, &y);

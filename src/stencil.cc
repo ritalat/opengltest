@@ -103,7 +103,9 @@ Status Stencil::render()
     m_floorTexture.activate(0);
     glBindVertexArray(m_planeVAO);
     model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
-    model = glm::rotate(model, glm::radians(SDL_GetTicks() / 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model,
+                        glm::radians(static_cast<float>(SDL_GetTicks()) / 10.0f),
+                        glm::vec3(0.0f, 1.0f, 0.0f));
     m_stencilShader.set_mat4("model", model);
     m_stencilShader.set_float("alpha", 1.0f);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -119,7 +121,9 @@ Status Stencil::render()
     glBindVertexArray(m_cubeVAO);
     model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.001f, 0.0f));
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(SDL_GetTicks() / -10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::rotate(model,
+                        glm::radians(static_cast<float>(SDL_GetTicks()) / -10.0f),
+                        glm::vec3(0.0f, 0.0f, 1.0f));
     model = glm::scale(model, glm::vec3(1.0f, 1.0f, -1.0f));
     m_stencilShader.set_mat4("model", model);
     m_stencilShader.set_float("alpha", 0.3f);
@@ -136,7 +140,9 @@ Status Stencil::render()
     glBindVertexArray(m_cubeVAO);
     model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.001f, 0.0f));
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::rotate(model, glm::radians(SDL_GetTicks() / -10.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::rotate(model,
+                        glm::radians(static_cast<float>(SDL_GetTicks()) / -10.0f),
+                        glm::vec3(0.0f, 0.0f, 1.0f));
     m_stencilShader.set_mat4("model", model);
     m_stencilShader.set_float("alpha", 1.0f);
     glDrawArrays(GL_TRIANGLES, 0, 36);

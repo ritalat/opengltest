@@ -39,61 +39,61 @@ const BasicMaterial cubeMaterials[numCubes] = {
         glm::vec3( 0.0215f,  0.1745f,  0.0215f),
         glm::vec3( 0.07568f,  0.61424f,  0.07568f),
         glm::vec3( 0.633f,  0.727811f,  0.633f),
-        128 * 0.6
+        128.0f * 0.6f
     },
     {   // Pearl
         glm::vec3( 0.25f,  0.20725f,  0.20725f),
         glm::vec3( 1.0f,  0.829f,  0.829f),
         glm::vec3( 0.296648f,  0.296648f,  0.296648f),
-        128 * 0.088
+        128.0f * 0.088f
     },
     {   // Bronze
         glm::vec3( 0.2125f,  0.1275f,  0.054f),
         glm::vec3( 0.714f,  0.4284f,  0.18144f),
         glm::vec3( 0.393548f,  0.271906f,  0.166721f),
-        128 * 0.2
+        128.0f * 0.2f
     },
     {   // Gold
         glm::vec3( 0.24725f,  0.1995f,  0.0745f),
         glm::vec3( 0.75164f,  0.60648f,  0.22648f),
         glm::vec3( 0.628281f,  0.555802f,  0.366065f),
-        128 * 0.4
+        128.0f * 0.4f
     },
     {   // Cyan Plastic
         glm::vec3( 0.0f,  0.1f,  0.06f),
         glm::vec3( 0.0f,  0.50980392f,  0.50980392f),
         glm::vec3( 0.50196078f,  0.50196078f,  0.50196078f),
-        128 * 0.25
+        128.0f * 0.25f
     },
     {   // Red Plastic
         glm::vec3( 0.0f,  0.0f,  0.0f),
         glm::vec3( 0.5f,  0.0f,  0.0f),
         glm::vec3( 0.7f,  0.6f,  0.6f),
-        128 * 0.25
+        128.0f * 0.25f
     },
     {   // Green Rubber
         glm::vec3( 0.0f,  0.05f,  0.0f),
         glm::vec3( 0.4f,  0.5f,  0.4f),
         glm::vec3( 0.04f,  0.7f,  0.04f),
-        128 * 0.078125
+        128.0f * 0.078125f
     },
     {   // Yellow Rubber
         glm::vec3( 0.05f,  0.05f,  0.0f),
         glm::vec3( 0.5f,  0.5f,  0.4f),
         glm::vec3( 0.7f,  0.7f,  0.04f),
-        128 * 0.078125
+        128.0f * 0.078125f
     },
     {   // Silver
         glm::vec3( 0.19225f,  0.19225f,  0.19225f),
         glm::vec3( 0.50754f,  0.50754f,  0.50754f),
         glm::vec3( 0.508273f,  0.508273f,  0.508273f),
-        128 * 0.4
+        128.0f * 0.4f
     },
     {   // Ruby
         glm::vec3( 0.1745f,  0.01175f,  0.01175f),
         glm::vec3( 0.61424f,  0.04136f,  0.04136f),
         glm::vec3( 0.727811f,  0.626959f,  0.626959f),
-        128 * 0.6
+        128.0f * 0.6f
     }
 };
 
@@ -180,7 +180,7 @@ Status LGL_2_Basic::render()
     for (int i = 0; i < numCubes; ++i) {
         model = glm::mat4(1.0f);
         model = glm::translate(model, cubePositions[i]);
-        float angle = 20.0f * i;
+        float angle = 20.0f * static_cast<float>(i);
         model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
         m_lightingShader.set_mat4("model", model);
 

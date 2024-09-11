@@ -34,8 +34,8 @@ private:
     unsigned int m_textVBO;
     glm::vec3 m_color;
     float m_scale;
-    int m_windowWidth;
-    int m_windowHeight;
+    float m_windowWidth;
+    float m_windowHeight;
     glm::mat4 m_projection;
     glm::mat2 m_texScale;
     std::vector<float> m_strVerts;

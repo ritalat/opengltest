@@ -129,7 +129,7 @@ Status Cubemaps::render()
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
-    model = glm::rotate(model, glm::radians(SDL_GetTicks() / 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(static_cast<float>(SDL_GetTicks()) / 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
     m_environmentMapShader.set_mat4("model", model);
 

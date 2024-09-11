@@ -41,8 +41,9 @@ int GLleluCamera::main_loop()
         unsigned int currentFrame = SDL_GetTicks();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        float cameraSpeedScaled = m_camera.speed * deltaTime;
-        float cameraSensitivityScaled = m_camera.sensitivity * deltaTime;
+        float deltaf = static_cast<float>(deltaTime);
+        float cameraSpeedScaled = m_camera.speed * deltaf;
+        float cameraSensitivityScaled = m_camera.sensitivity * deltaf;
 
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
@@ -61,8 +62,8 @@ int GLleluCamera::main_loop()
 
                 case SDL_MOUSEMOTION:
                     if (m_mouseGrab || SDL_BUTTON_LMASK & e.motion.state) {
-                        m_camera.yaw += e.motion.xrel * m_camera.sensitivity;
-                        m_camera.pitch -= e.motion.yrel * m_camera.sensitivity;
+                        m_camera.yaw += static_cast<float>(e.motion.xrel) * m_camera.sensitivity;
+                        m_camera.pitch -= static_cast<float>(e.motion.yrel) * m_camera.sensitivity;
                         if (m_camera.pitch > 89.0f)
                             m_camera.pitch = 89.0f;
                         if (m_camera.pitch < -89.0f)
@@ -157,10 +158,10 @@ int GLleluCamera::main_loop()
                 cameraSpeedScaled *= 2.0f;
             }
             if (SDL_GameControllerGetButton(m_gamepad, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)) {
-                m_camera.fov -= (0.1f * deltaTime);
+                m_camera.fov -= (0.1f * deltaf);
             }
             if (SDL_GameControllerGetButton(m_gamepad, SDL_CONTROLLER_BUTTON_LEFTSHOULDER)) {
-                m_camera.fov += (0.1f * deltaTime);
+                m_camera.fov += (0.1f * deltaf);
             }
             if (m_camera.fov < 1.0f) {
                 m_camera.fov = 1.0f;
@@ -207,7 +208,9 @@ int GLleluCamera::main_loop()
         }
 
         m_view = glm::lookAt(m_camera.position, m_camera.position + m_camera.front, m_camera.up);
-        m_projection = glm::perspective(glm::radians(m_camera.fov), (float)m_fbSize.width / (float)m_fbSize.height, 0.1f, 100.0f);
+        m_projection = glm::perspective(glm::radians(m_camera.fov),
+                                        static_cast<float>(m_fbSize.width) / static_cast<float>(m_fbSize.height),
+                                        0.1f, 100.0f);
 
         Status ret = update(deltaTime);
         if (ret != Status::Ok)

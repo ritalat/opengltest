@@ -42,7 +42,11 @@ int ComputeParticles::main_loop()
 {
     Particle initialParticles[NUM_PARTICLES];
     for (int i = 0; i < NUM_PARTICLES; ++i) {
-        Particle p { glm::vec2(0.0f, 0.0f), glm::vec2((float)rand() / RAND_MAX, (float)rand() / RAND_MAX) };
+        Particle p {
+            glm::vec2(0.0f, 0.0f),
+            glm::vec2(static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
+                      static_cast<float>(rand()) / static_cast<float>(RAND_MAX))
+        };
         p.velocity.x = p.velocity.x * 2.0f - 1.0f;
         p.velocity.y = p.velocity.y * 2.0f - 1.0f;
         p.velocity = glm::normalize(p.velocity);
@@ -115,8 +119,8 @@ int ComputeParticles::main_loop()
         lastFrame = currentFrame;
 
         Uniforms uniforms {
-            delta / 1000.0f,
-            1.0f + speedScale / 10.0f
+            static_cast<float>(delta) / 1000.0f,
+            1.0f + static_cast<float>(speedScale) / 10.0f
         };
 
         if (frameCount % 2 == 0) {

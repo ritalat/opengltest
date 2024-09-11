@@ -164,11 +164,11 @@ Status PostProcessing::event(SDL_Event &event)
     switch (event.type) {
         case SDL_KEYUP:
             if (SDL_SCANCODE_RETURN == event.key.keysym.scancode) {
-                int tmp = (int)m_currentEffect;
+                int tmp = static_cast<int>(m_currentEffect);
                 ++tmp;
-                if (tmp >= (int)EFFECT_END)
+                if (tmp >= static_cast<int>(EFFECT_END))
                     tmp = 0;
-                m_currentEffect = (Effect)tmp;
+                m_currentEffect = static_cast<Effect>(tmp);
             }
             break;
         case SDL_WINDOWEVENT:
@@ -225,7 +225,7 @@ Status PostProcessing::render()
     glClear(GL_COLOR_BUFFER_BIT);
 
     m_ppShader.use();
-    m_ppShader.set_int("effect", (int)m_currentEffect);
+    m_ppShader.set_int("effect", static_cast<int>(m_currentEffect));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_colorTexture);
