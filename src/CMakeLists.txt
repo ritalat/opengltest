@@ -40,6 +40,12 @@ function(create_sample name)
         set_target_properties(${name} PROPERTIES INSTALL_RPATH "\${ORIGIN}")
     endif()
 
+    if(MSVC)
+        target_compile_options(${name} PRIVATE /W4)
+    else()
+        target_compile_options(${name} PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
+    endif()
+
     target_link_libraries(${name} mylly
                                   SDL2::SDL2main)
 endfunction()

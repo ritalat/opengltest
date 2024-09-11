@@ -10,7 +10,6 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/glm.hpp"
 #include "glm/gtx/hash.hpp"
-#define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
 #include <stdexcept>
