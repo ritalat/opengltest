@@ -33,11 +33,12 @@ add_subdirectory(src)
 if(EMSCRIPTEN OR USE_GLES)
     if(EMSCRIPTEN)
         set(CMAKE_EXECUTABLE_SUFFIX ".html")
+        add_compile_options(-sNO_DISABLE_EXCEPTION_CATCHING)
         add_link_options(--embed-file ${CMAKE_SOURCE_DIR}/shaders/@shaders/
                          --preload-file ${CMAKE_SOURCE_DIR}/assets/@assets/
+                         --shell-file=${EMSCRIPTEN_ROOT_PATH}/src/shell_minimal.html
                          -sNO_DISABLE_EXCEPTION_CATCHING
-                         -sMAX_WEBGL_VERSION=2
-                         -sUSE_SDL=2)
+                         -sMIN_WEBGL_VERSION=2)
     endif()
     foreach(ES3_SAMPLE ${ES3_SAMPLES})
         create_sample(${ES3_SAMPLE})

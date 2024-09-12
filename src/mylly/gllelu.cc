@@ -13,6 +13,9 @@
 #include <filesystem>
 #include <stdexcept>
 #include <string_view>
+#if defined(__EMSCRIPTEN__)
+#include <unistd.h>
+#endif
 
 #define WINDOW_WIDTH 1024
 #define WINDOW_HEIGHT 768
@@ -27,6 +30,10 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
     m_mouseGrab(false),
     m_windowedMouseGrab(false)
 {
+#if defined(__EMSCRIPTEN__)
+    (void)glVersion;
+    dup2(1, 2);
+#endif
     if (argc > 0) {
         Path exe = Path(argv[0]).filename();
         fprintf(stderr, "Starting %s (%s)\n", WINDOW_NAME, cpath(exe));
