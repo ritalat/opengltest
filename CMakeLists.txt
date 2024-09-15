@@ -49,7 +49,15 @@ else()
     endforeach()
 endif()
 
-if(NOT EMSCRIPTEN)
+if(EMSCRIPTEN)
+    foreach(ES3_SAMPLE ${ES3_SAMPLES})
+        install(FILES ${CMAKE_BINARY_DIR}/${ES3_SAMPLE}.data
+                      ${CMAKE_BINARY_DIR}/${ES3_SAMPLE}.html
+                      ${CMAKE_BINARY_DIR}/${ES3_SAMPLE}.js
+                      ${CMAKE_BINARY_DIR}/${ES3_SAMPLE}.wasm
+                      DESTINATION ".")
+    endforeach()
+else()
     if(USE_GLES)
         install(TARGETS ${ES3_SAMPLES} mylly SDL2 RUNTIME DESTINATION ".")
     else()
