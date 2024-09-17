@@ -15,7 +15,7 @@ endif()
 
 set(USE_GLES OFF CACHE BOOL "...")
 
-if(EMSCRIPTEN OR USE_GLES)
+if(EMSCRIPTEN OR ANDROID OR USE_GLES)
     add_compile_definitions(USE_GLES=1)
 endif()
 
@@ -30,7 +30,7 @@ add_subdirectory(external)
 
 add_subdirectory(src)
 
-if(EMSCRIPTEN OR USE_GLES)
+if(EMSCRIPTEN OR ANDROID OR USE_GLES)
     if(EMSCRIPTEN)
         set(CMAKE_EXECUTABLE_SUFFIX ".html")
         add_compile_options(-sNO_DISABLE_EXCEPTION_CATCHING)
@@ -41,9 +41,17 @@ if(EMSCRIPTEN OR USE_GLES)
                          -sALLOW_MEMORY_GROWTH
                          -sMIN_WEBGL_VERSION=2)
     endif()
-    foreach(ES3_SAMPLE ${ES3_SAMPLES})
-        create_sample(${ES3_SAMPLE})
-    endforeach()
+    if(ANDROID)
+        add_library(main SHARED src/mylly/android_main.cc
+                                src/es3_triangle.cc
+                                src/es3_bitmap_font.cc
+                                src/es3_cubemaps.cc)
+        target_link_libraries(main mylly SDL2::SDL2main)
+    else()
+        foreach(ES3_SAMPLE ${ES3_SAMPLES})
+            create_sample(${ES3_SAMPLE})
+        endforeach()
+    endif()
 else()
     foreach(SAMPLE ${SAMPLES})
         create_sample(${SAMPLE})
@@ -58,7 +66,7 @@ if(EMSCRIPTEN)
                       ${CMAKE_BINARY_DIR}/${ES3_SAMPLE}.wasm
                       DESTINATION ".")
     endforeach()
-else()
+elseif(NOT ANDROID)
     if(USE_GLES)
         install(TARGETS ${ES3_SAMPLES} mylly SDL2 RUNTIME DESTINATION ".")
     else()

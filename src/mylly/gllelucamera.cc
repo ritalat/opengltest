@@ -125,6 +125,13 @@ void GLleluCamera::iterate()
                 }
                 break;
 
+            case SDL_WINDOWEVENT:
+                if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
+                    SDL_GL_GetDrawableSize(m_window, &m_fbSize.width, &m_fbSize.height);
+                    glViewport(0, 0, m_fbSize.width, m_fbSize.height);
+                }
+                break;
+
             default:
                 break;
         }

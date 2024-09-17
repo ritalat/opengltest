@@ -77,6 +77,12 @@ void BitmapFontES3::iterate()
                 if (SDL_SCANCODE_ESCAPE == event.key.keysym.scancode)
                     quit = true;
                 break;
+            case SDL_WINDOWEVENT:
+                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                    SDL_GL_GetDrawableSize(m_window, &m_fbSize.width, &m_fbSize.height);
+                    glViewport(0, 0, m_fbSize.width, m_fbSize.height);
+                }
+                break;
             default:
                 break;
         }
@@ -119,4 +125,6 @@ void BitmapFontES3::iterate()
     SDL_GL_SwapWindow(m_window);
 }
 
+#if !defined(__ANDROID__)
 GLLELU_MAIN_IMPLEMENTATION(BitmapFontES3)
+#endif

@@ -154,4 +154,6 @@ Status CubemapsES3::render()
     return Status::Ok;
 }
 
+#if !defined(__ANDROID__)
 GLLELU_MAIN_IMPLEMENTATION(CubemapsES3)
+#endif
