@@ -19,7 +19,9 @@ set(SAMPLES bitmap_font
             varjostinlelu
             PARENT_SCOPE)
 
-set(ES3_SAMPLES es3_triangle
+set(ES3_SAMPLES es3_bitmap_font
+                es3_cubemaps
+                es3_triangle
                 PARENT_SCOPE)
 
 function(create_sample name)
@@ -42,7 +44,7 @@ function(create_sample name)
 
     if(MSVC)
         target_compile_options(${name} PRIVATE /W4)
-    else()
+    elseif(NOT EMSCRIPTEN)
         target_compile_options(${name} PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
     endif()
 

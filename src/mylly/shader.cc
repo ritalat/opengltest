@@ -2,7 +2,7 @@
 
 #include "path.hh"
 
-#if defined(__EMSCRIPTEN__) || defined(USE_GLES)
+#if defined(USE_GLES)
 #include "glad/gles2.h"
 #else
 #include "glad/gl.h"
@@ -73,7 +73,7 @@ Shader::Shader(const std::string_view vert, const std::string_view frag):
     glDeleteShader(fragmentShader);
 }
 
-#if !(defined(__EMSCRIPTEN__) || defined(USE_GLES))
+#if !(defined(USE_GLES))
 Shader::Shader(const std::string_view comp):
     m_id(0)
 {

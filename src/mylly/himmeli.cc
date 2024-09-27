@@ -4,7 +4,7 @@
 #include "shader.hh"
 #include "texture.hh"
 
-#if defined(__EMSCRIPTEN__) || defined(USE_GLES)
+#if defined(USE_GLES)
 #include "glad/gles2.h"
 #else
 #include "glad/gl.h"

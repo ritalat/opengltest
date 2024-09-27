@@ -15,7 +15,7 @@ endif()
 
 set(USE_GLES OFF CACHE BOOL "...")
 
-if(USE_GLES)
+if(EMSCRIPTEN OR USE_GLES)
     add_compile_definitions(USE_GLES=1)
 endif()
 
@@ -38,6 +38,7 @@ if(EMSCRIPTEN OR USE_GLES)
                          --preload-file ${CMAKE_SOURCE_DIR}/assets/@assets/
                          --shell-file=${EMSCRIPTEN_ROOT_PATH}/src/shell_minimal.html
                          -sNO_DISABLE_EXCEPTION_CATCHING
+                         -sALLOW_MEMORY_GROWTH
                          -sMIN_WEBGL_VERSION=2)
     endif()
     foreach(ES3_SAMPLE ${ES3_SAMPLES})

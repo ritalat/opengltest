@@ -33,6 +33,7 @@ public:
     GLleluCamera(int argc, char *argv[], GLVersion glVersion = GLVersion::GL33);
     virtual ~GLleluCamera();
     virtual int main_loop() final;
+    void iterate();
     virtual Status event(SDL_Event &event);
     virtual Status update(unsigned int deltaTime);
     virtual Status render() = 0;
@@ -43,4 +44,8 @@ public:
     Camera m_camera;
     SDL_GameController *m_gamepad;
     SDL_JoystickID m_gamepadId;
+    unsigned int m_deltaTime;
+    unsigned int m_lastFrame;
+    bool m_quit;
+    int m_exitStatus;
 };

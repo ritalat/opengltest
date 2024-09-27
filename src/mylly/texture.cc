@@ -2,7 +2,7 @@
 
 #include "path.hh"
 
-#if defined(__EMSCRIPTEN__) || defined(USE_GLES)
+#if defined(USE_GLES)
 #include "glad/gles2.h"
 #else
 #include "glad/gl.h"
@@ -44,7 +44,7 @@ Texture::Texture(std::string_view file, bool flip):
         throw std::runtime_error("Failed to load texture: " + texturePath.string() + FILE_ERROR_HINT);
 
     GLenum format = channelsToFormat(nrChannels);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, format == GL_RED ? GL_R8 : format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(data);
 }

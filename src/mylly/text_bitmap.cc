@@ -3,7 +3,7 @@
 #include "shader.hh"
 #include "texture.hh"
 
-#if defined(__EMSCRIPTEN__) || defined(USE_GLES)
+#if defined(USE_GLES)
 #include "glad/gles2.h"
 #else
 #include "glad/gl.h"
@@ -112,7 +112,11 @@ static uint32_t UTF8_getch(const char *src, size_t srclen, int *inc)
 }
 
 TextRendererLatin1::TextRendererLatin1(int w, int h, std::string_view fontName):
+#if defined(USE_GLES)
+    m_textShader("es3_text_bitmap.vert", "es3_text_bitmap.frag"),
+#else
     m_textShader("text_bitmap.vert", "text_bitmap.frag"),
+#endif
     m_fontTexture(fontName, false),
     m_textVAO(0),
     m_textVBO(0),
@@ -125,7 +129,7 @@ TextRendererLatin1::TextRendererLatin1(int w, int h, std::string_view fontName):
     m_strVerts(QUAD_SIZE * MAX_STRING_LENGTH)
 {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    m_fontTexture.filtering(GL_NEAREST);
+    m_fontTexture.filtering(GL_NEAREST, GL_NEAREST);
 
     glGenVertexArrays(1, &m_textVAO);
     glBindVertexArray(m_textVAO);

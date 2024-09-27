@@ -10,7 +10,7 @@ class Shader
 {
 public:
     Shader(const std::string_view vert, const std::string_view frag);
-#if !(defined(__EMSCRIPTEN__) || defined(USE_GLES))
+#if !(defined(USE_GLES))
     Shader(const std::string_view comp);
 #endif
     ~Shader();

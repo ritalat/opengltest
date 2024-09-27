@@ -2,7 +2,7 @@
 
 #include "path.hh"
 
-#if defined(__EMSCRIPTEN__) || defined(USE_GLES)
+#if defined(USE_GLES)
 #include "glad/gles2.h"
 #else
 #include "glad/gl.h"
@@ -30,8 +30,10 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
     m_mouseGrab(false),
     m_windowedMouseGrab(false)
 {
-#if defined(__EMSCRIPTEN__)
+#if defined(USE_GLES)
     (void)glVersion;
+#endif
+#if defined(__EMSCRIPTEN__)
     dup2(1, 2);
 #endif
     if (argc > 0) {
@@ -68,7 +70,7 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-#if defined(__EMSCRIPTEN__) || defined(USE_GLES)
+#if defined(USE_GLES)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
@@ -91,7 +93,7 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
     if (!m_context)
         throw std::runtime_error("Failed to create OpenGL context");
 
-#if defined(__EMSCRIPTEN__) || defined(USE_GLES)
+#if defined(USE_GLES)
     if (!gladLoadGLES2((GLADloadfunc) SDL_GL_GetProcAddress))
         throw std::runtime_error("Failed to load OpenGL functions");
 #else
