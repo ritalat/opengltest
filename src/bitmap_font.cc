@@ -4,7 +4,7 @@
 #include "text_bitmap.hh"
 
 #include "glad/gl.h"
-#include "SDL.h"
+#include "SDL3/SDL.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -48,11 +48,11 @@ int BitmapFont::mainLoop()
     while (!quit) {
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
-                case SDL_QUIT:
+                case SDL_EVENT_QUIT:
                     quit = true;
                     break;
-                case SDL_KEYUP:
-                    if (SDL_SCANCODE_ESCAPE == event.key.keysym.scancode)
+                case SDL_EVENT_KEY_UP:
+                    if (SDL_SCANCODE_ESCAPE == event.key.scancode)
                         quit = true;
                     break;
                 default:
@@ -77,19 +77,20 @@ int BitmapFont::mainLoop()
         txt.drawString(250 + static_cast<int>(100.0f * sin(static_cast<float>(SDL_GetTicks()) / 1000.0f)),
                        height / 2, aakkosia);
 
-        int x, y;
+        float x, y;
         unsigned int buttons = SDL_GetMouseState(&x, &y);
-        if (buttons & SDL_BUTTON(SDL_BUTTON_LEFT)) {
+        if (buttons & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) {
             txt.setColor(0.0f, 1.0f, 0.0f);
-        } else if (buttons & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
+        } else if (buttons & SDL_BUTTON_MASK(SDL_BUTTON_RIGHT)) {
             txt.setColor(0.0f, 0.0f, 1.0f);
-        } else if (buttons & SDL_BUTTON(SDL_BUTTON_MIDDLE)) {
+        } else if (buttons & SDL_BUTTON_MASK(SDL_BUTTON_MIDDLE)) {
             txt.setColor(1.0f, 0.0f, 0.0f);
         } else {
             txt.setColor(1.0f, 1.0f, 1.0f);
         }
         txt.setScale(1.0f);
-        std::string mouse = "Mouse state: (" + std::to_string(x) + "," + std::to_string(y) + ")";
+        std::string mouse = "Mouse state: (" + std::to_string(static_cast<int>(x))
+                            + "," + std::to_string(static_cast<int>(y)) + ")";
         txt.drawString(0, height - FONT_SIZE, mouse);
 
         swapWindow();

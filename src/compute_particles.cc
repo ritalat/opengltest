@@ -4,8 +4,9 @@
 
 #include "glad/gl.h"
 #include "glm/glm.hpp"
-#include "SDL.h"
+#include "SDL3/SDL.h"
 
+#include <cstdint>
 #include <cstdlib>
 
 #define NUM_PARTICLES 1000
@@ -79,8 +80,8 @@ int ComputeParticles::mainLoop()
 
     glEnable(GL_PROGRAM_POINT_SIZE);
 
-    unsigned int frameCount = 0;
-    unsigned int lastFrame = 0;
+    uint64_t frameCount = 0;
+    uint64_t lastFrame = 0;
     int speedScale = 0;
     bool quit = false;
     SDL_Event event;
@@ -88,11 +89,11 @@ int ComputeParticles::mainLoop()
     while (!quit) {
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
-                case SDL_QUIT:
+                case SDL_EVENT_QUIT:
                     quit = true;
                     break;
-                case SDL_KEYUP:
-                    switch (event.key.keysym.scancode) {
+                case SDL_EVENT_KEY_UP:
+                    switch (event.key.scancode) {
                         case SDL_SCANCODE_ESCAPE:
                             quit = true;
                             break;
@@ -116,8 +117,8 @@ int ComputeParticles::mainLoop()
             }
         }
 
-        unsigned int currentFrame = SDL_GetTicks();
-        unsigned int delta = currentFrame - lastFrame;
+        uint64_t currentFrame = SDL_GetTicks();
+        uint64_t delta = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
         Uniforms uniforms {

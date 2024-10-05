@@ -2,7 +2,7 @@
 
 #include "api_decl.hh"
 
-#include "SDL.h"
+#include "SDL3/SDL.h"
 
 #include <string_view>
 
@@ -44,6 +44,7 @@ protected:
     void windowName(std::string_view name);
     void windowSize(int w, int h);
     Size fbSize() const;
+    void updateWindowSize();
     void windowFullscreen(bool fullscreen);
     bool windowFullscreen() const;
     void windowGrab(bool grabMouse);

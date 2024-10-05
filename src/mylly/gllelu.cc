@@ -7,7 +7,7 @@
 #else
 #include "glad/gl.h"
 #endif
-#include "SDL.h"
+#include "SDL3/SDL.h"
 
 #include <cstdio>
 #include <filesystem>
@@ -43,14 +43,13 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
         fprintf(stderr, "Starting %s\n", WINDOW_NAME);
     }
 
-    SDL_version compiled;
-    SDL_version linked;
-    SDL_VERSION(&compiled);
-    SDL_GetVersion(&linked);
+    int linked = SDL_GetVersion();
     fprintf(stderr, "Compiled with: SDL %u.%u.%u\n",
-                    compiled.major, compiled.minor, compiled.patch);
+                    SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_MICRO_VERSION);
     fprintf(stderr, "Loaded: SDL %u.%u.%u\n",
-                    linked.major, linked.minor, linked.patch);
+                    SDL_VERSIONNUM_MAJOR(linked),
+                    SDL_VERSIONNUM_MINOR(linked),
+                    SDL_VERSIONNUM_MICRO(linked));
 
     Path dataDir = datadir();
     if (dataDir.is_absolute()) {
@@ -60,7 +59,7 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
         fprintf(stderr, "Data directory: %s (%s)\n", cpath(dataDir), cpath(absolute));
     }
 
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER) != 0)
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
         throw std::runtime_error("Failed to init SDL");
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -82,8 +81,6 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
                         SDL_GL_CONTEXT_PROFILE_CORE);
 #endif
     m_window = SDL_CreateWindow(WINDOW_NAME,
-                                SDL_WINDOWPOS_UNDEFINED,
-                                SDL_WINDOWPOS_UNDEFINED,
                                 WINDOW_WIDTH, WINDOW_HEIGHT,
                                 SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
     if (!m_window)
@@ -101,7 +98,7 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
         throw std::runtime_error("Failed to load OpenGL functions");
 #endif
 
-    SDL_GL_GetDrawableSize(m_window, &m_fbSize.width, &m_fbSize.height);
+    SDL_GetWindowSizeInPixels(m_window, &m_fbSize.width, &m_fbSize.height);
     glViewport(0, 0, m_fbSize.width, m_fbSize.height);
 
     SDL_GL_SetSwapInterval(1);
@@ -110,7 +107,7 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
 GLlelu::~GLlelu()
 {
     if (m_context)
-        SDL_GL_DeleteContext(m_context);
+        SDL_GL_DestroyContext(m_context);
 
     if (m_window)
         SDL_DestroyWindow(m_window);
@@ -148,17 +145,20 @@ void GLlelu::windowName(std::string_view name)
 void GLlelu::windowSize(int w, int h)
 {
     if (!m_fullscreen) {
-        m_windowSize.width = w;
-        m_windowSize.height = h;
-        SDL_SetWindowSize(m_window, m_windowSize.width, m_windowSize.height);
-        SDL_GL_GetDrawableSize(m_window, &m_fbSize.width, &m_fbSize.height);
-        glViewport(0, 0, m_fbSize.width, m_fbSize.height);
+        SDL_SetWindowSize(m_window, w, h);
     }
 }
 
 Size GLlelu::fbSize() const
 {
     return m_fbSize;
+}
+
+void GLlelu::updateWindowSize()
+{
+    SDL_GetWindowSize(m_window, &m_windowSize.width, &m_windowSize.height);
+    SDL_GetWindowSizeInPixels(m_window, &m_fbSize.width, &m_fbSize.height);
+    glViewport(0, 0, m_fbSize.width, m_fbSize.height);
 }
 
 void GLlelu::windowFullscreen(bool fullscreen)
@@ -173,9 +173,7 @@ void GLlelu::windowFullscreen(bool fullscreen)
         }
     }
     m_fullscreen = fullscreen;
-    SDL_SetWindowFullscreen(m_window, m_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
-    SDL_GL_GetDrawableSize(m_window, &m_fbSize.width, &m_fbSize.height);
-    glViewport(0, 0, m_fbSize.width, m_fbSize.height);
+    SDL_SetWindowFullscreen(m_window, m_fullscreen);
 }
 
 bool GLlelu::windowFullscreen() const
@@ -186,7 +184,7 @@ bool GLlelu::windowFullscreen() const
 void GLlelu::windowGrab(bool grabMouse)
 {
     m_mouseGrab = grabMouse;
-    SDL_SetRelativeMouseMode(m_mouseGrab ? SDL_TRUE : SDL_FALSE);
+    SDL_SetWindowRelativeMouseMode(m_window, m_mouseGrab);
 }
 
 bool GLlelu::windowGrab() const

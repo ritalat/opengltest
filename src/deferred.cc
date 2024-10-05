@@ -7,7 +7,7 @@
 #include "glad/gl.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-#include "SDL.h"
+#include "SDL3/SDL.h"
 
 #include <cstdlib>
 #include <stdexcept>
@@ -211,8 +211,8 @@ Deferred::~Deferred()
 Status Deferred::event(SDL_Event &event)
 {
     switch (event.type) {
-        case SDL_KEYUP:
-            if (SDL_SCANCODE_RETURN == event.key.keysym.scancode) {
+        case SDL_EVENT_KEY_UP:
+            if (SDL_SCANCODE_RETURN == event.key.scancode) {
                 int tmp = static_cast<int>(m_visualizedBuffer);
                 ++tmp;
                 if (tmp >= static_cast<int>(Visualization::END))
@@ -220,15 +220,9 @@ Status Deferred::event(SDL_Event &event)
                 m_visualizedBuffer = static_cast<Visualization>(tmp);
             }
             break;
-        case SDL_WINDOWEVENT:
+        case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
             if (event.window.windowID == windowId()) {
-                switch (event.window.event) {
-                    case SDL_WINDOWEVENT_SIZE_CHANGED:
-                        recreateGbuffer();
-                        break;
-                    default:
-                        break;
-                }
+                recreateGbuffer();
             }
             break;
         default:
