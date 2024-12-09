@@ -6,6 +6,7 @@ set(SAMPLES bitmap_font
             blending
             compute_particles
             cubemaps
+            deferred
             hello_triangle
             lgl_1
             lgl_2_basic
