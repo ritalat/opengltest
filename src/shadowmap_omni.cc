@@ -29,10 +29,13 @@ class ShadowMapOmni: public GLleluCamera
 public:
     ShadowMapOmni(int argc, char *argv[]);
     virtual ~ShadowMapOmni();
+
+protected:
     virtual Status event(SDL_Event &event);
     virtual Status render();
     void draw_scene(Shader &shader);
 
+private:
     Shader m_shadowShader;
     Shader m_sceneShader;
     Texture m_floorTexture;
@@ -61,16 +64,15 @@ ShadowMapOmni::ShadowMapOmni(int argc, char *argv[]):
     m_shadowMap(0),
     m_shadowMapping(true)
 {
-    m_camera.position = glm::vec3(-2.5f, 3.5f, 4.5f);
-    m_camera.pitch = -40.0f;
-    m_camera.yaw = -60.0f;
+    camera().position = glm::vec3(-2.5f, 3.5f, 4.5f);
+    camera().pitch = -40.0f;
+    camera().yaw = -60.0f;
 
     glGenVertexArrays(1, &m_planeVAO);
     glBindVertexArray(m_planeVAO);
 
     glGenBuffers(1, &m_planeVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_planeVBO);
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(floorPlane), floorPlane, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -85,7 +87,6 @@ ShadowMapOmni::ShadowMapOmni(int argc, char *argv[]):
 
     glGenBuffers(1, &m_cubeVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_cubeVBO);
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -184,7 +185,7 @@ Status ShadowMapOmni::render()
         }
     }
 
-    glViewport(0, 0, m_fbSize.width, m_fbSize.height);
+    glViewport(0, 0, fb_size().width, fb_size().height);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -194,22 +195,22 @@ Status ShadowMapOmni::render()
     m_sceneShader.set_int("shadowMap", 10);
     m_sceneShader.set_float("farPlane", far);
 
-    m_sceneShader.set_mat4("view", m_view);
-    m_sceneShader.set_mat4("projection", m_projection);
+    m_sceneShader.set_mat4("view", view());
+    m_sceneShader.set_mat4("projection", projection());
 
     m_sceneShader.set_float("material.shininess", 64.0f);
     m_sceneShader.set_vec3("light.ambient", 0.2f, 0.2f, 0.2f);
     m_sceneShader.set_vec3("light.diffuse", 0.5f, 0.5f, 0.5f);
     m_sceneShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
     m_sceneShader.set_vec3("light.position", lightPos);
-    m_sceneShader.set_vec3("viewPos", m_camera.position);
+    m_sceneShader.set_vec3("viewPos", camera().position);
 
     glActiveTexture(GL_TEXTURE0 + 10);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_shadowMap);
 
     draw_scene(m_sceneShader);
 
-    SDL_GL_SwapWindow(m_window);
+    swap_window();
 
     return Status::Ok;
 }

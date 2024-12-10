@@ -36,13 +36,21 @@ class GLlelu
 public:
     GLlelu(int argc, char *argv[], GLVersion glVersion = GLVersion::GL33);
     virtual ~GLlelu();
+    int run();
+
+protected:
     void window_name(std::string_view name);
     void window_size(int w, int h);
+    Size fb_size() const;
     void window_fullscreen(bool fullscreen);
+    bool window_fullscreen() const;
     void window_grab(bool grabMouse);
-    int run();
+    bool window_grab() const;
+    void swap_window();
+    unsigned int window_id() const;
     virtual int main_loop() = 0;
 
+private:
     SDL_Window *m_window;
     SDL_GLContext m_context;
     Size m_windowSize;

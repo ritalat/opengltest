@@ -26,9 +26,12 @@ class Blending: public GLleluCamera
 public:
     Blending(int argc, char *argv[]);
     virtual ~Blending();
+
+protected:
     virtual Status event(SDL_Event &event);
     virtual Status render();
 
+private:
     Shader m_alphaShader;
     Shader m_blendingShader;
     Texture m_floorTexture;
@@ -72,7 +75,6 @@ Blending::Blending(int argc, char *argv[]):
 
     glGenBuffers(1, &m_planeVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_planeVBO);
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(plane), plane, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -85,7 +87,6 @@ Blending::Blending(int argc, char *argv[]):
 
     glGenBuffers(1, &m_cubeVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_cubeVBO);
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -124,8 +125,8 @@ Status Blending::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_blendingShader.use();
-    m_blendingShader.set_mat4("view", m_view);
-    m_blendingShader.set_mat4("projection", m_projection);
+    m_blendingShader.set_mat4("view", view());
+    m_blendingShader.set_mat4("projection", projection());
 
     m_floorTexture.activate(0);
 
@@ -150,8 +151,8 @@ Status Blending::render()
     glDisable(GL_CULL_FACE);
     if (m_simpleAlphaDiscard) {
         m_alphaShader.use();
-        m_alphaShader.set_mat4("view", m_view);
-        m_alphaShader.set_mat4("projection", m_projection);
+        m_alphaShader.set_mat4("view", view());
+        m_alphaShader.set_mat4("projection", projection());
         m_grassTexture.activate(0);
 
         glBindVertexArray(m_planeVAO);
@@ -173,7 +174,7 @@ Status Blending::render()
 
         std::map<float, glm::vec3> sortedPlanes;
         for (int i = 0; i < numPlanes; ++i) {
-            float distance = glm::length(m_camera.position - planes[i]);
+            float distance = glm::length(camera().position - planes[i]);
             sortedPlanes[distance] = planes[i];
         }
 
@@ -188,7 +189,7 @@ Status Blending::render()
     }
     glEnable(GL_CULL_FACE);
 
-    SDL_GL_SwapWindow(m_window);
+    swap_window();
 
     return Status::Ok;
 }

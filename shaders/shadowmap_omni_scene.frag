@@ -1,9 +1,10 @@
 #version 330 core
-out vec4 FragColor;
 
-in vec3 FragPos;
-in vec3 Normal;
-in vec2 TexCoord;
+in VertexData {
+    vec3 fragPos;
+    vec3 normal;
+    vec2 texCoord;
+} fsIn;
 
 struct Material {
     sampler2D diffuse;
@@ -27,9 +28,11 @@ uniform float farPlane;
 uniform samplerCube shadowMap;
 uniform bool enableShadows;
 
+out vec4 FragColor;
+
 float map_shadow()
 {
-    vec3 lightDir = FragPos - light.position;
+    vec3 lightDir = fsIn.fragPos - light.position;
     float closestDepth = texture(shadowMap, lightDir).r * farPlane;
     float currentDepth = length(lightDir);
 
@@ -43,17 +46,17 @@ float map_shadow()
 
 void main()
 {
-    vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoord));
+    vec3 ambient = light.ambient * vec3(texture(material.diffuse, fsIn.texCoord));
 
-    vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(light.position - FragPos);
+    vec3 norm = normalize(fsIn.normal);
+    vec3 lightDir = normalize(light.position - fsIn.fragPos);
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoord));
+    vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, fsIn.texCoord));
 
-    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 viewDir = normalize(viewPos - fsIn.fragPos);
     vec3 halfDir = normalize(lightDir + viewDir);
     float spec = pow(max(dot(norm, halfDir), 0.0), material.shininess);
-    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoord));
+    vec3 specular = light.specular * spec * vec3(texture(material.specular, fsIn.texCoord));
 
     if (DBG) {
         map_shadow();

@@ -1,10 +1,11 @@
 #version 330 core
-out vec4 FragColor;
 
 in vec2 TexCoord;
 
 uniform sampler2D texture0;
 uniform int effect;
+
+out vec4 FragColor;
 
 #define NONE 0
 #define NEGATIVE 1

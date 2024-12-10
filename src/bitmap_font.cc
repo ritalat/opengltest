@@ -15,6 +15,8 @@ class BitmapFont: public GLlelu
 public:
     BitmapFont(int argc, char *argv[]);
     virtual ~BitmapFont();
+
+protected:
     virtual int main_loop();
 };
 
@@ -29,7 +31,7 @@ BitmapFont::~BitmapFont()
 
 int BitmapFont::main_loop()
 {
-    TextRendererLatin1 txt(m_fbSize.width, m_fbSize.height, "font8x8.png");
+    TextRendererLatin1 txt(fb_size().width, fb_size().height, "font8x8.png");
 
     std::string fontLoaded = "Loaded font font8x8.png";
 
@@ -58,19 +60,22 @@ int BitmapFont::main_loop()
             }
         }
 
+        int width = fb_size().width;
+        int height = fb_size().height;
+
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         txt.set_color(1.0f, 1.0f, 1.0f);
         txt.set_scale(1.0f);
         txt.draw_string(0, 0, glInfoDump);
-        txt.draw_string(m_fbSize.width - static_cast<int>(fontLoaded.length()) * FONT_SIZE,
-                        m_fbSize.height - FONT_SIZE, fontLoaded);
+        txt.draw_string(width - static_cast<int>(fontLoaded.length()) * FONT_SIZE,
+                        height - FONT_SIZE, fontLoaded);
 
         txt.set_color(1.0f, 0.0f, 0.0f);
         txt.set_scale(2.5f);
         txt.draw_string(250 + static_cast<int>(100.0f * sin(static_cast<float>(SDL_GetTicks()) / 1000.0f)),
-                        m_fbSize.height / 2, aakkosia);
+                        height / 2, aakkosia);
 
         int x, y;
         unsigned int buttons = SDL_GetMouseState(&x, &y);
@@ -85,9 +90,9 @@ int BitmapFont::main_loop()
         }
         txt.set_scale(1.0f);
         std::string mouse = "Mouse state: (" + std::to_string(x) + "," + std::to_string(y) + ")";
-        txt.draw_string(0, m_fbSize.height - FONT_SIZE, mouse);
+        txt.draw_string(0, height - FONT_SIZE, mouse);
 
-        SDL_GL_SwapWindow(m_window);
+        swap_window();
     }
 
     return EXIT_SUCCESS;

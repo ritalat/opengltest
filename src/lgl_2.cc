@@ -88,9 +88,12 @@ class LGL_2: public GLleluCamera
 public:
     LGL_2(int argc, char *argv[]);
     virtual ~LGL_2();
+
+protected:
     virtual Status event(SDL_Event &event);
     virtual Status render();
 
+private:
     Shader m_lightingShader;
     Shader m_lightShader;
     Texture m_diffuseMap;
@@ -105,7 +108,7 @@ public:
 LGL_2::LGL_2(int argc, char *argv[]):
     GLleluCamera(argc, argv),
     m_lightingShader("lighting.vert", "lighting.frag"),
-    m_lightShader("lighting.vert", "lighting_light.frag"),
+    m_lightShader("light.vert", "light.frag"),
     m_diffuseMap("lgl_container2.png"),
     m_specularMap("lgl_container2_specular.png"),
     m_VAO(0),
@@ -124,7 +127,6 @@ LGL_2::LGL_2(int argc, char *argv[]):
 
     glGenBuffers(1, &m_VBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -155,8 +157,8 @@ LGL_2::LGL_2(int argc, char *argv[]):
     // https://wiki.ogre3d.org/-Point+Light+Attenuation
     LightUniformBuffer uboData {};
 
-    uboData.spotLight.position = glm::vec4(m_camera.position, 0.0f);
-    uboData.spotLight.direction = glm::vec4(m_camera.front, 0.0f);
+    uboData.spotLight.position = glm::vec4(camera().position, 0.0f);
+    uboData.spotLight.direction = glm::vec4(camera().front, 0.0f);
     uboData.spotLight.ambient = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
     uboData.spotLight.diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
     uboData.spotLight.specular = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
@@ -185,8 +187,8 @@ LGL_2::LGL_2(int argc, char *argv[]):
 
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(LightUniformBuffer), &uboData);
 
-    unsigned int lightsIndex = glGetUniformBlockIndex(m_lightingShader.m_id, "Lights");
-    glUniformBlockBinding(m_lightingShader.m_id, lightsIndex, 0);
+    unsigned int lightsIndex = glGetUniformBlockIndex(m_lightingShader.id(), "Lights");
+    glUniformBlockBinding(m_lightingShader.id(), lightsIndex, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_UBO);
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -225,14 +227,14 @@ Status LGL_2::render()
 
     m_lightingShader.use();
 
-    m_lightingShader.set_mat4("view", m_view);
-    m_lightingShader.set_mat4("projection", m_projection);
+    m_lightingShader.set_mat4("view", view());
+    m_lightingShader.set_mat4("projection", projection());
 
-    m_lightingShader.set_vec3("viewPos", m_camera.position);
+    m_lightingShader.set_vec3("viewPos", camera().position);
     m_lightingShader.set_bool("enableSpotLight", m_enableSpotLight);
 
     glBindBuffer(GL_UNIFORM_BUFFER, m_UBO);
-    glm::vec4 spotLightPos[2] = { glm::vec4(m_camera.position, 0.0f), glm::vec4(m_camera.front, 0.0f) };
+    glm::vec4 spotLightPos[2] = { glm::vec4(camera().position, 0.0f), glm::vec4(camera().front, 0.0f) };
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(spotLightPos), &spotLightPos);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -252,8 +254,8 @@ Status LGL_2::render()
 
     m_lightShader.use();
 
-    m_lightShader.set_mat4("view", m_view);
-    m_lightShader.set_mat4("projection", m_projection);
+    m_lightShader.set_mat4("view", view());
+    m_lightShader.set_mat4("projection", projection());
 
     glBindVertexArray(m_lightVAO);
     int nplights = sizeof(pointLightPositions) / sizeof(glm::vec3);
@@ -266,7 +268,7 @@ Status LGL_2::render()
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
-    SDL_GL_SwapWindow(m_window);
+    swap_window();
 
     return Status::Ok;
 }

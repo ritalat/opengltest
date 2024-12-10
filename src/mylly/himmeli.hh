@@ -8,6 +8,27 @@
 
 #include <string_view>
 
+class HimmeliBase
+{
+public:
+    HimmeliBase();
+    virtual ~HimmeliBase();
+    HimmeliBase(const HimmeliBase &) = delete;
+    HimmeliBase &operator=(const HimmeliBase &) = delete;
+    virtual void draw(Shader &shader) = 0;
+    void scale(const glm::mat4 &m, const glm::vec3 &v);
+    void scale(const glm::vec3 &v);
+    void rotate(const glm::mat4 &m, const float angle, const glm::vec3 &v);
+    void rotate(const float angle, const glm::vec3 &v);
+    void translate(const glm::mat4 &m, const glm::vec3 &v);
+    void translate(const glm::vec3 &v);
+
+protected:
+    glm::mat4 m_scale;
+    glm::mat4 m_rotate;
+    glm::mat4 m_translate;
+};
+
 struct Material {
     Material(std::string_view diffuse,
              std::string_view specular,
@@ -18,21 +39,17 @@ struct Material {
     float shininess;
 };
 
-class Himmeli
+class Himmeli : public HimmeliBase
 {
 public:
     Himmeli(std::string_view model, std::string_view diffuse,
                                     std::string_view specular = "none_specular.png",
                                     std::string_view normal = "none_normal.png");
-    Himmeli(const Himmeli &) = delete;
-    Himmeli &operator=(const Himmeli &) = delete;
-    void draw(Shader &shader);
+    virtual void draw(Shader &shader);
 
+private:
     Model m_model;
     Material m_material;
-    glm::mat4 m_scale;
-    glm::mat4 m_rotate;
-    glm::mat4 m_translate;
 };
 
 struct BasicMaterial {
@@ -42,17 +59,13 @@ struct BasicMaterial {
     float shininess;
 };
 
-class BasicHimmeli
+class BasicHimmeli : public HimmeliBase
 {
 public:
     BasicHimmeli(std::string_view model, BasicMaterial material);
-    BasicHimmeli(const Himmeli &) = delete;
-    BasicHimmeli &operator=(const Himmeli &) = delete;
-    void draw(Shader &shader);
+    virtual void draw(Shader &shader);
 
+private:
     Model m_model;
     BasicMaterial m_material;
-    glm::mat4 m_scale;
-    glm::mat4 m_rotate;
-    glm::mat4 m_translate;
 };

@@ -24,7 +24,11 @@ public:
     ~Model();
     Model(const Model &) = delete;
     Model &operator=(const Model &) = delete;
+    unsigned int vertices() const;
+    unsigned int indices() const;
+    unsigned int vao() const;
 
+private:
     unsigned int m_numVertices;
     unsigned int m_numIndices;
     unsigned int m_VAO;

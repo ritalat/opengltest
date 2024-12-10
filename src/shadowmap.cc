@@ -28,10 +28,13 @@ class ShadowMap: public GLleluCamera
 public:
     ShadowMap(int argc, char *argv[]);
     virtual ~ShadowMap();
+
+protected:
     virtual Status event(SDL_Event &event);
     virtual Status render();
     void draw_scene(Shader &shader);
 
+private:
     Shader m_shadowShader;
     Shader m_sceneShader;
     Texture m_floorTexture;
@@ -60,16 +63,15 @@ ShadowMap::ShadowMap(int argc, char *argv[]):
     m_shadowMap(0),
     m_shadowMapping(true)
 {
-    m_camera.position = glm::vec3(1.5f, 5.5f, 3.0f);
-    m_camera.pitch = -60.0f;
-    m_camera.yaw = -120.0f;
+    camera().position = glm::vec3(1.5f, 5.5f, 3.0f);
+    camera().pitch = -60.0f;
+    camera().yaw = -120.0f;
 
     glGenVertexArrays(1, &m_planeVAO);
     glBindVertexArray(m_planeVAO);
 
     glGenBuffers(1, &m_planeVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_planeVBO);
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(floorPlane), floorPlane, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -84,7 +86,6 @@ ShadowMap::ShadowMap(int argc, char *argv[]):
 
     glGenBuffers(1, &m_cubeVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_cubeVBO);
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -102,7 +103,6 @@ ShadowMap::ShadowMap(int argc, char *argv[]):
 
     glGenTextures(1, &m_shadowMap);
     glBindTexture(GL_TEXTURE_2D, m_shadowMap);
-
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOWMAP_SIZE, SHADOWMAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -170,7 +170,7 @@ Status ShadowMap::render()
         glEnable(GL_CULL_FACE);
     }
 
-    glViewport(0, 0, m_fbSize.width, m_fbSize.height);
+    glViewport(0, 0, fb_size().width, fb_size().height);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -179,8 +179,8 @@ Status ShadowMap::render()
     m_sceneShader.set_bool("enableShadows", m_shadowMapping);
     m_sceneShader.set_int("shadowMap", 10);
 
-    m_sceneShader.set_mat4("view", m_view);
-    m_sceneShader.set_mat4("projection", m_projection);
+    m_sceneShader.set_mat4("view", view());
+    m_sceneShader.set_mat4("projection", projection());
     m_sceneShader.set_mat4("lightSpaceMatrix", lightSpaceMatrix);
 
     m_sceneShader.set_float("material.shininess", 64.0f);
@@ -188,14 +188,14 @@ Status ShadowMap::render()
     m_sceneShader.set_vec3("light.diffuse", 0.5f, 0.5f, 0.5f);
     m_sceneShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
     m_sceneShader.set_vec3("light.direction", lightTarget - lightPos);
-    m_sceneShader.set_vec3("viewPos", m_camera.position);
+    m_sceneShader.set_vec3("viewPos", camera().position);
 
     glActiveTexture(GL_TEXTURE0 + 10);
     glBindTexture(GL_TEXTURE_2D, m_shadowMap);
 
     draw_scene(m_sceneShader);
 
-    SDL_GL_SwapWindow(m_window);
+    swap_window();
 
     return Status::Ok;
 }

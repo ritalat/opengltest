@@ -63,6 +63,11 @@ void Texture::activate(int unit)
     }
 }
 
+unsigned int Texture::id() const
+{
+    return m_id;
+}
+
 void Texture::filtering(int mag, int min)
 {
     glBindTexture(GL_TEXTURE_2D, m_id);
@@ -123,6 +128,11 @@ void Cubemap::activate(int unit)
         glActiveTexture(GL_TEXTURE0 + unit);
         glBindTexture(GL_TEXTURE_CUBE_MAP, m_id);
     }
+}
+
+unsigned int Cubemap::id() const
+{
+    return m_id;
 }
 
 void Cubemap::filtering(int mag, int min)

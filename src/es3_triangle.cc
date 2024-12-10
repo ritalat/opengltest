@@ -24,13 +24,16 @@ class TriangleES3: public GLlelu
 public:
     TriangleES3(int argc, char *argv[]);
     virtual ~TriangleES3();
+
+protected:
     virtual int main_loop();
     void iterate();
 
-    Shader triangleShader;
-    unsigned int VAO;
-    unsigned int VBO;
-    bool quit;
+private:
+    Shader m_triangleShader;
+    unsigned int m_VAO;
+    unsigned int m_VBO;
+    bool m_quit;
 };
 
 #if defined(__EMSCRIPTEN__)
@@ -42,24 +45,24 @@ void browser_callback(void *arg)
 
 TriangleES3::TriangleES3(int argc, char *argv[]):
     GLlelu(argc, argv),
-    triangleShader("es3_triangle.vert", "es3_triangle.frag"),
-    quit(false)
+    m_triangleShader("es3_triangle.vert", "es3_triangle.frag"),
+    m_quit(false)
 {
 }
 
 TriangleES3::~TriangleES3()
 {
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &m_VAO);
+    glDeleteBuffers(1, &m_VBO);
 }
 
 int TriangleES3::main_loop()
 {
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+    glGenVertexArrays(1, &m_VAO);
+    glBindVertexArray(m_VAO);
 
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glGenBuffers(1, &m_VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
@@ -73,7 +76,7 @@ int TriangleES3::main_loop()
 #if defined(__EMSCRIPTEN__)
     emscripten_set_main_loop_arg(browser_callback, this, 0, 1);
 #else
-    while (!quit) {
+    while (!m_quit) {
         iterate();
     }
 #endif
@@ -87,11 +90,11 @@ void TriangleES3::iterate()
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_QUIT:
-                quit = true;
+                m_quit = true;
                 break;
             case SDL_KEYUP:
                 if (SDL_SCANCODE_ESCAPE == event.key.keysym.scancode)
-                    quit = true;
+                    m_quit = true;
                 break;
             default:
                 break;
@@ -99,19 +102,19 @@ void TriangleES3::iterate()
     }
 
 #if defined(__EMSCRIPTEN__)
-    if(quit)
+    if(m_quit)
         emscripten_cancel_main_loop();
 #endif
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    triangleShader.use();
+    m_triangleShader.use();
 
-    glBindVertexArray(VAO);
+    glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    SDL_GL_SwapWindow(m_window);
+    swap_window();
 }
 
 GLLELU_MAIN_IMPLEMENTATION(TriangleES3)

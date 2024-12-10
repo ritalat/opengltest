@@ -76,13 +76,13 @@ void GLleluCamera::iterate()
                 if (SDL_SCANCODE_ESCAPE == e.key.keysym.scancode)
                     m_quit = true;
                 if (SDL_SCANCODE_F == e.key.keysym.scancode)
-                    window_fullscreen(!m_fullscreen);
+                    window_fullscreen(!window_fullscreen());
                 if (SDL_SCANCODE_G == e.key.keysym.scancode)
-                    window_grab(!m_mouseGrab);
+                    window_grab(!window_grab());
                 break;
 
             case SDL_MOUSEMOTION:
-                if (m_mouseGrab || SDL_BUTTON_LMASK & e.motion.state) {
+                if (window_grab() || SDL_BUTTON_LMASK & e.motion.state) {
                     m_camera.yaw += static_cast<float>(e.motion.xrel) * m_camera.sensitivity;
                     m_camera.pitch -= static_cast<float>(e.motion.yrel) * m_camera.sensitivity;
                     if (m_camera.pitch > 89.0f)
@@ -105,7 +105,7 @@ void GLleluCamera::iterate()
                     if (SDL_CONTROLLER_BUTTON_B == e.cbutton.button)
                         m_quit = true;
                     if (SDL_CONTROLLER_BUTTON_Y == e.cbutton.button)
-                        window_fullscreen(!m_fullscreen);
+                        window_fullscreen(!window_fullscreen());
                 }
                 break;
 
@@ -237,7 +237,7 @@ void GLleluCamera::iterate()
 
     m_view = glm::lookAt(m_camera.position, m_camera.position + m_camera.front, m_camera.up);
     m_projection = glm::perspective(glm::radians(m_camera.fov),
-                                    static_cast<float>(m_fbSize.width) / static_cast<float>(m_fbSize.height),
+                                    static_cast<float>(fb_size().width) / static_cast<float>(fb_size().height),
                                     0.1f, 100.0f);
 
     Status ret = update(m_deltaTime);
@@ -275,4 +275,19 @@ void GLleluCamera::find_gamepad()
             break;
         }
     }
+}
+
+const glm::mat4 &GLleluCamera::view() const
+{
+    return m_view;
+}
+
+const glm::mat4 &GLleluCamera::projection() const
+{
+    return m_projection;
+}
+
+Camera &GLleluCamera::camera()
+{
+    return m_camera;
 }

@@ -118,45 +118,6 @@ GLlelu::~GLlelu()
     SDL_Quit();
 }
 
-void GLlelu::window_name(std::string_view name)
-{
-    SDL_SetWindowTitle(m_window, name.data());
-}
-
-void GLlelu::window_size(int w, int h)
-{
-    if (!m_fullscreen) {
-        m_windowSize.width = w;
-        m_windowSize.height = h;
-        SDL_SetWindowSize(m_window, m_windowSize.width, m_windowSize.height);
-        SDL_GL_GetDrawableSize(m_window, &m_fbSize.width, &m_fbSize.height);
-        glViewport(0, 0, m_fbSize.width, m_fbSize.height);
-    }
-}
-
-void GLlelu::window_fullscreen(bool fullscreen)
-{
-    if (fullscreen != m_fullscreen) {
-        if (fullscreen) {
-            SDL_ShowWindow(m_window);
-            m_windowedMouseGrab = m_mouseGrab;
-            window_grab(true);
-        } else {
-            window_grab(m_windowedMouseGrab);
-        }
-    }
-    m_fullscreen = fullscreen;
-    SDL_SetWindowFullscreen(m_window, m_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
-    SDL_GL_GetDrawableSize(m_window, &m_fbSize.width, &m_fbSize.height);
-    glViewport(0, 0, m_fbSize.width, m_fbSize.height);
-}
-
-void GLlelu::window_grab(bool grabMouse)
-{
-    m_mouseGrab = grabMouse;
-    SDL_SetRelativeMouseMode(m_mouseGrab ? SDL_TRUE : SDL_FALSE);
-}
-
 int GLlelu::run()
 {
     if (!m_window || !m_context)
@@ -177,4 +138,68 @@ int GLlelu::run()
 
     SDL_ShowWindow(m_window);
     return main_loop();
+}
+
+void GLlelu::window_name(std::string_view name)
+{
+    SDL_SetWindowTitle(m_window, name.data());
+}
+
+void GLlelu::window_size(int w, int h)
+{
+    if (!m_fullscreen) {
+        m_windowSize.width = w;
+        m_windowSize.height = h;
+        SDL_SetWindowSize(m_window, m_windowSize.width, m_windowSize.height);
+        SDL_GL_GetDrawableSize(m_window, &m_fbSize.width, &m_fbSize.height);
+        glViewport(0, 0, m_fbSize.width, m_fbSize.height);
+    }
+}
+
+Size GLlelu::fb_size() const
+{
+    return m_fbSize;
+}
+
+void GLlelu::window_fullscreen(bool fullscreen)
+{
+    if (fullscreen != m_fullscreen) {
+        if (fullscreen) {
+            SDL_ShowWindow(m_window);
+            m_windowedMouseGrab = m_mouseGrab;
+            window_grab(true);
+        } else {
+            window_grab(m_windowedMouseGrab);
+        }
+    }
+    m_fullscreen = fullscreen;
+    SDL_SetWindowFullscreen(m_window, m_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+    SDL_GL_GetDrawableSize(m_window, &m_fbSize.width, &m_fbSize.height);
+    glViewport(0, 0, m_fbSize.width, m_fbSize.height);
+}
+
+bool GLlelu::window_fullscreen() const
+{
+    return m_fullscreen;
+}
+
+void GLlelu::window_grab(bool grabMouse)
+{
+    m_mouseGrab = grabMouse;
+    SDL_SetRelativeMouseMode(m_mouseGrab ? SDL_TRUE : SDL_FALSE);
+}
+
+bool GLlelu::window_grab() const
+{
+    return m_mouseGrab;
+}
+
+void GLlelu::swap_window()
+{
+    SDL_GL_SwapWindow(m_window);
+}
+
+unsigned int GLlelu::window_id() const
+{
+    return SDL_GetWindowID(m_window);
 }

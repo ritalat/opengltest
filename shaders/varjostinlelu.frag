@@ -1,9 +1,10 @@
 #version 330 core
-out vec4 FragColor;
 
 uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
+
+out vec4 FragColor;
 
 void main()
 {

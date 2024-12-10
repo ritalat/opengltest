@@ -28,8 +28,11 @@ class NormalMap: public GLleluCamera
 public:
     NormalMap(int argc, char *argv[]);
     virtual ~NormalMap();
+
+protected:
     virtual Status render();
 
+private:
     Shader m_lightingShader;
     Texture m_diffuseMap;
     Texture m_normalMap;
@@ -80,7 +83,6 @@ NormalMap::NormalMap(int argc, char *argv[]):
 
     glGenBuffers(1, &m_VBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-
     glBufferData(GL_ARRAY_BUFFER, cubeVerts.size() * sizeof(Vert), cubeVerts.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
@@ -112,12 +114,12 @@ Status NormalMap::render()
 
     m_lightingShader.use();
 
-    m_lightingShader.set_mat4("view", m_view);
-    m_lightingShader.set_mat4("projection", m_projection);
+    m_lightingShader.set_mat4("view", view());
+    m_lightingShader.set_mat4("projection", projection());
 
     m_lightingShader.set_float("material.shininess", 64.0f);
     m_lightingShader.set_vec3("lightPos", lightPos);
-    m_lightingShader.set_vec3("viewPos", m_camera.position);
+    m_lightingShader.set_vec3("viewPos", camera().position);
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::rotate(model, glm::radians(static_cast<float>(SDL_GetTicks()) / 50.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -126,7 +128,7 @@ Status NormalMap::render()
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    SDL_GL_SwapWindow(m_window);
+    swap_window();
 
     return Status::Ok;
 }

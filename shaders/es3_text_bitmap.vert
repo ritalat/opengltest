@@ -1,15 +1,15 @@
 #version 300 es
 
-layout (location = 0) in vec2 aPos;
-layout (location = 1) in vec2 aTexCoord;
-
-out vec2 TexCoord;
+layout (location = 0) in vec2 inPosition;
+layout (location = 1) in vec2 inTexCoord;
 
 uniform mat4 projection;
 uniform mat2 texScale;
 
+out vec2 TexCoord;
+
 void main()
 {
-    gl_Position = projection * vec4(aPos, 0.0, 1.0);
-    TexCoord = texScale * aTexCoord;
+    TexCoord = texScale * inTexCoord;
+    gl_Position = projection * vec4(inPosition, 0.0, 1.0);
 }

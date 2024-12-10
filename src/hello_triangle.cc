@@ -21,6 +21,8 @@ class HelloTriangle: public GLlelu
 public:
     HelloTriangle(int argc, char *argv[]);
     virtual ~HelloTriangle();
+
+protected:
     virtual int main_loop();
 };
 
@@ -80,7 +82,7 @@ int HelloTriangle::main_loop()
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        SDL_GL_SwapWindow(m_window);
+        swap_window();
     }
 
     glDeleteVertexArrays(1, &VAO);

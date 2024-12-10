@@ -32,13 +32,19 @@ class GLleluCamera: public GLlelu
 public:
     GLleluCamera(int argc, char *argv[], GLVersion glVersion = GLVersion::GL33);
     virtual ~GLleluCamera();
+
+protected:
     virtual int main_loop() final;
     void iterate();
     virtual Status event(SDL_Event &event);
     virtual Status update(unsigned int deltaTime);
     virtual Status render() = 0;
     void find_gamepad();
+    const glm::mat4 &view() const;
+    const glm::mat4 &projection() const;
+    Camera &camera();
 
+private:
     glm::mat4 m_view;
     glm::mat4 m_projection;
     Camera m_camera;

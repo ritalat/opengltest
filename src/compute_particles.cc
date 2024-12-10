@@ -26,6 +26,8 @@ class ComputeParticles: public GLlelu
 public:
     ComputeParticles(int argc, char *argv[]);
     virtual ~ComputeParticles();
+
+protected:
     virtual int main_loop();
 };
 
@@ -144,7 +146,7 @@ int ComputeParticles::main_loop()
         glBindVertexArray(dummyVAO);
         glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
 
-        SDL_GL_SwapWindow(m_window);
+        swap_window();
         ++frameCount;
     }
 

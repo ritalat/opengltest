@@ -97,7 +97,6 @@ Model::Model(std::string_view file):
 
     glGenBuffers(1, &m_VBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-
     glBufferData(GL_ARRAY_BUFFER, m_numVertices * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
@@ -109,7 +108,6 @@ Model::Model(std::string_view file):
 
     glGenBuffers(1, &m_EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_numIndices * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(0);
@@ -127,4 +125,19 @@ Model::~Model()
 
     if (m_EBO)
         glDeleteBuffers(1, &m_EBO);
+}
+
+unsigned int Model::vertices() const
+{
+    return m_numVertices;
+}
+
+unsigned int Model::indices() const
+{
+    return m_numIndices;
+}
+
+unsigned int Model::vao() const
+{
+    return m_VAO;
 }

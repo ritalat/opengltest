@@ -16,7 +16,7 @@
 #include <string_view>
 #include <unordered_map>
 
-Shader::Shader(const std::string_view vert, const std::string_view frag):
+Shader::Shader(std::string_view vert, std::string_view frag):
     m_id(0)
 {
     std::string vertCode = slurp_file(get_shader_path(vert));
@@ -74,7 +74,7 @@ Shader::Shader(const std::string_view vert, const std::string_view frag):
 }
 
 #if !(defined(USE_GLES))
-Shader::Shader(const std::string_view comp):
+Shader::Shader(std::string_view comp):
     m_id(0)
 {
     std::string compCode = slurp_file(get_shader_path(comp));
@@ -123,79 +123,84 @@ void Shader::use()
     glUseProgram(m_id);
 }
 
-void Shader::set_bool(const std::string_view name, bool value)
+unsigned int Shader::id() const
+{
+    return m_id;
+}
+
+void Shader::set_bool(std::string_view name, bool value)
 {
     int location = get_uniform_location(name);
     glUniform1i(location, (int)value);
 }
 
-void Shader::set_int(const std::string_view name, int value)
+void Shader::set_int(std::string_view name, int value)
 {
     int location = get_uniform_location(name);
     glUniform1i(location, value);
 }
 
-void Shader::set_float(const std::string_view name, float value)
+void Shader::set_float(std::string_view name, float value)
 {
     int location = get_uniform_location(name);
     glUniform1f(location, value);
 }
 
-void Shader::set_vec2(const std::string_view name, const glm::vec2 &value)
+void Shader::set_vec2(std::string_view name, const glm::vec2 &value)
 {
     int location = get_uniform_location(name);
     glUniform2fv(location, 1, &value[0]);
 }
 
-void Shader::set_vec2(const std::string_view name, float x, float y)
+void Shader::set_vec2(std::string_view name, float x, float y)
 {
     int location = get_uniform_location(name);
     glUniform2f(location, x, y);
 }
 
-void Shader::set_vec3(const std::string_view name, const glm::vec3 &value)
+void Shader::set_vec3(std::string_view name, const glm::vec3 &value)
 {
     int location = get_uniform_location(name);
     glUniform3fv(location, 1, &value[0]);
 }
 
-void Shader::set_vec3(const std::string_view name, float x, float y, float z)
+void Shader::set_vec3(std::string_view name, float x, float y, float z)
 {
     int location = get_uniform_location(name);
     glUniform3f(location, x, y, z);
 }
 
-void Shader::set_vec4(const std::string_view name, const glm::vec4 &value)
+void Shader::set_vec4(std::string_view name, const glm::vec4 &value)
 {
     int location = get_uniform_location(name);
     glUniform4fv(location, 1, &value[0]);
 }
 
-void Shader::set_vec4(const std::string_view name, float x, float y, float z, float w)
+void Shader::set_vec4(std::string_view name, float x, float y, float z, float w)
 {
     int location = get_uniform_location(name);
     glUniform4f(location, x, y, z, w);
 }
 
-void Shader::set_mat2(const std::string_view name, const glm::mat2 &value)
+void Shader::set_mat2(std::string_view name, const glm::mat2 &value)
 {
     int location = get_uniform_location(name);
     glUniformMatrix2fv(location, 1, GL_FALSE, &value[0][0]);
 }
 
-void Shader::set_mat3(const std::string_view name, const glm::mat3 &value)
+void Shader::set_mat3(std::string_view name, const glm::mat3 &value)
 {
     int location = get_uniform_location(name);
     glUniformMatrix3fv(location, 1, GL_FALSE, &value[0][0]);
 }
 
-void Shader::set_mat4(const std::string_view name, const glm::mat4 &value)
+void Shader::set_mat4(std::string_view name, const glm::mat4 &value)
 {
     int location = get_uniform_location(name);
     glUniformMatrix4fv(location, 1, GL_FALSE, &value[0][0]);
 }
 
-int Shader::get_uniform_location(const std::string_view name)
+int Shader::get_uniform_location(std::string_view name)
 {
     int location = 0;
     std::string nameStr(name);

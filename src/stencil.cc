@@ -14,8 +14,11 @@ class Stencil: public GLleluCamera
 public:
     Stencil(int argc, char *argv[]);
     virtual ~Stencil();
+
+protected:
     virtual Status render();
 
+private:
     Shader m_stencilShader;
     Texture m_floorTexture;
     Texture m_cubeTexture;
@@ -45,15 +48,14 @@ Stencil::Stencil(int argc, char *argv[]):
 
     m_cubeTexture.wrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-    m_camera.position = glm::vec3(0.0f, 1.0f, 3.0f);
-    m_camera.pitch = -20.0f;
+    camera().position = glm::vec3(0.0f, 1.0f, 3.0f);
+    camera().pitch = -20.0f;
 
     glGenVertexArrays(1, &m_planeVAO);
     glBindVertexArray(m_planeVAO);
 
     glGenBuffers(1, &m_planeVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_planeVBO);
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(plane), plane, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -66,7 +68,6 @@ Stencil::Stencil(int argc, char *argv[]):
 
     glGenBuffers(1, &m_cubeVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_cubeVBO);
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -96,8 +97,8 @@ Status Stencil::render()
     glm::mat4 model = glm::mat4(1.0f);
 
     m_stencilShader.use();
-    m_stencilShader.set_mat4("view", m_view);
-    m_stencilShader.set_mat4("projection", m_projection);
+    m_stencilShader.set_mat4("view", view());
+    m_stencilShader.set_mat4("projection", projection());
 
     // Floor
     m_floorTexture.activate(0);
@@ -147,7 +148,7 @@ Status Stencil::render()
     m_stencilShader.set_float("alpha", 1.0f);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    SDL_GL_SwapWindow(m_window);
+    swap_window();
 
     return Status::Ok;
 }

@@ -56,27 +56,18 @@ const float floorPlane[] = {
     -1.0f, 0.0f,  1.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f
 };
 
-const float quadVertices[] = {
-    -1.0f,  1.0f,   0.0f, 1.0f,
-    -1.0f, -1.0f,   0.0f, 0.0f,
-     1.0f, -1.0f,   1.0f, 0.0f,
-     1.0f,  1.0f,   1.0f, 1.0f
-};
-
-const unsigned int quadIndices[] = {
-    0, 1, 3,
-    1, 2, 3
-};
-
 class Deferred: public GLleluCamera
 {
 public:
     Deferred(int argc, char *argv[]);
     virtual ~Deferred();
+
+protected:
     virtual Status event(SDL_Event &event);
     virtual Status render();
     void recreate_gbuffer();
 
+private:
     Shader m_deferredLighting;
     Shader m_geometryPass;
     Texture m_floorDiffuse;
@@ -87,9 +78,7 @@ public:
     unsigned int m_planeVBO;
     unsigned int m_cubeVAO;
     unsigned int m_cubeVBO;
-    unsigned int m_quadVAO;
-    unsigned int m_quadVBO;
-    unsigned int m_quadEBO;
+    unsigned int m_dummyVAO;
     unsigned int m_gbuffer;
     unsigned int m_gposition;
     unsigned int m_gnormal;
@@ -102,7 +91,7 @@ public:
 
 Deferred::Deferred(int argc, char *argv[]):
     GLleluCamera(argc, argv),
-    m_deferredLighting("deferred.vert", "deferred.frag"),
+    m_deferredLighting("fullscreen.vert", "deferred.frag"),
     m_geometryPass("deferred_gbuffer.vert", "deferred_gbuffer.frag"),
     m_floorDiffuse("lgl_wall.jpg"),
     m_floorSpecular("none_specular.png"),
@@ -112,9 +101,7 @@ Deferred::Deferred(int argc, char *argv[]):
     m_planeVBO(0),
     m_cubeVAO(0),
     m_cubeVBO(0),
-    m_quadVAO(0),
-    m_quadVBO(0),
-    m_quadEBO(0),
+    m_dummyVAO(0),
     m_gbuffer(0),
     m_gposition(0),
     m_gnormal(0),
@@ -131,9 +118,9 @@ Deferred::Deferred(int argc, char *argv[]):
     m_geometryPass.set_int("diffuse", 0);
     m_geometryPass.set_int("specular", 1);
 
-    m_camera.position = glm::vec3(2.5f, 1.5f, 3.5f);
-    m_camera.pitch = -20.0f;
-    m_camera.yaw = -127.5f;
+    camera().position = glm::vec3(2.5f, 1.5f, 3.5f);
+    camera().pitch = -20.0f;
+    camera().yaw = -127.5f;
 
     glGenBuffers(1, &m_lightUBO);
     glBindBuffer(GL_UNIFORM_BUFFER, m_lightUBO);
@@ -163,8 +150,8 @@ Deferred::Deferred(int argc, char *argv[]):
     }
 
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(m_lights), &m_lights);
-    unsigned int lightsIndex = glGetUniformBlockIndex(m_deferredLighting.m_id, "Lights");
-    glUniformBlockBinding(m_deferredLighting.m_id, lightsIndex, 0);
+    unsigned int lightsIndex = glGetUniformBlockIndex(m_deferredLighting.id(), "Lights");
+    glUniformBlockBinding(m_deferredLighting.id(), lightsIndex, 0);
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_lightUBO);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -176,6 +163,7 @@ Deferred::Deferred(int argc, char *argv[]):
     glGenBuffers(1, &m_planeVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_planeVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(floorPlane), floorPlane, GL_STATIC_DRAW);
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
@@ -189,6 +177,7 @@ Deferred::Deferred(int argc, char *argv[]):
     glGenBuffers(1, &m_cubeVBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_cubeVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
@@ -196,24 +185,10 @@ Deferred::Deferred(int argc, char *argv[]):
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    glGenVertexArrays(1, &m_quadVAO);
-    glBindVertexArray(m_quadVAO);
-
-    glGenBuffers(1, &m_quadVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glGenBuffers(1, &m_quadEBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_quadEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quadIndices), quadIndices, GL_STATIC_DRAW);
+    glGenVertexArrays(1, &m_dummyVAO);
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     recreate_gbuffer();
 }
@@ -224,9 +199,7 @@ Deferred::~Deferred()
     glDeleteBuffers(1, &m_planeVBO);
     glDeleteVertexArrays(1, &m_cubeVAO);
     glDeleteBuffers(1, &m_cubeVBO);
-    glDeleteVertexArrays(1, &m_quadVAO);
-    glDeleteBuffers(1, &m_quadVBO);
-    glDeleteBuffers(1, &m_quadEBO);
+    glDeleteVertexArrays(1, &m_dummyVAO);
     glDeleteFramebuffers(1, &m_gbuffer);
     glDeleteTextures(1, &m_gposition);
     glDeleteTextures(1, &m_gnormal);
@@ -248,7 +221,7 @@ Status Deferred::event(SDL_Event &event)
             }
             break;
         case SDL_WINDOWEVENT:
-            if (event.window.windowID == SDL_GetWindowID(m_window)) {
+            if (event.window.windowID == window_id()) {
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
                         recreate_gbuffer();
@@ -272,8 +245,8 @@ Status Deferred::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_geometryPass.use();
-    m_geometryPass.set_mat4("view", m_view);
-    m_geometryPass.set_mat4("projection", m_projection);
+    m_geometryPass.set_mat4("view", view());
+    m_geometryPass.set_mat4("projection", projection());
 
     m_floorDiffuse.activate(0);
     m_floorSpecular.activate(1);
@@ -303,7 +276,7 @@ Status Deferred::render()
 
     m_deferredLighting.use();
     m_deferredLighting.set_int("numLights", NUM_LIGHTS);
-    m_deferredLighting.set_vec3("viewPos", m_camera.position);
+    m_deferredLighting.set_vec3("viewPos", camera().position);
     m_deferredLighting.set_int("visualizedBuffer", static_cast<int>(m_visualizedBuffer));
 
     glActiveTexture(GL_TEXTURE0);
@@ -312,11 +285,10 @@ Status Deferred::render()
     glBindTexture(GL_TEXTURE_2D, m_gnormal);
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, m_gcolor);
+    glBindVertexArray(m_dummyVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    glBindVertexArray(m_quadVAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-    SDL_GL_SwapWindow(m_window);
+    swap_window();
 
     return Status::Ok;
 }
@@ -336,21 +308,24 @@ void Deferred::recreate_gbuffer()
         glGenFramebuffers(1, &m_gbuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, m_gbuffer);
 
+    int width = fb_size().width;
+    int height = fb_size().height;
+
     glGenTextures(1, &m_gposition);
     glBindTexture(GL_TEXTURE_2D, m_gposition);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_fbSize.width, m_fbSize.height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glGenTextures(1, &m_gnormal);
     glBindTexture(GL_TEXTURE_2D, m_gnormal);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_fbSize.width, m_fbSize.height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glGenTextures(1, &m_gcolor);
     glBindTexture(GL_TEXTURE_2D, m_gcolor);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_fbSize.width, m_fbSize.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -358,7 +333,7 @@ void Deferred::recreate_gbuffer()
 
     glGenRenderbuffers(1, &m_gdepth);
     glBindRenderbuffer(GL_RENDERBUFFER, m_gdepth);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, m_fbSize.width, m_fbSize.height);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_gposition, 0);

@@ -1,13 +1,15 @@
 #version 330 core
-layout (location = 0) in vec3 aPos;
 
-out vec3 FragPos;
+layout (location = 0) in vec3 inPosition;
 
 uniform mat4 lightSpaceMatrix;
 uniform mat4 model;
 
+out vec3 FragPos;
+
 void main()
 {
-    FragPos = vec3(model * vec4(aPos, 1.0));
-    gl_Position = lightSpaceMatrix * model * vec4(aPos, 1.0);
+    vec4 worldPos = model * vec4(inPosition, 1.0);
+    FragPos = vec3(worldPos);
+    gl_Position = lightSpaceMatrix * worldPos;
 }

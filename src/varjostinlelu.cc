@@ -12,26 +12,17 @@
 #include <stdexcept>
 #include <string>
 
-const float vertices[] = {
-    -1.0f,  1.0f, 0.0f,
-    -1.0f, -1.0f, 0.0f,
-     1.0f, -1.0f, 0.0f,
-     1.0f,  1.0f, 0.0f
-};
-
-const unsigned int indices[] = {
-    0, 1, 3,
-    1, 2, 3
-};
-
 class VarjostinLelu: public GLlelu
 {
 public:
     VarjostinLelu(int argc, char *argv[]);
     virtual ~VarjostinLelu();
+
+protected:
     virtual int main_loop();
     void load_shaders();
 
+private:
     std::optional<Shader> m_leluShader;
     std::string m_error;
 };
@@ -50,30 +41,17 @@ int VarjostinLelu::main_loop()
     std::string notification;
     unsigned int notificationExpiration = 0;
 
-    TextRendererLatin1 txt(m_fbSize.width, m_fbSize.height, "font8x8.png");
+    int width = fb_size().width;
+    int height = fb_size().height;
+
+    TextRendererLatin1 txt(width, height, "font8x8.png");
 
     load_shaders();
 
-    unsigned int leluVAO;
-    glGenVertexArrays(1, &leluVAO);
-    glBindVertexArray(leluVAO);
-
-    unsigned int leluVBO;
-    glGenBuffers(1, &leluVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, leluVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    unsigned int leluEBO;
-    glGenBuffers(1, &leluEBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, leluEBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    unsigned int dummyVAO;
+    glGenVertexArrays(1, &dummyVAO);
 
     glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     bool quit = false;
     SDL_Event event;
@@ -105,14 +83,14 @@ int VarjostinLelu::main_loop()
         if (m_leluShader) {
             m_leluShader->use();
 
-            m_leluShader->set_vec2("u_resolution", static_cast<float>(m_fbSize.width), static_cast<float>(m_fbSize.height));
+            m_leluShader->set_vec2("u_resolution", static_cast<float>(width), static_cast<float>(height));
             int x, y;
             SDL_GetMouseState(&x, &y);
-            m_leluShader->set_vec2("u_mouse", static_cast<float>(x), static_cast<float>(m_fbSize.height - y));
+            m_leluShader->set_vec2("u_mouse", static_cast<float>(x), static_cast<float>(height - y));
             m_leluShader->set_float("u_time", static_cast<float>(SDL_GetTicks()) / 1000.0f);
 
-            glBindVertexArray(leluVAO);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glBindVertexArray(dummyVAO);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
             glBindVertexArray(0);
         }
 
@@ -126,15 +104,13 @@ int VarjostinLelu::main_loop()
             float scale = 3.0f;
             txt.set_scale(scale);
             txt.set_color(0.0f, 1.0f, 0.0f);
-            txt.draw_string(0, m_fbSize.height - static_cast<int>(scale) * FONT_SIZE, notification);
+            txt.draw_string(0, height - static_cast<int>(scale) * FONT_SIZE, notification);
         }
 
-        SDL_GL_SwapWindow(m_window);
+        swap_window();
     }
 
-    glDeleteBuffers(1, &leluEBO);
-    glDeleteBuffers(1, &leluVBO);
-    glDeleteVertexArrays(1, &leluVAO);
+    glDeleteVertexArrays(1, &dummyVAO);
 
     return EXIT_SUCCESS;
 }

@@ -1,5 +1,4 @@
 #version 330 core
-out vec4 FragColor;
 
 in vec2 TexCoord;
 
@@ -28,6 +27,8 @@ uniform sampler2D gcolor;
 uniform int numLights;
 uniform vec3 viewPos;
 uniform int visualizedBuffer;
+
+out vec4 FragColor;
 
 void main()
 {

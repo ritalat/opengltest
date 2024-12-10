@@ -1,10 +1,11 @@
 #version 330 core
-out vec4 FragColor;
 
-in vec3 FragPos;
-in vec3 Normal;
-in vec2 TexCoord;
-in vec4 FragPosLightSpace;
+in VertexData {
+    vec3 fragPos;
+    vec3 normal;
+    vec2 texCoord;
+    vec4 fragPosLightSpace;
+} fsIn;
 
 struct Material {
     sampler2D diffuse;
@@ -25,9 +26,11 @@ uniform vec3 viewPos;
 uniform sampler2D shadowMap;
 uniform bool enableShadows;
 
+out vec4 FragColor;
+
 float map_shadow(vec3 normal, vec3 lightDir)
 {
-    vec3 projCoords = FragPosLightSpace.xyz / FragPosLightSpace.w;
+    vec3 projCoords = fsIn.fragPosLightSpace.xyz / fsIn.fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
 
     if (projCoords.z > 1.0)
@@ -50,17 +53,17 @@ float map_shadow(vec3 normal, vec3 lightDir)
 
 void main()
 {
-    vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoord));
+    vec3 ambient = light.ambient * vec3(texture(material.diffuse, fsIn.texCoord));
 
-    vec3 norm = normalize(Normal);
+    vec3 norm = normalize(fsIn.normal);
     vec3 lightDir = normalize(-light.direction);
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, TexCoord));
+    vec3 diffuse = light.diffuse * diff * vec3(texture(material.diffuse, fsIn.texCoord));
 
-    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 viewDir = normalize(viewPos - fsIn.fragPos);
     vec3 halfDir = normalize(lightDir + viewDir);
     float spec = pow(max(dot(norm, halfDir), 0.0), material.shininess);
-    vec3 specular = light.specular * spec * vec3(texture(material.specular, TexCoord));
+    vec3 specular = light.specular * spec * vec3(texture(material.specular, fsIn.texCoord));
 
     float shadow = enableShadows ? map_shadow(norm, lightDir) : 0.0;
 

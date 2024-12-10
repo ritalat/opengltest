@@ -75,8 +75,11 @@ class LGL_1: public GLleluCamera
 public:
     LGL_1(int argc, char *argv[]);
     virtual ~LGL_1();
+
+protected:
     virtual Status render();
 
+private:
     Shader m_texturedShader;
     Texture m_texture0;
     Texture m_texture1;
@@ -101,7 +104,6 @@ LGL_1::LGL_1(int argc, char *argv[]):
 
     glGenBuffers(1, &m_VBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
@@ -128,8 +130,8 @@ Status LGL_1::render()
     m_texture1.activate(1);
 
     m_texturedShader.use();
-    m_texturedShader.set_mat4("view", m_view);
-    m_texturedShader.set_mat4("projection", m_projection);
+    m_texturedShader.set_mat4("view", view());
+    m_texturedShader.set_mat4("projection", projection());
 
     glBindVertexArray(m_VAO);
     int ncubes = sizeof(cubePositions) / sizeof(glm::vec3);
@@ -144,7 +146,7 @@ Status LGL_1::render()
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
-    SDL_GL_SwapWindow(m_window);
+    swap_window();
 
     return Status::Ok;
 }

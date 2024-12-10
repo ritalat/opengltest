@@ -104,8 +104,11 @@ class LGL_2_Basic: public GLleluCamera
 public:
     LGL_2_Basic(int argc, char *argv[]);
     virtual ~LGL_2_Basic();
+
+protected:
     virtual Status render();
 
+private:
     Shader m_lightingShader;
     Shader m_lightShader;
     unsigned int m_VAO;
@@ -116,7 +119,7 @@ public:
 LGL_2_Basic::LGL_2_Basic(int argc, char *argv[]):
     GLleluCamera(argc, argv),
     m_lightingShader("lighting.vert", "lighting_basic.frag"),
-    m_lightShader("lighting.vert", "lighting_light.frag"),
+    m_lightShader("light.vert", "light.frag"),
     m_VAO(0),
     m_lightVAO(0),
     m_VBO(0)
@@ -126,7 +129,6 @@ LGL_2_Basic::LGL_2_Basic(int argc, char *argv[]):
 
     glGenBuffers(1, &m_VBO);
     glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-
     glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -164,15 +166,15 @@ Status LGL_2_Basic::render()
 
     m_lightingShader.use();
 
-    m_lightingShader.set_mat4("view", m_view);
-    m_lightingShader.set_mat4("projection", m_projection);
+    m_lightingShader.set_mat4("view", view());
+    m_lightingShader.set_mat4("projection", projection());
 
     m_lightingShader.set_vec3("light.ambient", 1.0f, 1.0f, 1.0f);
     m_lightingShader.set_vec3("light.diffuse", 1.0f, 1.0f, 1.0f);
     m_lightingShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
     m_lightingShader.set_vec3("light.position", lightPos);
 
-    m_lightingShader.set_vec3("viewPos", m_camera.position);
+    m_lightingShader.set_vec3("viewPos", camera().position);
 
     glm::mat4 model = glm::mat4(1.0f);
 
@@ -194,8 +196,8 @@ Status LGL_2_Basic::render()
 
     m_lightShader.use();
 
-    m_lightShader.set_mat4("view", m_view);
-    m_lightShader.set_mat4("projection", m_projection);
+    m_lightShader.set_mat4("view", view());
+    m_lightShader.set_mat4("projection", projection());
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, lightPos);
@@ -205,7 +207,7 @@ Status LGL_2_Basic::render()
     glBindVertexArray(m_lightVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    SDL_GL_SwapWindow(m_window);
+    swap_window();
 
     return Status::Ok;
 }
