@@ -256,6 +256,7 @@ Status Deferred::render()
     model = glm::translate(model, glm::vec3(0.0f, -0.51f, 0.0f));
     model = glm::scale(model, glm::vec3(2.5f, 1.0f, 2.5f));
     m_geometryPass.set_mat4("model", model);
+    m_geometryPass.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     m_cubeDiffuse.activate(0);
@@ -266,6 +267,7 @@ Status Deferred::render()
         model = glm::translate(glm::mat4(1.0f), cubePositions[i]);
         model = glm::scale(model, glm::vec3(0.5f));
         m_geometryPass.set_mat4("model", model);
+        m_geometryPass.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 

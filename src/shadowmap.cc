@@ -156,7 +156,7 @@ Status ShadowMap::render()
     glm::mat4 lightView = glm::lookAt(lightPos,
                                       lightTarget,
                                       glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+    glm::mat4 lightSpaceMat = lightProjection * lightView;
 
     if (m_shadowMapping) {
         glViewport(0, 0, SHADOWMAP_SIZE, SHADOWMAP_SIZE);
@@ -164,7 +164,7 @@ Status ShadowMap::render()
         glClear(GL_DEPTH_BUFFER_BIT);
 
         m_shadowShader.use();
-        m_shadowShader.set_mat4("lightSpaceMatrix", lightSpaceMatrix);
+        m_shadowShader.set_mat4("lightSpaceMat", lightSpaceMat);
         glDisable(GL_CULL_FACE);
         draw_scene(m_shadowShader);
         glEnable(GL_CULL_FACE);
@@ -181,7 +181,7 @@ Status ShadowMap::render()
 
     m_sceneShader.set_mat4("view", view());
     m_sceneShader.set_mat4("projection", projection());
-    m_sceneShader.set_mat4("lightSpaceMatrix", lightSpaceMatrix);
+    m_sceneShader.set_mat4("lightSpaceMat", lightSpaceMat);
 
     m_sceneShader.set_float("material.shininess", 64.0f);
     m_sceneShader.set_vec3("light.ambient", 0.2f, 0.2f, 0.2f);
@@ -212,6 +212,7 @@ void ShadowMap::draw_scene(Shader &shader)
     model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
     model = glm::scale(model, glm::vec3(2.5f, 1.0f, 2.5f));
     shader.set_mat4("model", model);
+    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     shader.set_int("material.diffuse", 0);
@@ -223,10 +224,12 @@ void ShadowMap::draw_scene(Shader &shader)
     glBindVertexArray(m_cubeVAO);
     model = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 1.0f));
     shader.set_mat4("model", model);
+    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, -1.0f));
     shader.set_mat4("model", model);
+    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.0f, 0.0f));
@@ -234,6 +237,7 @@ void ShadowMap::draw_scene(Shader &shader)
                         glm::radians(static_cast<float>(SDL_GetTicks()) / 10.0f),
                         glm::vec3(0.0f, 1.0f, 0.0f));
     shader.set_mat4("model", model);
+    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 

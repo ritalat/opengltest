@@ -180,7 +180,7 @@ Status ShadowMapOmni::render()
             glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMapFBOs[i]);
             glClear(GL_DEPTH_BUFFER_BIT);
 
-            m_shadowShader.set_mat4("lightSpaceMatrix", lightSpaceMatrices[i]);
+            m_shadowShader.set_mat4("lightSpaceMat", lightSpaceMatrices[i]);
             draw_scene(m_shadowShader);
         }
     }
@@ -227,6 +227,7 @@ void ShadowMapOmni::draw_scene(Shader &shader)
     model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
     model = glm::scale(model, glm::vec3(5.0f, 1.0f, 5.0f));
     shader.set_mat4("model", model);
+    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     shader.set_int("material.diffuse", 0);
@@ -238,26 +239,32 @@ void ShadowMapOmni::draw_scene(Shader &shader)
     glBindVertexArray(m_cubeVAO);
     model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 2.0f));
     shader.set_mat4("model", model);
+    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 2.0f));
     shader.set_mat4("model", model);
+    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 0.0f, 2.0f));
     shader.set_mat4("model", model);
+    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -2.0f));
     shader.set_mat4("model", model);
+    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, -2.0f));
     shader.set_mat4("model", model);
+    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 0.0f, -2.0f));
     shader.set_mat4("model", model);
+    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 

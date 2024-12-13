@@ -134,6 +134,7 @@ Status CubemapsES3::render()
     model = glm::rotate(model, glm::radians(static_cast<float>(SDL_GetTicks()) / 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
     m_environmentMapShader.set_mat4("model", model);
+    m_environmentMapShader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
 
     glBindVertexArray(m_teapot.vao());
     glDrawElements(GL_TRIANGLES, m_teapot.indices(), GL_UNSIGNED_INT, 0);

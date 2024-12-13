@@ -118,6 +118,7 @@ Status LGL_2_Textured::render()
 
     glm::mat4 model = glm::mat4(1.0f);
     m_lightingShader.set_mat4("model", model);
+    m_lightingShader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
 
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);

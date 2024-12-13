@@ -185,6 +185,7 @@ Status LGL_2_Basic::render()
         float angle = 20.0f * static_cast<float>(i);
         model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
         m_lightingShader.set_mat4("model", model);
+        m_lightingShader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
 
         m_lightingShader.set_vec3("material.ambient", cubeMaterials[i].ambient);
         m_lightingShader.set_vec3("material.diffuse", cubeMaterials[i].diffuse);

@@ -7,6 +7,7 @@ layout (location = 2) in vec2 inTexCoord;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat4 normalMat;
 
 out VertexData {
     vec3 fragPos;
@@ -18,7 +19,7 @@ void main()
 {
     vec4 worldPos = model * vec4(inPosition, 1.0);
     vsOut.fragPos = vec3(worldPos);
-    vsOut.normal = mat3(transpose(inverse(model))) * inNormal;
+    vsOut.normal = mat3(normalMat) * inNormal;
     vsOut.texCoord = inTexCoord;
     gl_Position = projection * view * worldPos;
 }

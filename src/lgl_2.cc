@@ -248,6 +248,7 @@ Status LGL_2::render()
         float angle = 20.0f * static_cast<float>(i);
         model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
         m_lightingShader.set_mat4("model", model);
+        m_lightingShader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
