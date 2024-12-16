@@ -45,7 +45,7 @@ function(create_sample name)
     endif()
 
     if(MSVC)
-        target_compile_options(${name} PRIVATE /W4)
+        target_compile_options(${name} PRIVATE /W4 /wd4251)
     elseif(NOT EMSCRIPTEN)
         target_compile_options(${name} PRIVATE -Wall -Wextra -Wpedantic -Wconversion)
     endif()

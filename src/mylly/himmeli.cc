@@ -69,6 +69,10 @@ Himmeli::Himmeli(std::string_view model, std::string_view diffuse, std::string_v
 {
 }
 
+Himmeli::~Himmeli()
+{
+}
+
 // Assume same attributes and uniforms as lighting.{vert,frag}
 void Himmeli::draw(Shader &shader)
 {
@@ -95,6 +99,10 @@ void Himmeli::draw(Shader &shader)
 BasicHimmeli::BasicHimmeli(std::string_view model, BasicMaterial material):
     m_model(model),
     m_material(material)
+{
+}
+
+BasicHimmeli::~BasicHimmeli()
 {
 }
 

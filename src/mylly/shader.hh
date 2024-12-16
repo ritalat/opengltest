@@ -1,12 +1,14 @@
 #pragma once
 
+#include "api_decl.hh"
+
 #include "glm/glm.hpp"
 
 #include <string>
 #include <string_view>
 #include <unordered_map>
 
-class Shader
+class MYLLY_API Shader
 {
 public:
     Shader(std::string_view vert, std::string_view frag);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "api_decl.hh"
+
 #include <filesystem>
 #include <string>
 #include <string_view>
@@ -16,10 +18,10 @@ using Path = std::filesystem::path;
 #define cpath(path) path.c_str()
 #endif
 
-Path datadir();
-Path assetdir();
-Path shaderdir();
-Path getPath(std::string_view file);
-Path getAssetPath(std::string_view file);
-Path getShaderPath(std::string_view file);
-std::string slurpFile(const Path &path);
+MYLLY_API Path datadir();
+MYLLY_API Path assetdir();
+MYLLY_API Path shaderdir();
+MYLLY_API Path getPath(std::string_view file);
+MYLLY_API Path getAssetPath(std::string_view file);
+MYLLY_API Path getShaderPath(std::string_view file);
+MYLLY_API std::string slurpFile(const Path &path);

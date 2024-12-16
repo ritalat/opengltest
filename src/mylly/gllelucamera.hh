@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api_decl.hh"
 #include "gllelu.hh"
 
 #include "glm/glm.hpp"
@@ -27,7 +28,7 @@ struct Camera
     int deadzone = 2000;
 };
 
-class GLleluCamera: public GLlelu
+class MYLLY_API GLleluCamera: public GLlelu
 {
 public:
     GLleluCamera(int argc, char *argv[], GLVersion glVersion = GLVersion::GL33);

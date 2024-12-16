@@ -1,5 +1,7 @@
 #pragma once
 
+#include "api_decl.hh"
+
 #include "SDL.h"
 
 #include <string_view>
@@ -31,7 +33,7 @@ struct Size
     int height;
 };
 
-class GLlelu
+class MYLLY_API GLlelu
 {
 public:
     GLlelu(int argc, char *argv[], GLVersion glVersion = GLVersion::GL33);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api_decl.hh"
 #include "model.hh"
 #include "shader.hh"
 #include "texture.hh"
@@ -8,7 +9,7 @@
 
 #include <string_view>
 
-class HimmeliBase
+class MYLLY_API HimmeliBase
 {
 public:
     HimmeliBase();
@@ -39,12 +40,13 @@ struct Material {
     float shininess;
 };
 
-class Himmeli : public HimmeliBase
+class MYLLY_API Himmeli : public HimmeliBase
 {
 public:
     Himmeli(std::string_view model, std::string_view diffuse,
                                     std::string_view specular = "none_specular.png",
                                     std::string_view normal = "none_normal.png");
+    virtual ~Himmeli();
     virtual void draw(Shader &shader);
 
 private:
@@ -59,10 +61,11 @@ struct BasicMaterial {
     float shininess;
 };
 
-class BasicHimmeli : public HimmeliBase
+class MYLLY_API BasicHimmeli : public HimmeliBase
 {
 public:
     BasicHimmeli(std::string_view model, BasicMaterial material);
+    virtual ~BasicHimmeli();
     virtual void draw(Shader &shader);
 
 private:

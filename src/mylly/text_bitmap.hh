@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api_decl.hh"
 #include "shader.hh"
 #include "texture.hh"
 
@@ -12,7 +13,7 @@
 #define FONT_SIZE 8
 #define ATLAS_SIZE 16
 
-class TextRendererLatin1
+class MYLLY_API TextRendererLatin1
 {
 public:
     TextRendererLatin1(int w, int h, std::string_view fontName);

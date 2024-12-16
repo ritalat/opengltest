@@ -1,5 +1,7 @@
 #pragma once
 
+#include "api_decl.hh"
+
 #if defined(USE_GLES)
 #include "glad/gles2.h"
 #else
@@ -9,7 +11,7 @@
 #include <array>
 #include <string_view>
 
-class Texture
+class MYLLY_API Texture
 {
 public:
     Texture(std::string_view file, bool flip = true);
@@ -25,7 +27,7 @@ private:
     unsigned int m_id;
 };
 
-class Cubemap
+class MYLLY_API Cubemap
 {
 public:
     Cubemap(const std::array<std::string_view, 6> &files);

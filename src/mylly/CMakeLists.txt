@@ -9,7 +9,8 @@ set(SOURCES gllelu.cc
             text_bitmap.cc
             texture.cc)
 
-set(HEADERS gllelu.hh
+set(HEADERS api_decl.hh
+            gllelu.hh
             gllelu_main.hh
             gllelucamera.hh
             himmeli.hh
@@ -37,21 +38,18 @@ target_link_libraries(single_header stb tinyobjloader)
 add_library(mylly SHARED ${SOURCES} ${HEADERS})
 
 if(WIN32)
+    target_compile_definitions(mylly PRIVATE MYLLY_EXPORTS)
     set_target_properties(mylly PROPERTIES PREFIX "")
-    if(MSVC)
-        set_target_properties(mylly PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
-    else()
-        target_link_options(mylly PUBLIC "-Wl,--export-all-symbols")
-    endif()
 endif()
 
 if(UNIX AND NOT EMSCRIPTEN)
+    target_compile_options(mylly PRIVATE "-fvisibility=hidden")
     target_link_options(mylly PUBLIC "-Wl,--enable-new-dtags")
     set_target_properties(mylly PROPERTIES INSTALL_RPATH "\${ORIGIN}")
 endif()
 
 if(MSVC)
-    target_compile_options(mylly PRIVATE /W4)
+    target_compile_options(mylly PRIVATE /W4 /wd4251)
     target_compile_definitions(mylly PRIVATE _CRT_SECURE_NO_WARNINGS)
 elseif(NOT EMSCRIPTEN)
     target_compile_options(mylly PRIVATE -Wall -Wextra -Wpedantic -Wconversion)

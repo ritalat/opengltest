@@ -1,5 +1,7 @@
 #pragma once
 
+#include "api_decl.hh"
+
 #include "glm/glm.hpp"
 
 #include <string_view>
@@ -17,7 +19,7 @@ struct std::hash<Vertex> {
     size_t operator()(const Vertex &vertex) const;
 };
 
-class Model
+class MYLLY_API Model
 {
 public:
     Model(std::string_view file);
