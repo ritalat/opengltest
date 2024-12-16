@@ -37,7 +37,7 @@ Model::Model(std::string_view file):
     m_VBO(0),
     m_EBO(0)
 {
-    Path objPath = get_asset_path(file);
+    Path objPath = getAssetPath(file);
 
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;

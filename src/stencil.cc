@@ -44,7 +44,7 @@ Stencil::Stencil(int argc, char *argv[]):
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
     m_stencilShader.use();
-    m_stencilShader.set_int("texture0", 0);
+    m_stencilShader.setInt("texture0", 0);
 
     m_cubeTexture.wrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
@@ -97,8 +97,8 @@ Status Stencil::render()
     glm::mat4 model = glm::mat4(1.0f);
 
     m_stencilShader.use();
-    m_stencilShader.set_mat4("view", view());
-    m_stencilShader.set_mat4("projection", projection());
+    m_stencilShader.setMat4("view", view());
+    m_stencilShader.setMat4("projection", projection());
 
     // Floor
     m_floorTexture.activate(0);
@@ -107,8 +107,8 @@ Status Stencil::render()
     model = glm::rotate(model,
                         glm::radians(static_cast<float>(SDL_GetTicks()) / 10.0f),
                         glm::vec3(0.0f, 1.0f, 0.0f));
-    m_stencilShader.set_mat4("model", model);
-    m_stencilShader.set_float("alpha", 1.0f);
+    m_stencilShader.setMat4("model", model);
+    m_stencilShader.setFloat("alpha", 1.0f);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glStencilFunc(GL_EQUAL, 1, 0xff);
@@ -126,8 +126,8 @@ Status Stencil::render()
                         glm::radians(static_cast<float>(SDL_GetTicks()) / -10.0f),
                         glm::vec3(0.0f, 0.0f, 1.0f));
     model = glm::scale(model, glm::vec3(1.0f, 1.0f, -1.0f));
-    m_stencilShader.set_mat4("model", model);
-    m_stencilShader.set_float("alpha", 0.3f);
+    m_stencilShader.setMat4("model", model);
+    m_stencilShader.setFloat("alpha", 0.3f);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glEnable(GL_DEPTH_TEST);
@@ -144,11 +144,11 @@ Status Stencil::render()
     model = glm::rotate(model,
                         glm::radians(static_cast<float>(SDL_GetTicks()) / -10.0f),
                         glm::vec3(0.0f, 0.0f, 1.0f));
-    m_stencilShader.set_mat4("model", model);
-    m_stencilShader.set_float("alpha", 1.0f);
+    m_stencilShader.setMat4("model", model);
+    m_stencilShader.setFloat("alpha", 1.0f);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    swap_window();
+    swapWindow();
 
     return Status::Ok;
 }

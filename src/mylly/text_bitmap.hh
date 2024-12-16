@@ -19,14 +19,14 @@ public:
     ~TextRendererLatin1();
     TextRendererLatin1(const TextRendererLatin1 &) = delete;
     TextRendererLatin1 &operator=(const TextRendererLatin1 &) = delete;
-    void set_window_size(int w, int h);
-    void set_scale(float scale);
-    void set_color(glm::vec3 color);
-    void set_color(float r, float g, float b);
-    void draw_string(int x, int y, std::string_view str);
+    void setWindowSize(int w, int h);
+    void setScale(float scale);
+    void setColor(glm::vec3 color);
+    void setColor(float r, float g, float b);
+    void drawString(int x, int y, std::string_view str);
 
 private:
-    void draw_batch(int size);
+    void drawBatch(int size);
 
     Shader m_textShader;
     Texture m_fontTexture;

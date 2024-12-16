@@ -19,8 +19,8 @@ public:
     virtual ~VarjostinLelu();
 
 protected:
-    virtual int main_loop();
-    void load_shaders();
+    virtual int mainLoop();
+    void loadShaders();
 
 private:
     std::optional<Shader> m_leluShader;
@@ -36,17 +36,17 @@ VarjostinLelu::~VarjostinLelu()
 {
 }
 
-int VarjostinLelu::main_loop()
+int VarjostinLelu::mainLoop()
 {
     std::string notification;
     unsigned int notificationExpiration = 0;
 
-    int width = fb_size().width;
-    int height = fb_size().height;
+    int width = fbSize().width;
+    int height = fbSize().height;
 
     TextRendererLatin1 txt(width, height, "font8x8.png");
 
-    load_shaders();
+    loadShaders();
 
     unsigned int dummyVAO;
     glGenVertexArrays(1, &dummyVAO);
@@ -69,7 +69,7 @@ int VarjostinLelu::main_loop()
                     if (SDL_SCANCODE_RETURN == event.key.keysym.scancode) {
                         notification = "Reloading shaders...";
                         notificationExpiration = SDL_GetTicks() + 2000;
-                        load_shaders();
+                        loadShaders();
                     }
                     break;
                 default:
@@ -83,11 +83,11 @@ int VarjostinLelu::main_loop()
         if (m_leluShader) {
             m_leluShader->use();
 
-            m_leluShader->set_vec2("u_resolution", static_cast<float>(width), static_cast<float>(height));
+            m_leluShader->setVec2("u_resolution", static_cast<float>(width), static_cast<float>(height));
             int x, y;
             SDL_GetMouseState(&x, &y);
-            m_leluShader->set_vec2("u_mouse", static_cast<float>(x), static_cast<float>(height - y));
-            m_leluShader->set_float("u_time", static_cast<float>(SDL_GetTicks()) / 1000.0f);
+            m_leluShader->setVec2("u_mouse", static_cast<float>(x), static_cast<float>(height - y));
+            m_leluShader->setFloat("u_time", static_cast<float>(SDL_GetTicks()) / 1000.0f);
 
             glBindVertexArray(dummyVAO);
             glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -95,19 +95,19 @@ int VarjostinLelu::main_loop()
         }
 
         if (!m_error.empty()) {
-            txt.set_scale(1.0f);
-            txt.set_color(1.0f, 0.0f, 0.0f);
-            txt.draw_string(0, 0, m_error);
+            txt.setScale(1.0f);
+            txt.setColor(1.0f, 0.0f, 0.0f);
+            txt.drawString(0, 0, m_error);
         }
 
         if (notificationExpiration > SDL_GetTicks()) {
             float scale = 3.0f;
-            txt.set_scale(scale);
-            txt.set_color(0.0f, 1.0f, 0.0f);
-            txt.draw_string(0, height - static_cast<int>(scale) * FONT_SIZE, notification);
+            txt.setScale(scale);
+            txt.setColor(0.0f, 1.0f, 0.0f);
+            txt.drawString(0, height - static_cast<int>(scale) * FONT_SIZE, notification);
         }
 
-        swap_window();
+        swapWindow();
     }
 
     glDeleteVertexArrays(1, &dummyVAO);
@@ -115,7 +115,7 @@ int VarjostinLelu::main_loop()
     return EXIT_SUCCESS;
 }
 
-void VarjostinLelu::load_shaders()
+void VarjostinLelu::loadShaders()
 {
     try {
         m_leluShader.emplace("varjostinlelu.vert", "varjostinlelu.frag");

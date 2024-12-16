@@ -63,9 +63,9 @@ Blending::Blending(int argc, char *argv[]):
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     m_alphaShader.use();
-    m_alphaShader.set_int("texture0", 0);
+    m_alphaShader.setInt("texture0", 0);
     m_blendingShader.use();
-    m_blendingShader.set_int("texture0", 0);
+    m_blendingShader.setInt("texture0", 0);
 
     m_grassTexture.wrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
     m_windowTexture.wrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -125,8 +125,8 @@ Status Blending::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_blendingShader.use();
-    m_blendingShader.set_mat4("view", view());
-    m_blendingShader.set_mat4("projection", projection());
+    m_blendingShader.setMat4("view", view());
+    m_blendingShader.setMat4("projection", projection());
 
     m_floorTexture.activate(0);
 
@@ -134,25 +134,25 @@ Status Blending::render()
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, -0.51f, 0.0f));
     model = glm::scale(model, glm::vec3(5.0f, 1.0f, 5.0f));
-    m_blendingShader.set_mat4("model", model);
+    m_blendingShader.setMat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     m_cubeTexture.activate(0);
 
     glBindVertexArray(m_cubeVAO);
     model = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 1.0f));
-    m_blendingShader.set_mat4("model", model);
+    m_blendingShader.setMat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, -1.0f));
-    m_blendingShader.set_mat4("model", model);
+    m_blendingShader.setMat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glDisable(GL_CULL_FACE);
     if (m_simpleAlphaDiscard) {
         m_alphaShader.use();
-        m_alphaShader.set_mat4("view", view());
-        m_alphaShader.set_mat4("projection", projection());
+        m_alphaShader.setMat4("view", view());
+        m_alphaShader.setMat4("projection", projection());
         m_grassTexture.activate(0);
 
         glBindVertexArray(m_planeVAO);
@@ -163,7 +163,7 @@ Status Blending::render()
             model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
             model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
             model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
-            m_alphaShader.set_mat4("model", model);
+            m_alphaShader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 6);
             angle += 20.0f;
         }
@@ -183,13 +183,13 @@ Status Blending::render()
             model = glm::translate(glm::mat4(1.0f), pos);
             model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
             model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
-            m_blendingShader.set_mat4("model", model);
+            m_blendingShader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
     }
     glEnable(GL_CULL_FACE);
 
-    swap_window();
+    swapWindow();
 
     return Status::Ok;
 }

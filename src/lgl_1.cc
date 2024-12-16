@@ -70,11 +70,11 @@ const glm::vec3 cubePositions[] = {
     glm::vec3(-1.3f,  1.0f, -1.5f)
 };
 
-class LGL_1: public GLleluCamera
+class LGL1: public GLleluCamera
 {
 public:
-    LGL_1(int argc, char *argv[]);
-    virtual ~LGL_1();
+    LGL1(int argc, char *argv[]);
+    virtual ~LGL1();
 
 protected:
     virtual Status render();
@@ -87,7 +87,7 @@ private:
     unsigned int m_VBO;
 };
 
-LGL_1::LGL_1(int argc, char *argv[]):
+LGL1::LGL1(int argc, char *argv[]):
     GLleluCamera(argc, argv),
     m_texturedShader("textured.vert", "textured.frag"),
     m_texture0("lgl_container.jpg"),
@@ -96,8 +96,8 @@ LGL_1::LGL_1(int argc, char *argv[]):
     m_VBO(0)
 {
     m_texturedShader.use();
-    m_texturedShader.set_int("texture0", 0);
-    m_texturedShader.set_int("texture1", 1);
+    m_texturedShader.setInt("texture0", 0);
+    m_texturedShader.setInt("texture1", 1);
 
     glGenVertexArrays(1, &m_VAO);
     glBindVertexArray(m_VAO);
@@ -115,13 +115,13 @@ LGL_1::LGL_1(int argc, char *argv[]):
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-LGL_1::~LGL_1()
+LGL1::~LGL1()
 {
     glDeleteVertexArrays(1, &m_VAO);
     glDeleteBuffers(1, &m_VBO);
 }
 
-Status LGL_1::render()
+Status LGL1::render()
 {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -130,8 +130,8 @@ Status LGL_1::render()
     m_texture1.activate(1);
 
     m_texturedShader.use();
-    m_texturedShader.set_mat4("view", view());
-    m_texturedShader.set_mat4("projection", projection());
+    m_texturedShader.setMat4("view", view());
+    m_texturedShader.setMat4("projection", projection());
 
     glBindVertexArray(m_VAO);
     int ncubes = sizeof(cubePositions) / sizeof(glm::vec3);
@@ -141,14 +141,14 @@ Status LGL_1::render()
         float angle = 20.0f * static_cast<float>(i);
         model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
-        m_texturedShader.set_mat4("model", model);
+        m_texturedShader.setMat4("model", model);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
-    swap_window();
+    swapWindow();
 
     return Status::Ok;
 }
 
-GLLELU_MAIN_IMPLEMENTATION(LGL_1)
+GLLELU_MAIN_IMPLEMENTATION(LGL1)

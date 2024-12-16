@@ -83,11 +83,11 @@ const glm::vec3 pointLightPositions[] = {
 
 const int numPointLights = sizeof(pointLightPositions) / sizeof(glm::vec3);
 
-class LGL_2: public GLleluCamera
+class LGL2: public GLleluCamera
 {
 public:
-    LGL_2(int argc, char *argv[]);
-    virtual ~LGL_2();
+    LGL2(int argc, char *argv[]);
+    virtual ~LGL2();
 
 protected:
     virtual Status event(SDL_Event &event);
@@ -105,7 +105,7 @@ private:
     bool m_enableSpotLight;
 };
 
-LGL_2::LGL_2(int argc, char *argv[]):
+LGL2::LGL2(int argc, char *argv[]):
     GLleluCamera(argc, argv),
     m_lightingShader("lighting.vert", "lighting.frag"),
     m_lightShader("light.vert", "light.frag"),
@@ -118,9 +118,9 @@ LGL_2::LGL_2(int argc, char *argv[]):
     m_enableSpotLight(true)
 {
     m_lightingShader.use();
-    m_lightingShader.set_int("material.diffuse", 0);
-    m_lightingShader.set_int("material.specular", 1);
-    m_lightingShader.set_float("material.shininess", 64.0f);
+    m_lightingShader.setInt("material.diffuse", 0);
+    m_lightingShader.setInt("material.specular", 1);
+    m_lightingShader.setFloat("material.shininess", 64.0f);
 
     glGenVertexArrays(1, &m_VAO);
     glBindVertexArray(m_VAO);
@@ -193,10 +193,10 @@ LGL_2::LGL_2(int argc, char *argv[]):
 
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    m_lightingShader.set_int("numPointLights", lights);
+    m_lightingShader.setInt("numPointLights", lights);
 }
 
-LGL_2::~LGL_2()
+LGL2::~LGL2()
 {
     glDeleteVertexArrays(1, &m_VAO);
     glDeleteVertexArrays(1, &m_lightVAO);
@@ -204,7 +204,7 @@ LGL_2::~LGL_2()
     glDeleteBuffers(1, &m_UBO);
 }
 
-Status LGL_2::event(SDL_Event &event)
+Status LGL2::event(SDL_Event &event)
 {
     switch (event.type) {
         case SDL_KEYUP:
@@ -217,7 +217,7 @@ Status LGL_2::event(SDL_Event &event)
     return Status::Ok;
 }
 
-Status LGL_2::render()
+Status LGL2::render()
 {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -227,11 +227,11 @@ Status LGL_2::render()
 
     m_lightingShader.use();
 
-    m_lightingShader.set_mat4("view", view());
-    m_lightingShader.set_mat4("projection", projection());
+    m_lightingShader.setMat4("view", view());
+    m_lightingShader.setMat4("projection", projection());
 
-    m_lightingShader.set_vec3("viewPos", camera().position);
-    m_lightingShader.set_bool("enableSpotLight", m_enableSpotLight);
+    m_lightingShader.setVec3("viewPos", camera().position);
+    m_lightingShader.setBool("enableSpotLight", m_enableSpotLight);
 
     glBindBuffer(GL_UNIFORM_BUFFER, m_UBO);
     glm::vec4 spotLightPos[2] = { glm::vec4(camera().position, 0.0f), glm::vec4(camera().front, 0.0f) };
@@ -247,16 +247,16 @@ Status LGL_2::render()
         model = glm::translate(model, cubePositions[i]);
         float angle = 20.0f * static_cast<float>(i);
         model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-        m_lightingShader.set_mat4("model", model);
-        m_lightingShader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+        m_lightingShader.setMat4("model", model);
+        m_lightingShader.setMat4("normalMat", glm::transpose(glm::inverse(model)));
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
     m_lightShader.use();
 
-    m_lightShader.set_mat4("view", view());
-    m_lightShader.set_mat4("projection", projection());
+    m_lightShader.setMat4("view", view());
+    m_lightShader.setMat4("projection", projection());
 
     glBindVertexArray(m_lightVAO);
     int nplights = sizeof(pointLightPositions) / sizeof(glm::vec3);
@@ -264,14 +264,14 @@ Status LGL_2::render()
         model = glm::mat4(1.0f);
         model = glm::translate(model, pointLightPositions[i]);
         model = glm::scale(model, glm::vec3(0.2f));
-        m_lightShader.set_mat4("model", model);
+        m_lightShader.setMat4("model", model);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
-    swap_window();
+    swapWindow();
 
     return Status::Ok;
 }
 
-GLLELU_MAIN_IMPLEMENTATION(LGL_2)
+GLLELU_MAIN_IMPLEMENTATION(LGL2)

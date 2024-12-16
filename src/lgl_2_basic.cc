@@ -99,11 +99,11 @@ const BasicMaterial cubeMaterials[numCubes] = {
 
 const glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
-class LGL_2_Basic: public GLleluCamera
+class LGL2Basic: public GLleluCamera
 {
 public:
-    LGL_2_Basic(int argc, char *argv[]);
-    virtual ~LGL_2_Basic();
+    LGL2Basic(int argc, char *argv[]);
+    virtual ~LGL2Basic();
 
 protected:
     virtual Status render();
@@ -116,7 +116,7 @@ private:
     unsigned int m_VBO;
 };
 
-LGL_2_Basic::LGL_2_Basic(int argc, char *argv[]):
+LGL2Basic::LGL2Basic(int argc, char *argv[]):
     GLleluCamera(argc, argv),
     m_lightingShader("lighting.vert", "lighting_basic.frag"),
     m_lightShader("light.vert", "light.frag"),
@@ -152,29 +152,29 @@ LGL_2_Basic::LGL_2_Basic(int argc, char *argv[]):
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-LGL_2_Basic::~LGL_2_Basic()
+LGL2Basic::~LGL2Basic()
 {
     glDeleteVertexArrays(1, &m_VAO);
     glDeleteVertexArrays(1, &m_lightVAO);
     glDeleteBuffers(1, &m_VBO);
 }
 
-Status LGL_2_Basic::render()
+Status LGL2Basic::render()
 {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_lightingShader.use();
 
-    m_lightingShader.set_mat4("view", view());
-    m_lightingShader.set_mat4("projection", projection());
+    m_lightingShader.setMat4("view", view());
+    m_lightingShader.setMat4("projection", projection());
 
-    m_lightingShader.set_vec3("light.ambient", 1.0f, 1.0f, 1.0f);
-    m_lightingShader.set_vec3("light.diffuse", 1.0f, 1.0f, 1.0f);
-    m_lightingShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
-    m_lightingShader.set_vec3("light.position", lightPos);
+    m_lightingShader.setVec3("light.ambient", 1.0f, 1.0f, 1.0f);
+    m_lightingShader.setVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
+    m_lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+    m_lightingShader.setVec3("light.position", lightPos);
 
-    m_lightingShader.set_vec3("viewPos", camera().position);
+    m_lightingShader.setVec3("viewPos", camera().position);
 
     glm::mat4 model = glm::mat4(1.0f);
 
@@ -184,33 +184,33 @@ Status LGL_2_Basic::render()
         model = glm::translate(model, cubePositions[i]);
         float angle = 20.0f * static_cast<float>(i);
         model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-        m_lightingShader.set_mat4("model", model);
-        m_lightingShader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+        m_lightingShader.setMat4("model", model);
+        m_lightingShader.setMat4("normalMat", glm::transpose(glm::inverse(model)));
 
-        m_lightingShader.set_vec3("material.ambient", cubeMaterials[i].ambient);
-        m_lightingShader.set_vec3("material.diffuse", cubeMaterials[i].diffuse);
-        m_lightingShader.set_vec3("material.specular", cubeMaterials[i].specular);
-        m_lightingShader.set_float("material.shininess", cubeMaterials[i].shininess);
+        m_lightingShader.setVec3("material.ambient", cubeMaterials[i].ambient);
+        m_lightingShader.setVec3("material.diffuse", cubeMaterials[i].diffuse);
+        m_lightingShader.setVec3("material.specular", cubeMaterials[i].specular);
+        m_lightingShader.setFloat("material.shininess", cubeMaterials[i].shininess);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
     m_lightShader.use();
 
-    m_lightShader.set_mat4("view", view());
-    m_lightShader.set_mat4("projection", projection());
+    m_lightShader.setMat4("view", view());
+    m_lightShader.setMat4("projection", projection());
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, lightPos);
     model = glm::scale(model, glm::vec3(0.2f));
-    m_lightShader.set_mat4("model", model);
+    m_lightShader.setMat4("model", model);
 
     glBindVertexArray(m_lightVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    swap_window();
+    swapWindow();
 
     return Status::Ok;
 }
 
-GLLELU_MAIN_IMPLEMENTATION(LGL_2_Basic)
+GLLELU_MAIN_IMPLEMENTATION(LGL2Basic)

@@ -157,30 +157,30 @@ TextRendererLatin1::~TextRendererLatin1()
         glDeleteBuffers(1, &m_textVBO);
 }
 
-void TextRendererLatin1::set_window_size(int w, int h)
+void TextRendererLatin1::setWindowSize(int w, int h)
 {
     m_windowWidth = static_cast<float>(w);
     m_windowHeight = static_cast<float>(h);
     m_projection = glm::ortho(0.0f, m_windowWidth, 0.0f, m_windowHeight);
 }
 
-void TextRendererLatin1::set_scale(float scale)
+void TextRendererLatin1::setScale(float scale)
 {
     m_scale = scale;
 }
 
-void TextRendererLatin1::set_color(glm::vec3 color)
+void TextRendererLatin1::setColor(glm::vec3 color)
 {
     m_color = color;
 }
 
-void TextRendererLatin1::set_color(float r, float g, float b)
+void TextRendererLatin1::setColor(float r, float g, float b)
 {
     m_color = glm::vec3(r, g, b);
 }
 
 // Top left corner of the window is treated as (0,0) to make drawing text more natural
-void TextRendererLatin1::draw_string(int x, int y, std::string_view str)
+void TextRendererLatin1::drawString(int x, int y, std::string_view str)
 {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -190,10 +190,10 @@ void TextRendererLatin1::draw_string(int x, int y, std::string_view str)
     glBindVertexArray(m_textVAO);
 
     m_textShader.use();
-    m_textShader.set_mat4("projection", m_projection);
-    m_textShader.set_mat2("texScale", m_texScale);
-    m_textShader.set_vec3("color", m_color);
-    m_textShader.set_int("font", 0);
+    m_textShader.setMat4("projection", m_projection);
+    m_textShader.setMat2("texScale", m_texScale);
+    m_textShader.setVec3("color", m_color);
+    m_textShader.setInt("font", 0);
 
     float curx = static_cast<float>(x);
     float cury = m_windowHeight - static_cast<float>(y) - m_scale * FONT_SIZEF;
@@ -237,7 +237,7 @@ void TextRendererLatin1::draw_string(int x, int y, std::string_view str)
             ++quadIndex;
 
             if (quadIndex == MAX_STRING_LENGTH) {
-                draw_batch(MAX_STRING_LENGTH);
+                drawBatch(MAX_STRING_LENGTH);
                 quadIndex = 0;
             }
         }
@@ -246,14 +246,14 @@ void TextRendererLatin1::draw_string(int x, int y, std::string_view str)
         len -= advance;
     }
 
-    draw_batch(quadIndex);
+    drawBatch(quadIndex);
 
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_BLEND);
 }
 
-void TextRendererLatin1::draw_batch(int size)
+void TextRendererLatin1::drawBatch(int size)
 {
     if (size < 1)
         return;

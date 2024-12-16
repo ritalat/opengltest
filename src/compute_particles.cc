@@ -28,7 +28,7 @@ public:
     virtual ~ComputeParticles();
 
 protected:
-    virtual int main_loop();
+    virtual int mainLoop();
 };
 
 ComputeParticles::ComputeParticles(int argc, char *argv[]):
@@ -40,7 +40,7 @@ ComputeParticles::~ComputeParticles()
 {
 }
 
-int ComputeParticles::main_loop()
+int ComputeParticles::mainLoop()
 {
     Particle initialParticles[NUM_PARTICLES];
     for (int i = 0; i < NUM_PARTICLES; ++i) {
@@ -146,7 +146,7 @@ int ComputeParticles::main_loop()
         glBindVertexArray(dummyVAO);
         glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
 
-        swap_window();
+        swapWindow();
         ++frameCount;
     }
 

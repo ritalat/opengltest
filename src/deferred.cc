@@ -65,7 +65,7 @@ public:
 protected:
     virtual Status event(SDL_Event &event);
     virtual Status render();
-    void recreate_gbuffer();
+    void recreateGbuffer();
 
 private:
     Shader m_deferredLighting;
@@ -111,12 +111,12 @@ Deferred::Deferred(int argc, char *argv[]):
     m_visualizedBuffer(Visualization::NONE)
 {
     m_deferredLighting.use();
-    m_deferredLighting.set_int("gposition", 0);
-    m_deferredLighting.set_int("gnormal", 1);
-    m_deferredLighting.set_int("gcolor", 2);
+    m_deferredLighting.setInt("gposition", 0);
+    m_deferredLighting.setInt("gnormal", 1);
+    m_deferredLighting.setInt("gcolor", 2);
     m_geometryPass.use();
-    m_geometryPass.set_int("diffuse", 0);
-    m_geometryPass.set_int("specular", 1);
+    m_geometryPass.setInt("diffuse", 0);
+    m_geometryPass.setInt("specular", 1);
 
     camera().position = glm::vec3(2.5f, 1.5f, 3.5f);
     camera().pitch = -20.0f;
@@ -155,7 +155,7 @@ Deferred::Deferred(int argc, char *argv[]):
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_lightUBO);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    m_deferredLighting.set_int("numLights", NUM_LIGHTS);
+    m_deferredLighting.setInt("numLights", NUM_LIGHTS);
 
     glGenVertexArrays(1, &m_planeVAO);
     glBindVertexArray(m_planeVAO);
@@ -190,7 +190,7 @@ Deferred::Deferred(int argc, char *argv[]):
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    recreate_gbuffer();
+    recreateGbuffer();
 }
 
 Deferred::~Deferred()
@@ -221,10 +221,10 @@ Status Deferred::event(SDL_Event &event)
             }
             break;
         case SDL_WINDOWEVENT:
-            if (event.window.windowID == window_id()) {
+            if (event.window.windowID == windowId()) {
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
-                        recreate_gbuffer();
+                        recreateGbuffer();
                         break;
                     default:
                         break;
@@ -245,8 +245,8 @@ Status Deferred::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_geometryPass.use();
-    m_geometryPass.set_mat4("view", view());
-    m_geometryPass.set_mat4("projection", projection());
+    m_geometryPass.setMat4("view", view());
+    m_geometryPass.setMat4("projection", projection());
 
     m_floorDiffuse.activate(0);
     m_floorSpecular.activate(1);
@@ -255,8 +255,8 @@ Status Deferred::render()
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, -0.51f, 0.0f));
     model = glm::scale(model, glm::vec3(2.5f, 1.0f, 2.5f));
-    m_geometryPass.set_mat4("model", model);
-    m_geometryPass.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+    m_geometryPass.setMat4("model", model);
+    m_geometryPass.setMat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     m_cubeDiffuse.activate(0);
@@ -266,8 +266,8 @@ Status Deferred::render()
     for (size_t i = 0; i < sizeof(cubePositions) / sizeof(glm::vec3); ++i) {
         model = glm::translate(glm::mat4(1.0f), cubePositions[i]);
         model = glm::scale(model, glm::vec3(0.5f));
-        m_geometryPass.set_mat4("model", model);
-        m_geometryPass.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+        m_geometryPass.setMat4("model", model);
+        m_geometryPass.setMat4("normalMat", glm::transpose(glm::inverse(model)));
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
@@ -277,9 +277,9 @@ Status Deferred::render()
     glClear(GL_COLOR_BUFFER_BIT);
 
     m_deferredLighting.use();
-    m_deferredLighting.set_int("numLights", NUM_LIGHTS);
-    m_deferredLighting.set_vec3("viewPos", camera().position);
-    m_deferredLighting.set_int("visualizedBuffer", static_cast<int>(m_visualizedBuffer));
+    m_deferredLighting.setInt("numLights", NUM_LIGHTS);
+    m_deferredLighting.setVec3("viewPos", camera().position);
+    m_deferredLighting.setInt("visualizedBuffer", static_cast<int>(m_visualizedBuffer));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_gposition);
@@ -290,12 +290,12 @@ Status Deferred::render()
     glBindVertexArray(m_dummyVAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    swap_window();
+    swapWindow();
 
     return Status::Ok;
 }
 
-void Deferred::recreate_gbuffer()
+void Deferred::recreateGbuffer()
 {
     if (m_gposition)
         glDeleteTextures(1, &m_gposition);
@@ -310,8 +310,8 @@ void Deferred::recreate_gbuffer()
         glGenFramebuffers(1, &m_gbuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, m_gbuffer);
 
-    int width = fb_size().width;
-    int height = fb_size().height;
+    int width = fbSize().width;
+    int height = fbSize().height;
 
     glGenTextures(1, &m_gposition);
     glBindTexture(GL_TEXTURE_2D, m_gposition);

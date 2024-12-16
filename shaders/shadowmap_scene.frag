@@ -28,7 +28,7 @@ uniform bool enableShadows;
 
 out vec4 FragColor;
 
-float map_shadow(vec3 normal, vec3 lightDir)
+float mapShadow(vec3 normal, vec3 lightDir)
 {
     vec3 projCoords = fsIn.fragPosLightSpace.xyz / fsIn.fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
@@ -65,7 +65,7 @@ void main()
     float spec = pow(max(dot(norm, halfDir), 0.0), material.shininess);
     vec3 specular = light.specular * spec * vec3(texture(material.specular, fsIn.texCoord));
 
-    float shadow = enableShadows ? map_shadow(norm, lightDir) : 0.0;
+    float shadow = enableShadows ? mapShadow(norm, lightDir) : 0.0;
 
     vec3 phong = ambient + (1.0 - shadow) * (diffuse + specular);
     FragColor = vec4(phong, 1.0);

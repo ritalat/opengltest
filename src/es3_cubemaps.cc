@@ -93,9 +93,9 @@ CubemapsES3::CubemapsES3(int argc, char *argv[]):
     m_skyboxVBO(0)
 {
     m_skyboxShader.use();
-    m_skyboxShader.set_int("skybox", 0);
+    m_skyboxShader.setInt("skybox", 0);
     m_environmentMapShader.use();
-    m_environmentMapShader.set_int("skybox", 0);
+    m_environmentMapShader.setInt("skybox", 0);
 
     glGenVertexArrays(1, &m_skyboxVAO);
     glBindVertexArray(m_skyboxVAO);
@@ -125,16 +125,16 @@ Status CubemapsES3::render()
     m_skybox.activate(0);
 
     m_environmentMapShader.use();
-    m_environmentMapShader.set_mat4("view", view());
-    m_environmentMapShader.set_mat4("projection", projection());
-    m_environmentMapShader.set_vec3("viewPos", camera().position);
+    m_environmentMapShader.setMat4("view", view());
+    m_environmentMapShader.setMat4("projection", projection());
+    m_environmentMapShader.setVec3("viewPos", camera().position);
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
     model = glm::rotate(model, glm::radians(static_cast<float>(SDL_GetTicks()) / 10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
-    m_environmentMapShader.set_mat4("model", model);
-    m_environmentMapShader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+    m_environmentMapShader.setMat4("model", model);
+    m_environmentMapShader.setMat4("normalMat", glm::transpose(glm::inverse(model)));
 
     glBindVertexArray(m_teapot.vao());
     glDrawElements(GL_TRIANGLES, m_teapot.indices(), GL_UNSIGNED_INT, 0);
@@ -143,8 +143,8 @@ Status CubemapsES3::render()
     glDepthFunc(GL_LEQUAL);
 
     m_skyboxShader.use();
-    m_skyboxShader.set_mat4("view", glm::mat4(glm::mat3(view())));
-    m_skyboxShader.set_mat4("projection", projection());
+    m_skyboxShader.setMat4("view", glm::mat4(glm::mat3(view())));
+    m_skyboxShader.setMat4("projection", projection());
 
     glBindVertexArray(m_skyboxVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -152,7 +152,7 @@ Status CubemapsES3::render()
 
     glDepthFunc(GL_LESS);
 
-    swap_window();
+    swapWindow();
 
     return Status::Ok;
 }

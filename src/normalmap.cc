@@ -49,8 +49,8 @@ NormalMap::NormalMap(int argc, char *argv[]):
     m_VBO(0)
 {
     m_lightingShader.use();
-    m_lightingShader.set_int("material.diffuse", 0);
-    m_lightingShader.set_int("material.normal", 1);
+    m_lightingShader.setInt("material.diffuse", 0);
+    m_lightingShader.setInt("material.normal", 1);
 
     unsigned int numTris = sizeof(cube) / sizeof(float) / 8 / 3;
     std::vector<Vert> cubeVerts(numTris * 3);
@@ -114,21 +114,21 @@ Status NormalMap::render()
 
     m_lightingShader.use();
 
-    m_lightingShader.set_mat4("view", view());
-    m_lightingShader.set_mat4("projection", projection());
+    m_lightingShader.setMat4("view", view());
+    m_lightingShader.setMat4("projection", projection());
 
-    m_lightingShader.set_float("material.shininess", 64.0f);
-    m_lightingShader.set_vec3("lightPos", lightPos);
-    m_lightingShader.set_vec3("viewPos", camera().position);
+    m_lightingShader.setFloat("material.shininess", 64.0f);
+    m_lightingShader.setVec3("lightPos", lightPos);
+    m_lightingShader.setVec3("viewPos", camera().position);
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::rotate(model, glm::radians(static_cast<float>(SDL_GetTicks()) / 50.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    m_lightingShader.set_mat4("model", model);
+    m_lightingShader.setMat4("model", model);
 
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    swap_window();
+    swapWindow();
 
     return Status::Ok;
 }

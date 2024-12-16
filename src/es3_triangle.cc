@@ -26,7 +26,7 @@ public:
     virtual ~TriangleES3();
 
 protected:
-    virtual int main_loop();
+    virtual int mainLoop();
     void iterate();
 
 private:
@@ -37,7 +37,7 @@ private:
 };
 
 #if defined(__EMSCRIPTEN__)
-void browser_callback(void *arg)
+void browserCallback(void *arg)
 {
     static_cast<TriangleES3*>(arg)->iterate();
 }
@@ -56,7 +56,7 @@ TriangleES3::~TriangleES3()
     glDeleteBuffers(1, &m_VBO);
 }
 
-int TriangleES3::main_loop()
+int TriangleES3::mainLoop()
 {
     glGenVertexArrays(1, &m_VAO);
     glBindVertexArray(m_VAO);
@@ -74,7 +74,7 @@ int TriangleES3::main_loop()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 #if defined(__EMSCRIPTEN__)
-    emscripten_set_main_loop_arg(browser_callback, this, 0, 1);
+    emscripten_set_main_loop_arg(browserCallback, this, 0, 1);
 #else
     while (!m_quit) {
         iterate();
@@ -114,7 +114,7 @@ void TriangleES3::iterate()
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    swap_window();
+    swapWindow();
 }
 
 GLLELU_MAIN_IMPLEMENTATION(TriangleES3)

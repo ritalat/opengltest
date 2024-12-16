@@ -28,7 +28,7 @@ vec2 offsets[9] = vec2[](
     vec2( offset, -offset)
 );
 
-vec4 kernel_effect(float kernel[9])
+vec4 kernelEffect(float kernel[9])
 {
     vec3 sample[9];
     for (int i = 0; i < 9; ++i) {
@@ -48,7 +48,7 @@ vec4 sharpen()
         -1,  9, -1,
         -1, -1, -1
     );
-    return kernel_effect(kernel);
+    return kernelEffect(kernel);
 }
 
 vec4 blur()
@@ -58,7 +58,7 @@ vec4 blur()
         2.0 / 16, 4.0 / 16, 2.0 / 16,
         1.0 / 16, 2.0 / 16, 1.0 / 16
     );
-    return kernel_effect(kernel);
+    return kernelEffect(kernel);
 }
 
 vec4 edge()
@@ -68,7 +68,7 @@ vec4 edge()
         1, -8, 1,
         1,  1, 1
     );
-    return kernel_effect(kernel);
+    return kernelEffect(kernel);
 }
 
 void main()

@@ -28,11 +28,11 @@ const glm::vec3 cubePositions[] = {
 
 const glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
-class LGL_2_Textured: public GLleluCamera
+class LGL2Textured: public GLleluCamera
 {
 public:
-    LGL_2_Textured(int argc, char *argv[]);
-    virtual ~LGL_2_Textured();
+    LGL2Textured(int argc, char *argv[]);
+    virtual ~LGL2Textured();
 
 protected:
     virtual Status render();
@@ -47,7 +47,7 @@ private:
     unsigned int m_VBO;
 };
 
-LGL_2_Textured::LGL_2_Textured(int argc, char *argv[]):
+LGL2Textured::LGL2Textured(int argc, char *argv[]):
     GLleluCamera(argc, argv),
     m_lightingShader("lighting.vert", "lighting_textured.frag"),
     m_lightShader("light.vert", "light.frag"),
@@ -58,8 +58,8 @@ LGL_2_Textured::LGL_2_Textured(int argc, char *argv[]):
     m_VBO(0)
 {
     m_lightingShader.use();
-    m_lightingShader.set_int("material.diffuse", 0);
-    m_lightingShader.set_int("material.specular", 1);
+    m_lightingShader.setInt("material.diffuse", 0);
+    m_lightingShader.setInt("material.specular", 1);
 
     glGenVertexArrays(1, &m_VAO);
     glBindVertexArray(m_VAO);
@@ -89,14 +89,14 @@ LGL_2_Textured::LGL_2_Textured(int argc, char *argv[]):
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-LGL_2_Textured::~LGL_2_Textured()
+LGL2Textured::~LGL2Textured()
 {
     glDeleteVertexArrays(1, &m_VAO);
     glDeleteVertexArrays(1, &m_lightVAO);
     glDeleteBuffers(1, &m_VBO);
 }
 
-Status LGL_2_Textured::render()
+Status LGL2Textured::render()
 {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -106,39 +106,39 @@ Status LGL_2_Textured::render()
 
     m_lightingShader.use();
 
-    m_lightingShader.set_mat4("view", view());
-    m_lightingShader.set_mat4("projection", projection());
+    m_lightingShader.setMat4("view", view());
+    m_lightingShader.setMat4("projection", projection());
 
-    m_lightingShader.set_float("material.shininess", 64.0f);
-    m_lightingShader.set_vec3("light.ambient", 0.2f, 0.2f, 0.2f);
-    m_lightingShader.set_vec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-    m_lightingShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
-    m_lightingShader.set_vec3("light.position", lightPos);
-    m_lightingShader.set_vec3("viewPos", camera().position);
+    m_lightingShader.setFloat("material.shininess", 64.0f);
+    m_lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+    m_lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+    m_lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+    m_lightingShader.setVec3("light.position", lightPos);
+    m_lightingShader.setVec3("viewPos", camera().position);
 
     glm::mat4 model = glm::mat4(1.0f);
-    m_lightingShader.set_mat4("model", model);
-    m_lightingShader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+    m_lightingShader.setMat4("model", model);
+    m_lightingShader.setMat4("normalMat", glm::transpose(glm::inverse(model)));
 
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     m_lightShader.use();
 
-    m_lightShader.set_mat4("view", view());
-    m_lightShader.set_mat4("projection", projection());
+    m_lightShader.setMat4("view", view());
+    m_lightShader.setMat4("projection", projection());
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, lightPos);
     model = glm::scale(model, glm::vec3(0.2f));
-    m_lightShader.set_mat4("model", model);
+    m_lightShader.setMat4("model", model);
 
     glBindVertexArray(m_lightVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    swap_window();
+    swapWindow();
 
     return Status::Ok;
 }
 
-GLLELU_MAIN_IMPLEMENTATION(LGL_2_Textured)
+GLLELU_MAIN_IMPLEMENTATION(LGL2Textured)

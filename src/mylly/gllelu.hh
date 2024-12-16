@@ -39,16 +39,16 @@ public:
     int run();
 
 protected:
-    void window_name(std::string_view name);
-    void window_size(int w, int h);
-    Size fb_size() const;
-    void window_fullscreen(bool fullscreen);
-    bool window_fullscreen() const;
-    void window_grab(bool grabMouse);
-    bool window_grab() const;
-    void swap_window();
-    unsigned int window_id() const;
-    virtual int main_loop() = 0;
+    void windowName(std::string_view name);
+    void windowSize(int w, int h);
+    Size fbSize() const;
+    void windowFullscreen(bool fullscreen);
+    bool windowFullscreen() const;
+    void windowGrab(bool grabMouse);
+    bool windowGrab() const;
+    void swapWindow();
+    unsigned int windowId() const;
+    virtual int mainLoop() = 0;
 
 private:
     SDL_Window *m_window;

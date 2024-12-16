@@ -33,7 +33,7 @@ public:
 protected:
     virtual Status event(SDL_Event &event);
     virtual Status render();
-    void draw_scene(Shader &shader);
+    void drawScene(Shader &shader);
 
 private:
     Shader m_shadowShader;
@@ -173,52 +173,52 @@ Status ShadowMapOmni::render()
         glViewport(0, 0, SHADOWMAP_SIZE, SHADOWMAP_SIZE);
 
         m_shadowShader.use();
-        m_shadowShader.set_vec3("lightPos", lightPos);
-        m_shadowShader.set_float("farPlane", far);
+        m_shadowShader.setVec3("lightPos", lightPos);
+        m_shadowShader.setFloat("farPlane", far);
 
         for (int i = 0; i < 6; ++i) {
             glBindFramebuffer(GL_FRAMEBUFFER, m_shadowMapFBOs[i]);
             glClear(GL_DEPTH_BUFFER_BIT);
 
-            m_shadowShader.set_mat4("lightSpaceMat", lightSpaceMatrices[i]);
-            draw_scene(m_shadowShader);
+            m_shadowShader.setMat4("lightSpaceMat", lightSpaceMatrices[i]);
+            drawScene(m_shadowShader);
         }
     }
 
-    glViewport(0, 0, fb_size().width, fb_size().height);
+    glViewport(0, 0, fbSize().width, fbSize().height);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_sceneShader.use();
-    m_sceneShader.set_bool("enableShadows", m_shadowMapping);
-    m_sceneShader.set_int("shadowMap", 10);
-    m_sceneShader.set_float("farPlane", far);
+    m_sceneShader.setBool("enableShadows", m_shadowMapping);
+    m_sceneShader.setInt("shadowMap", 10);
+    m_sceneShader.setFloat("farPlane", far);
 
-    m_sceneShader.set_mat4("view", view());
-    m_sceneShader.set_mat4("projection", projection());
+    m_sceneShader.setMat4("view", view());
+    m_sceneShader.setMat4("projection", projection());
 
-    m_sceneShader.set_float("material.shininess", 64.0f);
-    m_sceneShader.set_vec3("light.ambient", 0.2f, 0.2f, 0.2f);
-    m_sceneShader.set_vec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-    m_sceneShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
-    m_sceneShader.set_vec3("light.position", lightPos);
-    m_sceneShader.set_vec3("viewPos", camera().position);
+    m_sceneShader.setFloat("material.shininess", 64.0f);
+    m_sceneShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+    m_sceneShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+    m_sceneShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+    m_sceneShader.setVec3("light.position", lightPos);
+    m_sceneShader.setVec3("viewPos", camera().position);
 
     glActiveTexture(GL_TEXTURE0 + 10);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_shadowMap);
 
-    draw_scene(m_sceneShader);
+    drawScene(m_sceneShader);
 
-    swap_window();
+    swapWindow();
 
     return Status::Ok;
 }
 
-void ShadowMapOmni::draw_scene(Shader &shader)
+void ShadowMapOmni::drawScene(Shader &shader)
 {
-    shader.set_int("material.diffuse", 0);
-    shader.set_int("material.specular", 0);
+    shader.setInt("material.diffuse", 0);
+    shader.setInt("material.specular", 0);
 
     m_floorTexture.activate(0);
 
@@ -226,45 +226,45 @@ void ShadowMapOmni::draw_scene(Shader &shader)
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
     model = glm::scale(model, glm::vec3(5.0f, 1.0f, 5.0f));
-    shader.set_mat4("model", model);
-    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+    shader.setMat4("model", model);
+    shader.setMat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    shader.set_int("material.diffuse", 0);
-    shader.set_int("material.specular", 1);
+    shader.setInt("material.diffuse", 0);
+    shader.setInt("material.specular", 1);
 
     m_cubeTexture.activate(0);
     m_cubeSpecularTexture.activate(1);
 
     glBindVertexArray(m_cubeVAO);
     model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 2.0f));
-    shader.set_mat4("model", model);
-    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+    shader.setMat4("model", model);
+    shader.setMat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 2.0f));
-    shader.set_mat4("model", model);
-    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+    shader.setMat4("model", model);
+    shader.setMat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 0.0f, 2.0f));
-    shader.set_mat4("model", model);
-    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+    shader.setMat4("model", model);
+    shader.setMat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -2.0f));
-    shader.set_mat4("model", model);
-    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+    shader.setMat4("model", model);
+    shader.setMat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, -2.0f));
-    shader.set_mat4("model", model);
-    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+    shader.setMat4("model", model);
+    shader.setMat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 0.0f, -2.0f));
-    shader.set_mat4("model", model);
-    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+    shader.setMat4("model", model);
+    shader.setMat4("normalMat", glm::transpose(glm::inverse(model)));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 

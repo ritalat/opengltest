@@ -23,7 +23,7 @@ public:
     virtual ~HelloTriangle();
 
 protected:
-    virtual int main_loop();
+    virtual int mainLoop();
 };
 
 HelloTriangle::HelloTriangle(int argc, char *argv[]):
@@ -35,7 +35,7 @@ HelloTriangle::~HelloTriangle()
 {
 }
 
-int HelloTriangle::main_loop()
+int HelloTriangle::mainLoop()
 {
     Shader triangleShader("triangle.vert", "triangle.frag");
 
@@ -82,7 +82,7 @@ int HelloTriangle::main_loop()
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        swap_window();
+        swapWindow();
     }
 
     glDeleteVertexArrays(1, &VAO);

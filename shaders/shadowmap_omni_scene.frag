@@ -30,7 +30,7 @@ uniform bool enableShadows;
 
 out vec4 FragColor;
 
-float map_shadow()
+float mapShadow()
 {
     vec3 lightDir = fsIn.fragPos - light.position;
     float closestDepth = texture(shadowMap, lightDir).r * farPlane;
@@ -59,11 +59,11 @@ void main()
     vec3 specular = light.specular * spec * vec3(texture(material.specular, fsIn.texCoord));
 
     if (DBG) {
-        map_shadow();
+        mapShadow();
         return;
     }
 
-    float shadow = enableShadows ? map_shadow() : 0.0;
+    float shadow = enableShadows ? mapShadow() : 0.0;
 
     vec3 phong = ambient + (1.0 - shadow) * (diffuse + specular);
     FragColor = vec4(phong, 1.0);

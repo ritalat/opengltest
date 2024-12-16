@@ -94,26 +94,26 @@ Status ObjFiles::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_lightingShader.use();
-    m_lightingShader.set_mat4("view", view());
-    m_lightingShader.set_mat4("projection", projection());
+    m_lightingShader.setMat4("view", view());
+    m_lightingShader.setMat4("projection", projection());
 
-    m_lightingShader.set_vec3("light.ambient", 0.2f, 0.2f, 0.2f);
-    m_lightingShader.set_vec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-    m_lightingShader.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
-    m_lightingShader.set_vec3("light.position", lightPos);
-    m_lightingShader.set_vec3("viewPos", camera().position);
+    m_lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+    m_lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+    m_lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+    m_lightingShader.setVec3("light.position", lightPos);
+    m_lightingShader.setVec3("viewPos", camera().position);
 
     m_room.draw(m_lightingShader);
 
     m_lightingShaderBasic.use();
-    m_lightingShaderBasic.set_mat4("view", view());
-    m_lightingShaderBasic.set_mat4("projection", projection());
+    m_lightingShaderBasic.setMat4("view", view());
+    m_lightingShaderBasic.setMat4("projection", projection());
 
-    m_lightingShaderBasic.set_vec3("light.ambient", 1.0f, 1.0f, 1.0f);
-    m_lightingShaderBasic.set_vec3("light.diffuse", 1.0f, 1.0f, 1.0f);
-    m_lightingShaderBasic.set_vec3("light.specular", 1.0f, 1.0f, 1.0f);
-    m_lightingShaderBasic.set_vec3("light.position", lightPos);
-    m_lightingShaderBasic.set_vec3("viewPos", camera().position);
+    m_lightingShaderBasic.setVec3("light.ambient", 1.0f, 1.0f, 1.0f);
+    m_lightingShaderBasic.setVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
+    m_lightingShaderBasic.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+    m_lightingShaderBasic.setVec3("light.position", lightPos);
+    m_lightingShaderBasic.setVec3("viewPos", camera().position);
 
     m_monkey.draw(m_lightingShaderBasic);
     m_teapot.rotate(glm::mat4(1.0f),
@@ -122,18 +122,18 @@ Status ObjFiles::render()
     m_teapot.draw(m_lightingShaderBasic);
 
     m_lightShader.use();
-    m_lightShader.set_mat4("view", view());
-    m_lightShader.set_mat4("projection", projection());
+    m_lightShader.setMat4("view", view());
+    m_lightShader.setMat4("projection", projection());
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, lightPos);
     model = glm::scale(model, glm::vec3(0.2f));
-    m_lightShader.set_mat4("model", model);
+    m_lightShader.setMat4("model", model);
 
     glBindVertexArray(m_lightVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    swap_window();
+    swapWindow();
 
     return Status::Ok;
 }

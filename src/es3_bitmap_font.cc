@@ -20,7 +20,7 @@ public:
     virtual ~BitmapFontES3();
 
 protected:
-    virtual int main_loop();
+    virtual int mainLoop();
     void iterate();
 
 private:
@@ -32,7 +32,7 @@ private:
 };
 
 #if defined(__EMSCRIPTEN__)
-void browser_callback(void *arg)
+void browserCallback(void *arg)
 {
     static_cast<BitmapFontES3*>(arg)->iterate();
 }
@@ -40,7 +40,7 @@ void browser_callback(void *arg)
 
 BitmapFontES3::BitmapFontES3(int argc, char *argv[]):
     GLlelu(argc, argv),
-    m_txt(fb_size().width, fb_size().height, "font8x8.png"),
+    m_txt(fbSize().width, fbSize().height, "font8x8.png"),
     m_fontLoaded("Loaded font font8x8.png"),
     m_glInfoDump("OpenGL vendor: " + std::string((char *)glGetString(GL_VENDOR)) + '\n' +
                  "OpenGL renderer: " + std::string((char *)glGetString(GL_RENDERER)) + '\n' +
@@ -55,10 +55,10 @@ BitmapFontES3::~BitmapFontES3()
 {
 }
 
-int BitmapFontES3::main_loop()
+int BitmapFontES3::mainLoop()
 {
 #if defined(__EMSCRIPTEN__)
-    emscripten_set_main_loop_arg(browser_callback, this, 0, 1);
+    emscripten_set_main_loop_arg(browserCallback, this, 0, 1);
 #else
     while (!m_quit) {
         iterate();
@@ -93,36 +93,36 @@ void BitmapFontES3::iterate()
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    int width = fb_size().width;
-    int height = fb_size().height;
+    int width = fbSize().width;
+    int height = fbSize().height;
 
-    m_txt.set_color(1.0f, 1.0f, 1.0f);
-    m_txt.set_scale(1.0f);
-    m_txt.draw_string(0, 0, m_glInfoDump);
-    m_txt.draw_string(width - static_cast<int>(m_fontLoaded.length()) * FONT_SIZE,
-                      height - FONT_SIZE, m_fontLoaded);
+    m_txt.setColor(1.0f, 1.0f, 1.0f);
+    m_txt.setScale(1.0f);
+    m_txt.drawString(0, 0, m_glInfoDump);
+    m_txt.drawString(width - static_cast<int>(m_fontLoaded.length()) * FONT_SIZE,
+                     height - FONT_SIZE, m_fontLoaded);
 
-    m_txt.set_color(1.0f, 0.0f, 0.0f);
-    m_txt.set_scale(2.5f);
-    m_txt.draw_string(250 + static_cast<int>(100.0f * sin(static_cast<float>(SDL_GetTicks()) / 1000.0f)),
-                      height / 2, m_aakkosia);
+    m_txt.setColor(1.0f, 0.0f, 0.0f);
+    m_txt.setScale(2.5f);
+    m_txt.drawString(250 + static_cast<int>(100.0f * sin(static_cast<float>(SDL_GetTicks()) / 1000.0f)),
+                     height / 2, m_aakkosia);
 
     int x, y;
     unsigned int buttons = SDL_GetMouseState(&x, &y);
     if (buttons & SDL_BUTTON(SDL_BUTTON_LEFT)) {
-        m_txt.set_color(0.0f, 1.0f, 0.0f);
+        m_txt.setColor(0.0f, 1.0f, 0.0f);
     } else if (buttons & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
-        m_txt.set_color(0.0f, 0.0f, 1.0f);
+        m_txt.setColor(0.0f, 0.0f, 1.0f);
     } else if (buttons & SDL_BUTTON(SDL_BUTTON_MIDDLE)) {
-        m_txt.set_color(1.0f, 0.0f, 0.0f);
+        m_txt.setColor(1.0f, 0.0f, 0.0f);
     } else {
-        m_txt.set_color(1.0f, 1.0f, 1.0f);
+        m_txt.setColor(1.0f, 1.0f, 1.0f);
     }
-    m_txt.set_scale(1.0f);
+    m_txt.setScale(1.0f);
     std::string mouse = "Mouse state: (" + std::to_string(x) + "," + std::to_string(y) + ")";
-    m_txt.draw_string(0, height - FONT_SIZE, mouse);
+    m_txt.drawString(0, height - FONT_SIZE, mouse);
 
-    swap_window();
+    swapWindow();
 }
 
 GLLELU_MAIN_IMPLEMENTATION(BitmapFontES3)

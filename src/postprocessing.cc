@@ -39,7 +39,7 @@ public:
 protected:
     virtual Status event(SDL_Event &event);
     virtual Status render();
-    void recreate_framebuffer();
+    void recreateFramebuffer();
 
 private:
     Shader m_ppShader;
@@ -73,9 +73,9 @@ PostProcessing::PostProcessing(int argc, char *argv[]):
     m_currentEffect(EFFECT_NONE)
 {
     m_ppShader.use();
-    m_ppShader.set_int("texture0", 0);
+    m_ppShader.setInt("texture0", 0);
     m_sceneShader.use();
-    m_sceneShader.set_int("texture0", 0);
+    m_sceneShader.setInt("texture0", 0);
 
     camera().position = glm::vec3(2.5f, 1.5f, 3.5f);
     camera().pitch = -20.0f;
@@ -112,7 +112,7 @@ PostProcessing::PostProcessing(int argc, char *argv[]):
 
     glGenFramebuffers(1, &m_FBO);
 
-    recreate_framebuffer();
+    recreateFramebuffer();
 }
 
 PostProcessing::~PostProcessing()
@@ -140,10 +140,10 @@ Status PostProcessing::event(SDL_Event &event)
             }
             break;
         case SDL_WINDOWEVENT:
-            if (event.window.windowID == window_id()) {
+            if (event.window.windowID == windowId()) {
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
-                        recreate_framebuffer();
+                        recreateFramebuffer();
                         break;
                     default:
                         break;
@@ -164,8 +164,8 @@ Status PostProcessing::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_sceneShader.use();
-    m_sceneShader.set_mat4("view", view());
-    m_sceneShader.set_mat4("projection", projection());
+    m_sceneShader.setMat4("view", view());
+    m_sceneShader.setMat4("projection", projection());
 
     m_floorTexture.activate(0);
 
@@ -173,18 +173,18 @@ Status PostProcessing::render()
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, -0.51f, 0.0f));
     model = glm::scale(model, glm::vec3(2.5f, 1.0f, 2.5f));
-    m_sceneShader.set_mat4("model", model);
+    m_sceneShader.setMat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     m_cubeTexture.activate(0);
 
     glBindVertexArray(m_cubeVAO);
     model = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 1.0f));
-    m_sceneShader.set_mat4("model", model);
+    m_sceneShader.setMat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     model = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, -1.0f));
-    m_sceneShader.set_mat4("model", model);
+    m_sceneShader.setMat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -193,7 +193,7 @@ Status PostProcessing::render()
     glClear(GL_COLOR_BUFFER_BIT);
 
     m_ppShader.use();
-    m_ppShader.set_int("effect", static_cast<int>(m_currentEffect));
+    m_ppShader.setInt("effect", static_cast<int>(m_currentEffect));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_colorTexture);
@@ -201,12 +201,12 @@ Status PostProcessing::render()
     glBindVertexArray(m_dummyVAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    swap_window();
+    swapWindow();
 
     return Status::Ok;
 }
 
-void PostProcessing::recreate_framebuffer()
+void PostProcessing::recreateFramebuffer()
 {
     if (m_colorTexture)
         glDeleteTextures(1, &m_colorTexture);
@@ -215,8 +215,8 @@ void PostProcessing::recreate_framebuffer()
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
 
-    int width = fb_size().width;
-    int height = fb_size().height;
+    int width = fbSize().width;
+    int height = fbSize().height;
 
     glGenTextures(1, &m_colorTexture);
     glBindTexture(GL_TEXTURE_2D, m_colorTexture);

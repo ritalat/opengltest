@@ -137,15 +137,15 @@ int GLlelu::run()
                     glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     SDL_ShowWindow(m_window);
-    return main_loop();
+    return mainLoop();
 }
 
-void GLlelu::window_name(std::string_view name)
+void GLlelu::windowName(std::string_view name)
 {
     SDL_SetWindowTitle(m_window, name.data());
 }
 
-void GLlelu::window_size(int w, int h)
+void GLlelu::windowSize(int w, int h)
 {
     if (!m_fullscreen) {
         m_windowSize.width = w;
@@ -156,20 +156,20 @@ void GLlelu::window_size(int w, int h)
     }
 }
 
-Size GLlelu::fb_size() const
+Size GLlelu::fbSize() const
 {
     return m_fbSize;
 }
 
-void GLlelu::window_fullscreen(bool fullscreen)
+void GLlelu::windowFullscreen(bool fullscreen)
 {
     if (fullscreen != m_fullscreen) {
         if (fullscreen) {
             SDL_ShowWindow(m_window);
             m_windowedMouseGrab = m_mouseGrab;
-            window_grab(true);
+            windowGrab(true);
         } else {
-            window_grab(m_windowedMouseGrab);
+            windowGrab(m_windowedMouseGrab);
         }
     }
     m_fullscreen = fullscreen;
@@ -178,28 +178,28 @@ void GLlelu::window_fullscreen(bool fullscreen)
     glViewport(0, 0, m_fbSize.width, m_fbSize.height);
 }
 
-bool GLlelu::window_fullscreen() const
+bool GLlelu::windowFullscreen() const
 {
     return m_fullscreen;
 }
 
-void GLlelu::window_grab(bool grabMouse)
+void GLlelu::windowGrab(bool grabMouse)
 {
     m_mouseGrab = grabMouse;
     SDL_SetRelativeMouseMode(m_mouseGrab ? SDL_TRUE : SDL_FALSE);
 }
 
-bool GLlelu::window_grab() const
+bool GLlelu::windowGrab() const
 {
     return m_mouseGrab;
 }
 
-void GLlelu::swap_window()
+void GLlelu::swapWindow()
 {
     SDL_GL_SwapWindow(m_window);
 }
 
-unsigned int GLlelu::window_id() const
+unsigned int GLlelu::windowId() const
 {
     return SDL_GetWindowID(m_window);
 }

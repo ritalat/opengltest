@@ -29,22 +29,22 @@ Path shaderdir()
     return BASE_DIR / "shaders";
 }
 
-Path get_path(std::string_view file)
+Path getPath(std::string_view file)
 {
     return datadir() / file;
 }
 
-Path get_asset_path(std::string_view file)
+Path getAssetPath(std::string_view file)
 {
     return assetdir() / file;
 }
 
-Path get_shader_path(std::string_view file)
+Path getShaderPath(std::string_view file)
 {
     return shaderdir() / file;
 }
 
-std::string slurp_file(const Path &path)
+std::string slurpFile(const Path &path)
 {
     std::ifstream stream(path);
 

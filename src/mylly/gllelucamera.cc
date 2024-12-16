@@ -16,7 +16,7 @@
 #include <cstdlib>
 
 #if defined(__EMSCRIPTEN__)
-void browser_callback(void *arg)
+void browserCallback(void *arg)
 {
     static_cast<GLleluCamera*>(arg)->iterate();
 }
@@ -31,7 +31,7 @@ GLleluCamera::GLleluCamera(int argc, char *argv[], GLVersion glVersion):
     m_quit(false),
     m_exitStatus(EXIT_SUCCESS)
 {
-    find_gamepad();
+    findGamepad();
 }
 
 GLleluCamera::~GLleluCamera()
@@ -40,13 +40,13 @@ GLleluCamera::~GLleluCamera()
         SDL_GameControllerClose(m_gamepad);
 }
 
-int GLleluCamera::main_loop()
+int GLleluCamera::mainLoop()
 {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
 #if defined(__EMSCRIPTEN__)
-    emscripten_set_main_loop_arg(browser_callback, this, 0, 1);
+    emscripten_set_main_loop_arg(browserCallback, this, 0, 1);
 #else
     while (!m_quit) {
         iterate();
@@ -76,13 +76,13 @@ void GLleluCamera::iterate()
                 if (SDL_SCANCODE_ESCAPE == e.key.keysym.scancode)
                     m_quit = true;
                 if (SDL_SCANCODE_F == e.key.keysym.scancode)
-                    window_fullscreen(!window_fullscreen());
+                    windowFullscreen(!windowFullscreen());
                 if (SDL_SCANCODE_G == e.key.keysym.scancode)
-                    window_grab(!window_grab());
+                    windowGrab(!windowGrab());
                 break;
 
             case SDL_MOUSEMOTION:
-                if (window_grab() || SDL_BUTTON_LMASK & e.motion.state) {
+                if (windowGrab() || SDL_BUTTON_LMASK & e.motion.state) {
                     m_camera.yaw += static_cast<float>(e.motion.xrel) * m_camera.sensitivity;
                     m_camera.pitch -= static_cast<float>(e.motion.yrel) * m_camera.sensitivity;
                     if (m_camera.pitch > 89.0f)
@@ -105,7 +105,7 @@ void GLleluCamera::iterate()
                     if (SDL_CONTROLLER_BUTTON_B == e.cbutton.button)
                         m_quit = true;
                     if (SDL_CONTROLLER_BUTTON_Y == e.cbutton.button)
-                        window_fullscreen(!window_fullscreen());
+                        windowFullscreen(!windowFullscreen());
                 }
                 break;
 
@@ -121,7 +121,7 @@ void GLleluCamera::iterate()
                     SDL_GameControllerClose(m_gamepad);
                     m_gamepad = NULL;
                     m_gamepadId = -1;
-                    find_gamepad();
+                    findGamepad();
                 }
                 break;
 
@@ -237,7 +237,7 @@ void GLleluCamera::iterate()
 
     m_view = glm::lookAt(m_camera.position, m_camera.position + m_camera.front, m_camera.up);
     m_projection = glm::perspective(glm::radians(m_camera.fov),
-                                    static_cast<float>(fb_size().width) / static_cast<float>(fb_size().height),
+                                    static_cast<float>(fbSize().width) / static_cast<float>(fbSize().height),
                                     0.1f, 100.0f);
 
     Status ret = update(m_deltaTime);
@@ -265,7 +265,7 @@ Status GLleluCamera::update(unsigned int deltaTime)
     return Status::Ok;
 }
 
-void GLleluCamera::find_gamepad()
+void GLleluCamera::findGamepad()
 {
     int numJoysticks = SDL_NumJoysticks();
     for (int i = 0; i < numJoysticks; ++i) {

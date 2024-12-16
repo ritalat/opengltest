@@ -74,12 +74,12 @@ void Himmeli::draw(Shader &shader)
 {
     glm::mat4 model = m_translate * m_rotate * m_scale;
     shader.use();
-    shader.set_int("material.diffuse", 0);
-    shader.set_int("material.specular", 1);
-    shader.set_int("material.normal", 2);
-    shader.set_float("material.shininess", m_material.shininess);
-    shader.set_mat4("model", model);
-    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+    shader.setInt("material.diffuse", 0);
+    shader.setInt("material.specular", 1);
+    shader.setInt("material.normal", 2);
+    shader.setFloat("material.shininess", m_material.shininess);
+    shader.setMat4("model", model);
+    shader.setMat4("normalMat", glm::transpose(glm::inverse(model)));
     m_material.diffuse.activate(0);
     m_material.specular.activate(1);
     m_material.normal.activate(2);
@@ -103,12 +103,12 @@ void BasicHimmeli::draw(Shader &shader)
 {
     glm::mat4 model = m_translate * m_rotate * m_scale;
     shader.use();
-    shader.set_vec3("material.ambient", m_material.ambient);
-    shader.set_vec3("material.diffuse", m_material.diffuse);
-    shader.set_vec3("material.specular", m_material.specular);
-    shader.set_float("material.shininess", m_material.shininess);
-    shader.set_mat4("model", model);
-    shader.set_mat4("normalMat", glm::transpose(glm::inverse(model)));
+    shader.setVec3("material.ambient", m_material.ambient);
+    shader.setVec3("material.diffuse", m_material.diffuse);
+    shader.setVec3("material.specular", m_material.specular);
+    shader.setFloat("material.shininess", m_material.shininess);
+    shader.setMat4("model", model);
+    shader.setMat4("normalMat", glm::transpose(glm::inverse(model)));
     glBindVertexArray(m_model.vao());
     if (m_model.indices() > 0) {
         glDrawElements(GL_TRIANGLES, m_model.indices(), GL_UNSIGNED_INT, 0);

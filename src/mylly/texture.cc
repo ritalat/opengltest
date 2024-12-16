@@ -37,7 +37,7 @@ Texture::Texture(std::string_view file, bool flip):
     };
 
     int width, height, nrChannels;
-    Path texturePath = get_asset_path(file);
+    Path texturePath = getAssetPath(file);
     unsigned char *data = stbi_load(cpath(texturePath), &width, &height, &nrChannels, 0);
 
     if (!data)
@@ -105,7 +105,7 @@ Cubemap::Cubemap(const std::array<std::string_view, 6> &files):
 
     for (size_t i = 0; i < files.size(); ++i) {
         int width, height, nrChannels;
-        Path texturePath = get_asset_path(files[i]);
+        Path texturePath = getAssetPath(files[i]);
         unsigned char *data = stbi_load(cpath(texturePath), &width, &height, &nrChannels, 0);
 
         if (!data)
