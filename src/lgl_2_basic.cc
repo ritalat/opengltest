@@ -1,4 +1,5 @@
-#include "gllelucamera.hh"
+#include "camera.hh"
+#include "gllelu.hh"
 #include "gllelu_main.hh"
 #include "shader.hh"
 #include "shapes.hh"
@@ -99,16 +100,16 @@ const BasicMaterial cubeMaterials[numCubes] = {
 
 const glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
-class LGL2Basic: public GLleluCamera
+class LGL2Basic: public GLlelu
 {
 public:
     LGL2Basic(int argc, char *argv[]);
     virtual ~LGL2Basic();
-
-protected:
-    virtual Status render();
+    virtual SDL_AppResult event(SDL_Event *event);
+    virtual SDL_AppResult iterate();
 
 private:
+    Camera m_camera;
     Shader m_lightingShader;
     Shader m_lightShader;
     unsigned int m_VAO;
@@ -117,13 +118,17 @@ private:
 };
 
 LGL2Basic::LGL2Basic(int argc, char *argv[]):
-    GLleluCamera(argc, argv),
+    GLlelu(argc, argv),
+    m_camera(this),
     m_lightingShader("lighting.vert", "lighting_basic.frag"),
     m_lightShader("light.vert", "light.frag"),
     m_VAO(0),
     m_lightVAO(0),
     m_VBO(0)
 {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
     glGenVertexArrays(1, &m_VAO);
     glBindVertexArray(m_VAO);
 
@@ -159,22 +164,30 @@ LGL2Basic::~LGL2Basic()
     glDeleteBuffers(1, &m_VBO);
 }
 
-Status LGL2Basic::render()
+SDL_AppResult LGL2Basic::event(SDL_Event *event)
 {
+    m_camera.event(event);
+    return GLlelu::event(event);
+}
+
+SDL_AppResult LGL2Basic::iterate()
+{
+    m_camera.iterate();
+
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_lightingShader.use();
 
-    m_lightingShader.setMat4("view", view());
-    m_lightingShader.setMat4("projection", projection());
+    m_lightingShader.setMat4("view", m_camera.view());
+    m_lightingShader.setMat4("projection", m_camera.projection());
 
     m_lightingShader.setVec3("light.ambient", 1.0f, 1.0f, 1.0f);
     m_lightingShader.setVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
     m_lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
     m_lightingShader.setVec3("light.position", lightPos);
 
-    m_lightingShader.setVec3("viewPos", camera().position);
+    m_lightingShader.setVec3("viewPos", m_camera.data.position);
 
     glm::mat4 model = glm::mat4(1.0f);
 
@@ -197,8 +210,8 @@ Status LGL2Basic::render()
 
     m_lightShader.use();
 
-    m_lightShader.setMat4("view", view());
-    m_lightShader.setMat4("projection", projection());
+    m_lightShader.setMat4("view", m_camera.view());
+    m_lightShader.setMat4("projection", m_camera.projection());
 
     model = glm::mat4(1.0f);
     model = glm::translate(model, lightPos);
@@ -208,9 +221,7 @@ Status LGL2Basic::render()
     glBindVertexArray(m_lightVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    swapWindow();
-
-    return Status::Ok;
+    return GLlelu::iterate();
 }
 
 GLLELU_MAIN_IMPLEMENTATION(LGL2Basic)

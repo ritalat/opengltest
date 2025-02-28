@@ -27,23 +27,34 @@ class ComputeParticles: public GLlelu
 public:
     ComputeParticles(int argc, char *argv[]);
     virtual ~ComputeParticles();
+    virtual SDL_AppResult event(SDL_Event *event);
+    virtual SDL_AppResult iterate();
 
-protected:
-    virtual int mainLoop();
+private:
+    Shader m_computeShader;
+    Shader m_drawShader;
+    Particle m_initialParticles[NUM_PARTICLES];
+    unsigned int m_dummyVAO;
+    unsigned int m_particleBufferA;
+    unsigned int m_particleBufferB;
+    unsigned int m_UBO;
+    uint64_t m_frameCount;
+    uint64_t m_lastFrame;
+    int m_speedScale;
 };
 
 ComputeParticles::ComputeParticles(int argc, char *argv[]):
-    GLlelu(argc, argv, GLVersion::GL43)
+    GLlelu(argc, argv, GLVersion::GL43),
+    m_computeShader("compute_particles.comp"),
+    m_drawShader("compute_particles.vert", "compute_particles.frag"),
+    m_dummyVAO(0),
+    m_particleBufferA(0),
+    m_particleBufferB(0),
+    m_UBO(0),
+    m_frameCount(0),
+    m_lastFrame(0),
+    m_speedScale(0)
 {
-}
-
-ComputeParticles::~ComputeParticles()
-{
-}
-
-int ComputeParticles::mainLoop()
-{
-    Particle initialParticles[NUM_PARTICLES];
     for (int i = 0; i < NUM_PARTICLES; ++i) {
         Particle p {
             glm::vec2(0.0f, 0.0f),
@@ -53,110 +64,97 @@ int ComputeParticles::mainLoop()
         p.velocity.x = p.velocity.x * 2.0f - 1.0f;
         p.velocity.y = p.velocity.y * 2.0f - 1.0f;
         p.velocity = glm::normalize(p.velocity);
-        initialParticles[i] = p;
+        m_initialParticles[i] = p;
     }
 
-    Shader computeShader("compute_particles.comp");
-    Shader drawShader("compute_particles.vert", "compute_particles.frag");
+    glGenVertexArrays(1, &m_dummyVAO);
 
-    unsigned int dummyVAO;
-    glGenVertexArrays(1, &dummyVAO);
+    glGenBuffers(1, &m_particleBufferA);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_particleBufferA);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(m_initialParticles), m_initialParticles, GL_DYNAMIC_COPY);
 
-    unsigned int particleBufferA;
-    glGenBuffers(1, &particleBufferA);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleBufferA);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(initialParticles), initialParticles, GL_DYNAMIC_COPY);
+    glGenBuffers(1, &m_particleBufferB);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_particleBufferB);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(m_initialParticles), NULL, GL_DYNAMIC_COPY);
 
-    unsigned int particleBufferB;
-    glGenBuffers(1, &particleBufferB);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleBufferB);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(initialParticles), NULL, GL_DYNAMIC_COPY);
-
-    unsigned int UBO;
-    glGenBuffers(1, &UBO);
-    glBindBuffer(GL_UNIFORM_BUFFER, UBO);
+    glGenBuffers(1, &m_UBO);
+    glBindBuffer(GL_UNIFORM_BUFFER, m_UBO);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(Uniforms), NULL, GL_DYNAMIC_DRAW);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, UBO);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, m_UBO);
 
     glEnable(GL_PROGRAM_POINT_SIZE);
+}
 
-    uint64_t frameCount = 0;
-    uint64_t lastFrame = 0;
-    int speedScale = 0;
-    bool quit = false;
-    SDL_Event event;
+ComputeParticles::~ComputeParticles()
+{
+    glDeleteVertexArrays(1, &m_dummyVAO);
+    glDeleteBuffers(1, &m_particleBufferA);
+    glDeleteBuffers(1, &m_particleBufferB);
+    glDeleteBuffers(1, &m_UBO);
+}
 
-    while (!quit) {
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-                case SDL_EVENT_QUIT:
-                    quit = true;
+SDL_AppResult ComputeParticles::event(SDL_Event *event)
+{
+    switch (event->type) {
+        case SDL_EVENT_KEY_UP:
+            switch (event->key.scancode) {
+                case SDL_SCANCODE_RETURN:
+                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_particleBufferA);
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(m_initialParticles), m_initialParticles);
+                    glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_particleBufferB);
+                    glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(m_initialParticles), m_initialParticles);
                     break;
-                case SDL_EVENT_KEY_UP:
-                    switch (event.key.scancode) {
-                        case SDL_SCANCODE_ESCAPE:
-                            quit = true;
-                            break;
-                        case SDL_SCANCODE_RETURN:
-                            glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleBufferA);
-                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(initialParticles), initialParticles);
-                            glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleBufferB);
-                            glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(initialParticles), initialParticles);
-                            break;
-                        case SDL_SCANCODE_UP:
-                            ++speedScale;
-                            break;
-                        case SDL_SCANCODE_DOWN:
-                            --speedScale;
-                        default:
-                            break;
-                    }
+                case SDL_SCANCODE_UP:
+                    ++m_speedScale;
                     break;
+                case SDL_SCANCODE_DOWN:
+                    --m_speedScale;
                 default:
                     break;
             }
-        }
-
-        uint64_t currentFrame = SDL_GetTicks();
-        uint64_t delta = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-
-        Uniforms uniforms {
-            static_cast<float>(delta) / 1000.0f,
-            1.0f + static_cast<float>(speedScale) / 10.0f
-        };
-
-        if (frameCount % 2 == 0) {
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBufferA);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, particleBufferB);
-        } else {
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, particleBufferA);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleBufferB);
-        }
-
-        computeShader.use();
-        glBindBuffer(GL_UNIFORM_BUFFER, UBO);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Uniforms), &uniforms);
-
-        glDispatchCompute(NUM_PARTICLES / LOCAL_SIZE_X, 1, 1);
-
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        drawShader.use();
-        glBindVertexArray(dummyVAO);
-        glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
-
-        swapWindow();
-        ++frameCount;
+            break;
+        default:
+            break;
     }
 
-    glDeleteVertexArrays(1, &dummyVAO);
-    glDeleteBuffers(1, &particleBufferA);
-    glDeleteBuffers(1, &particleBufferB);
-    glDeleteBuffers(1, &UBO);
+    return GLlelu::event(event);
+}
 
-    return EXIT_SUCCESS;
+SDL_AppResult ComputeParticles::iterate()
+{
+    uint64_t currentFrame = SDL_GetTicks();
+    uint64_t delta = currentFrame - m_lastFrame;
+    m_lastFrame = currentFrame;
+
+    Uniforms uniforms {
+        static_cast<float>(delta) / 1000.0f,
+        1.0f + static_cast<float>(m_speedScale) / 10.0f
+    };
+
+    if (m_frameCount % 2 == 0) {
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_particleBufferA);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_particleBufferB);
+    } else {
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_particleBufferA);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_particleBufferB);
+    }
+
+    m_computeShader.use();
+    glBindBuffer(GL_UNIFORM_BUFFER, m_UBO);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Uniforms), &uniforms);
+
+    glDispatchCompute(NUM_PARTICLES / LOCAL_SIZE_X, 1, 1);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    m_drawShader.use();
+    glBindVertexArray(m_dummyVAO);
+    glDrawArrays(GL_POINTS, 0, NUM_PARTICLES);
+
+    ++m_frameCount;
+
+    return GLlelu::iterate();
 }
 
 GLLELU_MAIN_IMPLEMENTATION(ComputeParticles)

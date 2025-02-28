@@ -1,4 +1,5 @@
-#include "gllelucamera.hh"
+#include "camera.hh"
+#include "gllelu.hh"
 #include "gllelu_main.hh"
 #include "shader.hh"
 #include "shapes.hh"
@@ -9,16 +10,16 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "SDL3/SDL.h"
 
-class Stencil: public GLleluCamera
+class Stencil: public GLlelu
 {
 public:
     Stencil(int argc, char *argv[]);
     virtual ~Stencil();
-
-protected:
-    virtual Status render();
+    virtual SDL_AppResult event(SDL_Event *event);
+    virtual SDL_AppResult iterate();
 
 private:
+    Camera m_camera;
     Shader m_stencilShader;
     Texture m_floorTexture;
     Texture m_cubeTexture;
@@ -29,7 +30,8 @@ private:
 };
 
 Stencil::Stencil(int argc, char *argv[]):
-    GLleluCamera(argc, argv),
+    GLlelu(argc, argv),
+    m_camera(this),
     m_stencilShader("stencil.vert", "stencil.frag"),
     m_floorTexture("lgl_marble.jpg"),
     m_cubeTexture("vt_texture.jpg"),
@@ -38,6 +40,9 @@ Stencil::Stencil(int argc, char *argv[]):
     m_cubeVAO(0),
     m_cubeVBO(0)
 {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_STENCIL_TEST);
@@ -48,8 +53,8 @@ Stencil::Stencil(int argc, char *argv[]):
 
     m_cubeTexture.wrapping(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 
-    camera().position = glm::vec3(0.0f, 1.0f, 3.0f);
-    camera().pitch = -20.0f;
+    m_camera.data.position = glm::vec3(0.0f, 1.0f, 3.0f);
+    m_camera.data.pitch = -20.0f;
 
     glGenVertexArrays(1, &m_planeVAO);
     glBindVertexArray(m_planeVAO);
@@ -87,8 +92,16 @@ Stencil::~Stencil()
     glDeleteBuffers(1, &m_cubeVBO);
 }
 
-Status Stencil::render()
+SDL_AppResult Stencil::event(SDL_Event *event)
 {
+    m_camera.event(event);
+    return GLlelu::event(event);
+}
+
+SDL_AppResult Stencil::iterate()
+{
+    m_camera.iterate();
+
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
     glStencilMask(0xFF);
@@ -97,8 +110,8 @@ Status Stencil::render()
     glm::mat4 model = glm::mat4(1.0f);
 
     m_stencilShader.use();
-    m_stencilShader.setMat4("view", view());
-    m_stencilShader.setMat4("projection", projection());
+    m_stencilShader.setMat4("view", m_camera.view());
+    m_stencilShader.setMat4("projection", m_camera.projection());
 
     // Floor
     m_floorTexture.activate(0);
@@ -148,9 +161,7 @@ Status Stencil::render()
     m_stencilShader.setFloat("alpha", 1.0f);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    swapWindow();
-
-    return Status::Ok;
+    return GLlelu::iterate();
 }
 
 GLLELU_MAIN_IMPLEMENTATION(Stencil)

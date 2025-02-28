@@ -1,4 +1,5 @@
-#include "gllelucamera.hh"
+#include "camera.hh"
+#include "gllelu.hh"
 #include "gllelu_main.hh"
 #include "shader.hh"
 #include "shapes.hh"
@@ -23,16 +24,16 @@ struct Vert {
 
 const glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
-class NormalMap: public GLleluCamera
+class NormalMap: public GLlelu
 {
 public:
     NormalMap(int argc, char *argv[]);
     virtual ~NormalMap();
-
-protected:
-    virtual Status render();
+    virtual SDL_AppResult event(SDL_Event *event);
+    virtual SDL_AppResult iterate();
 
 private:
+    Camera m_camera;
     Shader m_lightingShader;
     Texture m_diffuseMap;
     Texture m_normalMap;
@@ -41,13 +42,17 @@ private:
 };
 
 NormalMap::NormalMap(int argc, char *argv[]):
-    GLleluCamera(argc, argv),
+    GLlelu(argc, argv),
+    m_camera(this),
     m_lightingShader("normalmap.vert", "normalmap.frag"),
     m_diffuseMap("lgl_brickwall.jpg"),
     m_normalMap("lgl_brickwall_normal.png"),
     m_VAO(0),
     m_VBO(0)
 {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
     m_lightingShader.use();
     m_lightingShader.setInt("material.diffuse", 0);
     m_lightingShader.setInt("material.normal", 1);
@@ -104,8 +109,16 @@ NormalMap::~NormalMap()
     glDeleteBuffers(1, &m_VBO);
 }
 
-Status NormalMap::render()
+SDL_AppResult NormalMap::event(SDL_Event *event)
 {
+    m_camera.event(event);
+    return GLlelu::event(event);
+}
+
+SDL_AppResult NormalMap::iterate()
+{
+    m_camera.iterate();
+
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -114,12 +127,12 @@ Status NormalMap::render()
 
     m_lightingShader.use();
 
-    m_lightingShader.setMat4("view", view());
-    m_lightingShader.setMat4("projection", projection());
+    m_lightingShader.setMat4("view", m_camera.view());
+    m_lightingShader.setMat4("projection", m_camera.projection());
 
     m_lightingShader.setFloat("material.shininess", 64.0f);
     m_lightingShader.setVec3("lightPos", lightPos);
-    m_lightingShader.setVec3("viewPos", camera().position);
+    m_lightingShader.setVec3("viewPos", m_camera.data.position);
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::rotate(model, glm::radians(static_cast<float>(SDL_GetTicks()) / 50.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -128,9 +141,7 @@ Status NormalMap::render()
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    swapWindow();
-
-    return Status::Ok;
+    return GLlelu::iterate();
 }
 
 GLLELU_MAIN_IMPLEMENTATION(NormalMap)

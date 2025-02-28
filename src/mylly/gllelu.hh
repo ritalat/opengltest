@@ -38,9 +38,8 @@ class MYLLY_API GLlelu
 public:
     GLlelu(int argc, char *argv[], GLVersion glVersion = GLVersion::GL33);
     virtual ~GLlelu();
-    int run();
-
-protected:
+    virtual SDL_AppResult event(SDL_Event *event);
+    virtual SDL_AppResult iterate();
     void windowName(std::string_view name);
     void windowSize(int w, int h);
     Size fbSize() const;
@@ -49,9 +48,9 @@ protected:
     bool windowFullscreen() const;
     void windowGrab(bool grabMouse);
     bool windowGrab() const;
-    void swapWindow();
     unsigned int windowId() const;
-    virtual int mainLoop() = 0;
+    void findGamepad();
+    SDL_Gamepad *gamepad() const;
 
 private:
     SDL_Window *m_window;
@@ -61,4 +60,6 @@ private:
     bool m_fullscreen;
     bool m_mouseGrab;
     bool m_windowedMouseGrab;
+    SDL_Gamepad *m_gamepad;
+    SDL_JoystickID m_gamepadId;
 };

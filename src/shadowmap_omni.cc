@@ -1,4 +1,5 @@
-#include "gllelucamera.hh"
+#include "camera.hh"
+#include "gllelu.hh"
 #include "gllelu_main.hh"
 #include "shader.hh"
 #include "shapes.hh"
@@ -24,18 +25,17 @@ const float floorPlane[] = {
     -1.0f, 0.0f,  1.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f
 };
 
-class ShadowMapOmni: public GLleluCamera
+class ShadowMapOmni: public GLlelu
 {
 public:
     ShadowMapOmni(int argc, char *argv[]);
     virtual ~ShadowMapOmni();
-
-protected:
-    virtual Status event(SDL_Event &event);
-    virtual Status render();
+    virtual SDL_AppResult event(SDL_Event *event);
+    virtual SDL_AppResult iterate();
     void drawScene(Shader &shader);
 
 private:
+    Camera m_camera;
     Shader m_shadowShader;
     Shader m_sceneShader;
     Texture m_floorTexture;
@@ -51,7 +51,8 @@ private:
 };
 
 ShadowMapOmni::ShadowMapOmni(int argc, char *argv[]):
-    GLleluCamera(argc, argv),
+    GLlelu(argc, argv),
+    m_camera(this),
     m_shadowShader("shadowmap_omni.vert", "shadowmap_omni.frag"),
     m_sceneShader("shadowmap_omni_scene.vert", "shadowmap_omni_scene.frag"),
     m_floorTexture("lgl_wall.jpg"),
@@ -64,9 +65,12 @@ ShadowMapOmni::ShadowMapOmni(int argc, char *argv[]):
     m_shadowMap(0),
     m_shadowMapping(true)
 {
-    camera().position = glm::vec3(-2.5f, 3.5f, 4.5f);
-    camera().pitch = -40.0f;
-    camera().yaw = -60.0f;
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
+    m_camera.data.position = glm::vec3(-2.5f, 3.5f, 4.5f);
+    m_camera.data.pitch = -40.0f;
+    m_camera.data.yaw = -60.0f;
 
     glGenVertexArrays(1, &m_planeVAO);
     glBindVertexArray(m_planeVAO);
@@ -139,22 +143,26 @@ ShadowMapOmni::~ShadowMapOmni()
     glDeleteTextures(1, &m_shadowMap);
 }
 
-Status ShadowMapOmni::event(SDL_Event &event)
+SDL_AppResult ShadowMapOmni::event(SDL_Event *event)
 {
-    switch (event.type) {
+    switch (event->type) {
         case SDL_EVENT_KEY_UP:
-            if (SDL_SCANCODE_RETURN == event.key.scancode) {
+            if (SDL_SCANCODE_RETURN == event->key.scancode) {
                 m_shadowMapping = !m_shadowMapping;
             }
             break;
         default:
             break;
     }
-    return Status::Ok;
+
+    m_camera.event(event);
+    return GLlelu::event(event);
 }
 
-Status ShadowMapOmni::render()
+SDL_AppResult ShadowMapOmni::iterate()
 {
+    m_camera.iterate();
+
     glm::vec3 lightPos = glm::vec3(4 * sin(static_cast<float>(SDL_GetTicks()) / 1000.0f), 1.0f, 0.0f);
     float aspect = 1.0f;
     float near = 1.0f;
@@ -195,24 +203,22 @@ Status ShadowMapOmni::render()
     m_sceneShader.setInt("shadowMap", 10);
     m_sceneShader.setFloat("farPlane", far);
 
-    m_sceneShader.setMat4("view", view());
-    m_sceneShader.setMat4("projection", projection());
+    m_sceneShader.setMat4("view", m_camera.view());
+    m_sceneShader.setMat4("projection", m_camera.projection());
 
     m_sceneShader.setFloat("material.shininess", 64.0f);
     m_sceneShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
     m_sceneShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
     m_sceneShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
     m_sceneShader.setVec3("light.position", lightPos);
-    m_sceneShader.setVec3("viewPos", camera().position);
+    m_sceneShader.setVec3("viewPos", m_camera.data.position);
 
     glActiveTexture(GL_TEXTURE0 + 10);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_shadowMap);
 
     drawScene(m_sceneShader);
 
-    swapWindow();
-
-    return Status::Ok;
+    return GLlelu::iterate();
 }
 
 void ShadowMapOmni::drawScene(Shader &shader)

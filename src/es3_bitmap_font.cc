@@ -3,9 +3,6 @@
 #include "shader.hh"
 #include "text_bitmap.hh"
 
-#if defined(__EMSCRIPTEN__)
-#include <emscripten/emscripten.h>
-#endif
 #include "glad/gles2.h"
 #include "SDL3/SDL.h"
 
@@ -18,10 +15,8 @@ class BitmapFontES3: public GLlelu
 public:
     BitmapFontES3(int argc, char *argv[]);
     virtual ~BitmapFontES3();
-
-protected:
-    virtual int mainLoop();
-    void iterate();
+    virtual SDL_AppResult event(SDL_Event *event);
+    virtual SDL_AppResult iterate();
 
 private:
     TextRendererLatin1 m_txt;
@@ -30,13 +25,6 @@ private:
     std::string m_aakkosia;
     bool m_quit;
 };
-
-#if defined(__EMSCRIPTEN__)
-void browserCallback(void *arg)
-{
-    static_cast<BitmapFontES3*>(arg)->iterate();
-}
-#endif
 
 BitmapFontES3::BitmapFontES3(int argc, char *argv[]):
     GLlelu(argc, argv),
@@ -55,41 +43,24 @@ BitmapFontES3::~BitmapFontES3()
 {
 }
 
-int BitmapFontES3::mainLoop()
+SDL_AppResult BitmapFontES3::event(SDL_Event *event)
 {
-#if defined(__EMSCRIPTEN__)
-    emscripten_set_main_loop_arg(browserCallback, this, 0, 1);
-#else
-    while (!m_quit) {
-        iterate();
-    }
-#endif
+    switch (event->type) {
+        case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+            if (event->window.windowID == windowId()) {
+                m_txt.setWindowSize(fbSize().width, fbSize().height);
+            }
+            break;
 
-    return EXIT_SUCCESS;
+        default:
+            break;
+    }
+
+    return GLlelu::event(event);
 }
 
-void BitmapFontES3::iterate()
+SDL_AppResult BitmapFontES3::iterate()
 {
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-            case SDL_EVENT_QUIT:
-                m_quit = true;
-                break;
-            case SDL_EVENT_KEY_UP:
-                if (SDL_SCANCODE_ESCAPE == event.key.scancode)
-                    m_quit = true;
-                break;
-            default:
-                break;
-        }
-    }
-
-#if defined(__EMSCRIPTEN__)
-    if(m_quit)
-        emscripten_cancel_main_loop();
-#endif
-
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -123,7 +94,7 @@ void BitmapFontES3::iterate()
                         + "," + std::to_string(static_cast<int>(y)) + ")";
     m_txt.drawString(0, height - FONT_SIZE, mouse);
 
-    swapWindow();
+    return GLlelu::iterate();
 }
 
 GLLELU_MAIN_IMPLEMENTATION(BitmapFontES3)

@@ -1,4 +1,5 @@
-#include "gllelucamera.hh"
+#include "camera.hh"
+#include "gllelu.hh"
 #include "gllelu_main.hh"
 #include "shader.hh"
 #include "shapes.hh"
@@ -21,17 +22,16 @@ const glm::vec3 planes[] = {
 
 const int numPlanes = sizeof(planes) / sizeof(glm::vec3);
 
-class Blending: public GLleluCamera
+class Blending: public GLlelu
 {
 public:
     Blending(int argc, char *argv[]);
     virtual ~Blending();
-
-protected:
-    virtual Status event(SDL_Event &event);
-    virtual Status render();
+    virtual SDL_AppResult event(SDL_Event *event);
+    virtual SDL_AppResult iterate();
 
 private:
+    Camera m_camera;
     Shader m_alphaShader;
     Shader m_blendingShader;
     Texture m_floorTexture;
@@ -46,7 +46,8 @@ private:
 };
 
 Blending::Blending(int argc, char *argv[]):
-    GLleluCamera(argc, argv),
+    GLlelu(argc, argv),
+    m_camera(this),
     m_alphaShader("blending.vert", "simple_alpha.frag"),
     m_blendingShader("blending.vert", "blending.frag"),
     m_floorTexture("lgl_metal.png"),
@@ -59,6 +60,8 @@ Blending::Blending(int argc, char *argv[]):
     m_cubeVAO(0),
     m_cubeVBO(0)
 {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -106,27 +109,31 @@ Blending::~Blending()
     glDeleteBuffers(1, &m_cubeVBO);
 }
 
-Status Blending::event(SDL_Event &event)
+SDL_AppResult Blending::event(SDL_Event *event)
 {
-    switch (event.type) {
+    switch (event->type) {
         case SDL_EVENT_KEY_UP:
-            if (SDL_SCANCODE_RETURN == event.key.scancode)
+            if (SDL_SCANCODE_RETURN == event->key.scancode)
                 m_simpleAlphaDiscard = !m_simpleAlphaDiscard;
             break;
         default:
             break;
     }
-    return Status::Ok;
+
+    m_camera.event(event);
+    return GLlelu::event(event);
 }
 
-Status Blending::render()
+SDL_AppResult Blending::iterate()
 {
+    m_camera.iterate();
+
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_blendingShader.use();
-    m_blendingShader.setMat4("view", view());
-    m_blendingShader.setMat4("projection", projection());
+    m_blendingShader.setMat4("view", m_camera.view());
+    m_blendingShader.setMat4("projection", m_camera.projection());
 
     m_floorTexture.activate(0);
 
@@ -151,8 +158,8 @@ Status Blending::render()
     glDisable(GL_CULL_FACE);
     if (m_simpleAlphaDiscard) {
         m_alphaShader.use();
-        m_alphaShader.setMat4("view", view());
-        m_alphaShader.setMat4("projection", projection());
+        m_alphaShader.setMat4("view", m_camera.view());
+        m_alphaShader.setMat4("projection", m_camera.projection());
         m_grassTexture.activate(0);
 
         glBindVertexArray(m_planeVAO);
@@ -174,7 +181,7 @@ Status Blending::render()
 
         std::map<float, glm::vec3> sortedPlanes;
         for (int i = 0; i < numPlanes; ++i) {
-            float distance = glm::length(camera().position - planes[i]);
+            float distance = glm::length(m_camera.data.position - planes[i]);
             sortedPlanes[distance] = planes[i];
         }
 
@@ -189,9 +196,7 @@ Status Blending::render()
     }
     glEnable(GL_CULL_FACE);
 
-    swapWindow();
-
-    return Status::Ok;
+    return GLlelu::iterate();
 }
 
 GLLELU_MAIN_IMPLEMENTATION(Blending)

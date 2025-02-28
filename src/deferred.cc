@@ -1,4 +1,5 @@
-#include "gllelucamera.hh"
+#include "camera.hh"
+#include "gllelu.hh"
 #include "gllelu_main.hh"
 #include "shader.hh"
 #include "shapes.hh"
@@ -56,18 +57,17 @@ const float floorPlane[] = {
     -1.0f, 0.0f,  1.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f
 };
 
-class Deferred: public GLleluCamera
+class Deferred: public GLlelu
 {
 public:
     Deferred(int argc, char *argv[]);
     virtual ~Deferred();
-
-protected:
-    virtual Status event(SDL_Event &event);
-    virtual Status render();
+    virtual SDL_AppResult event(SDL_Event *event);
+    virtual SDL_AppResult iterate();
     void recreateGbuffer();
 
 private:
+    Camera m_camera;
     Shader m_deferredLighting;
     Shader m_geometryPass;
     Texture m_floorDiffuse;
@@ -90,7 +90,8 @@ private:
 };
 
 Deferred::Deferred(int argc, char *argv[]):
-    GLleluCamera(argc, argv),
+    GLlelu(argc, argv),
+    m_camera(this),
     m_deferredLighting("fullscreen.vert", "deferred.frag"),
     m_geometryPass("deferred_gbuffer.vert", "deferred_gbuffer.frag"),
     m_floorDiffuse("lgl_wall.jpg"),
@@ -110,6 +111,9 @@ Deferred::Deferred(int argc, char *argv[]):
     m_lightUBO(0),
     m_visualizedBuffer(Visualization::NONE)
 {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
     m_deferredLighting.use();
     m_deferredLighting.setInt("gposition", 0);
     m_deferredLighting.setInt("gnormal", 1);
@@ -118,9 +122,9 @@ Deferred::Deferred(int argc, char *argv[]):
     m_geometryPass.setInt("diffuse", 0);
     m_geometryPass.setInt("specular", 1);
 
-    camera().position = glm::vec3(2.5f, 1.5f, 3.5f);
-    camera().pitch = -20.0f;
-    camera().yaw = -127.5f;
+    m_camera.data.position = glm::vec3(2.5f, 1.5f, 3.5f);
+    m_camera.data.pitch = -20.0f;
+    m_camera.data.yaw = -127.5f;
 
     glGenBuffers(1, &m_lightUBO);
     glBindBuffer(GL_UNIFORM_BUFFER, m_lightUBO);
@@ -208,11 +212,11 @@ Deferred::~Deferred()
     glDeleteBuffers(1, &m_lightUBO);
 }
 
-Status Deferred::event(SDL_Event &event)
+SDL_AppResult Deferred::event(SDL_Event *event)
 {
-    switch (event.type) {
+    switch (event->type) {
         case SDL_EVENT_KEY_UP:
-            if (SDL_SCANCODE_RETURN == event.key.scancode) {
+            if (SDL_SCANCODE_RETURN == event->key.scancode) {
                 int tmp = static_cast<int>(m_visualizedBuffer);
                 ++tmp;
                 if (tmp >= static_cast<int>(Visualization::END))
@@ -221,26 +225,30 @@ Status Deferred::event(SDL_Event &event)
             }
             break;
         case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
-            if (event.window.windowID == windowId()) {
+            if (event->window.windowID == windowId()) {
                 recreateGbuffer();
             }
             break;
         default:
             break;
     }
-    return Status::Ok;
+
+    m_camera.event(event);
+    return GLlelu::event(event);
 }
 
-Status Deferred::render()
+SDL_AppResult Deferred::iterate()
 {
+    m_camera.iterate();
+
     glBindFramebuffer(GL_FRAMEBUFFER, m_gbuffer);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_geometryPass.use();
-    m_geometryPass.setMat4("view", view());
-    m_geometryPass.setMat4("projection", projection());
+    m_geometryPass.setMat4("view", m_camera.view());
+    m_geometryPass.setMat4("projection", m_camera.projection());
 
     m_floorDiffuse.activate(0);
     m_floorSpecular.activate(1);
@@ -272,7 +280,7 @@ Status Deferred::render()
 
     m_deferredLighting.use();
     m_deferredLighting.setInt("numLights", NUM_LIGHTS);
-    m_deferredLighting.setVec3("viewPos", camera().position);
+    m_deferredLighting.setVec3("viewPos", m_camera.data.position);
     m_deferredLighting.setInt("visualizedBuffer", static_cast<int>(m_visualizedBuffer));
 
     glActiveTexture(GL_TEXTURE0);
@@ -284,9 +292,7 @@ Status Deferred::render()
     glBindVertexArray(m_dummyVAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    swapWindow();
-
-    return Status::Ok;
+    return GLlelu::iterate();
 }
 
 void Deferred::recreateGbuffer()

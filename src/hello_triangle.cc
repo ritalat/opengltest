@@ -21,31 +21,25 @@ class HelloTriangle: public GLlelu
 public:
     HelloTriangle(int argc, char *argv[]);
     virtual ~HelloTriangle();
+    virtual SDL_AppResult iterate();
 
-protected:
-    virtual int mainLoop();
+private:
+    Shader m_triangleShader;
+    unsigned int m_VAO;
+    unsigned int m_VBO;
 };
 
 HelloTriangle::HelloTriangle(int argc, char *argv[]):
-    GLlelu(argc, argv)
+    GLlelu(argc, argv),
+    m_triangleShader("triangle.vert", "triangle.frag"),
+    m_VAO(0),
+    m_VBO(0)
 {
-}
+    glGenVertexArrays(1, &m_VAO);
+    glBindVertexArray(m_VAO);
 
-HelloTriangle::~HelloTriangle()
-{
-}
-
-int HelloTriangle::mainLoop()
-{
-    Shader triangleShader("triangle.vert", "triangle.frag");
-
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glGenBuffers(1, &m_VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
@@ -56,39 +50,25 @@ int HelloTriangle::mainLoop()
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    bool quit = false;
-    SDL_Event event;
+}
 
-    while (!quit) {
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-                case SDL_EVENT_QUIT:
-                    quit = true;
-                    break;
-                case SDL_EVENT_KEY_UP:
-                    if (SDL_SCANCODE_ESCAPE == event.key.scancode)
-                        quit = true;
-                    break;
-                default:
-                    break;
-            }
-        }
+HelloTriangle::~HelloTriangle()
+{
+    glDeleteVertexArrays(1, &m_VAO);
+    glDeleteBuffers(1, &m_VBO);
+}
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+SDL_AppResult HelloTriangle::iterate()
+{
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-        triangleShader.use();
+    m_triangleShader.use();
 
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(m_VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        swapWindow();
-    }
-
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-
-    return EXIT_SUCCESS;
+    return GLlelu::iterate();
 }
 
 GLLELU_MAIN_IMPLEMENTATION(HelloTriangle)

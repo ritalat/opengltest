@@ -1,4 +1,5 @@
-#include "gllelucamera.hh"
+#include "camera.hh"
+#include "gllelu.hh"
 #include "gllelu_main.hh"
 #include "himmeli.hh"
 #include "shader.hh"
@@ -25,16 +26,16 @@ const BasicMaterial gold {
     128.0f * 0.4f
 };
 
-class ObjFiles: public GLleluCamera
+class ObjFiles: public GLlelu
 {
 public:
     ObjFiles(int argc, char *argv[]);
     virtual ~ObjFiles();
-
-protected:
-    virtual Status render();
+    virtual SDL_AppResult event(SDL_Event *event);
+    virtual SDL_AppResult iterate();
 
 private:
+    Camera m_camera;
     Shader m_lightingShader;
     Shader m_lightingShaderBasic;
     Shader m_lightShader;
@@ -46,7 +47,8 @@ private:
 };
 
 ObjFiles::ObjFiles(int argc, char *argv[]):
-    GLleluCamera(argc, argv),
+    GLlelu(argc, argv),
+    m_camera(this),
     m_lightingShader("lighting.vert", "lighting_textured.frag"),
     m_lightingShaderBasic("lighting.vert", "lighting_basic.frag"),
     m_lightShader("light.vert", "light.frag"),
@@ -56,6 +58,9 @@ ObjFiles::ObjFiles(int argc, char *argv[]):
     m_lightVAO(0),
     m_lightVBO(0)
 {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
     m_room.translate(glm::vec3(0.0f, -0.5f, 0.0f));
     m_room.rotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     m_room.rotate(glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -88,32 +93,40 @@ ObjFiles::~ObjFiles()
     glDeleteBuffers(1, &m_lightVBO);
 }
 
-Status ObjFiles::render()
+SDL_AppResult ObjFiles::event(SDL_Event *event)
 {
+    m_camera.event(event);
+    return GLlelu::event(event);
+}
+
+SDL_AppResult ObjFiles::iterate()
+{
+    m_camera.iterate();
+
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_lightingShader.use();
-    m_lightingShader.setMat4("view", view());
-    m_lightingShader.setMat4("projection", projection());
+    m_lightingShader.setMat4("view", m_camera.view());
+    m_lightingShader.setMat4("projection", m_camera.projection());
 
     m_lightingShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
     m_lightingShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
     m_lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
     m_lightingShader.setVec3("light.position", lightPos);
-    m_lightingShader.setVec3("viewPos", camera().position);
+    m_lightingShader.setVec3("viewPos", m_camera.data.position);
 
     m_room.draw(m_lightingShader);
 
     m_lightingShaderBasic.use();
-    m_lightingShaderBasic.setMat4("view", view());
-    m_lightingShaderBasic.setMat4("projection", projection());
+    m_lightingShaderBasic.setMat4("view", m_camera.view());
+    m_lightingShaderBasic.setMat4("projection", m_camera.projection());
 
     m_lightingShaderBasic.setVec3("light.ambient", 1.0f, 1.0f, 1.0f);
     m_lightingShaderBasic.setVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
     m_lightingShaderBasic.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
     m_lightingShaderBasic.setVec3("light.position", lightPos);
-    m_lightingShaderBasic.setVec3("viewPos", camera().position);
+    m_lightingShaderBasic.setVec3("viewPos", m_camera.data.position);
 
     m_monkey.draw(m_lightingShaderBasic);
     m_teapot.rotate(glm::mat4(1.0f),
@@ -122,8 +135,8 @@ Status ObjFiles::render()
     m_teapot.draw(m_lightingShaderBasic);
 
     m_lightShader.use();
-    m_lightShader.setMat4("view", view());
-    m_lightShader.setMat4("projection", projection());
+    m_lightShader.setMat4("view", m_camera.view());
+    m_lightShader.setMat4("projection", m_camera.projection());
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, lightPos);
@@ -133,9 +146,7 @@ Status ObjFiles::render()
     glBindVertexArray(m_lightVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    swapWindow();
-
-    return Status::Ok;
+    return GLlelu::iterate();
 }
 
 GLLELU_MAIN_IMPLEMENTATION(ObjFiles)

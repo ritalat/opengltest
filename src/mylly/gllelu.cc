@@ -102,6 +102,17 @@ GLlelu::GLlelu(int argc, char *argv[], GLVersion glVersion):
     glViewport(0, 0, m_fbSize.width, m_fbSize.height);
 
     SDL_GL_SetSwapInterval(1);
+
+    fprintf(stderr, "Window size: %dx%d\n", m_windowSize.width, m_windowSize.height);
+    fprintf(stderr, "Drawable size: %dx%d\n", m_fbSize.width, m_fbSize.height);
+
+    fprintf(stderr, "OpenGL vendor: %s\n", glGetString(GL_VENDOR));
+    fprintf(stderr, "OpenGL renderer: %s\n", glGetString(GL_RENDERER));
+    fprintf(stderr, "OpenGL version: %s\n", glGetString(GL_VERSION));
+    fprintf(stderr, "OpenGL Shading Language version: %s\n",
+                    glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    SDL_ShowWindow(m_window);
 }
 
 GLlelu::~GLlelu()
@@ -115,26 +126,69 @@ GLlelu::~GLlelu()
     SDL_Quit();
 }
 
-int GLlelu::run()
+SDL_AppResult GLlelu::event(SDL_Event *event)
 {
-    if (!m_window || !m_context)
-        return EXIT_FAILURE;
+    switch(event->type) {
+        case SDL_EVENT_QUIT:
+            return SDL_APP_SUCCESS;
 
-    if (m_fullscreen) {
-        fprintf(stderr, "Window size: fullscreen\n");
-    } else {
-        fprintf(stderr, "Window size: %dx%d\n", m_windowSize.width, m_windowSize.height);
+        case SDL_EVENT_KEY_UP:
+            if (SDL_SCANCODE_ESCAPE == event->key.scancode)
+                return SDL_APP_SUCCESS;
+            if (SDL_SCANCODE_F == event->key.scancode)
+                windowFullscreen(!windowFullscreen());
+            if (SDL_SCANCODE_G == event->key.scancode)
+                windowGrab(!windowGrab());
+            break;
+
+        case SDL_EVENT_GAMEPAD_BUTTON_UP:
+            if (m_gamepad && event->gbutton.which == m_gamepadId) {
+                if (SDL_GAMEPAD_BUTTON_EAST == event->gbutton.button)
+                return SDL_APP_SUCCESS;
+                if (SDL_GAMEPAD_BUTTON_NORTH == event->gbutton.button)
+                    windowFullscreen(!windowFullscreen());
+            }
+            break;
+
+        case SDL_EVENT_GAMEPAD_ADDED:
+            if (!m_gamepad) {
+                m_gamepad = SDL_OpenGamepad(event->gdevice.which);
+                m_gamepadId = SDL_GetJoystickID(SDL_GetGamepadJoystick(m_gamepad));
+            }
+            break;
+
+        case SDL_EVENT_GAMEPAD_REMOVED:
+            if (m_gamepad && event->cdevice.which == m_gamepadId) {
+                SDL_CloseGamepad(m_gamepad);
+                m_gamepad = NULL;
+                m_gamepadId = 0;
+                findGamepad();
+            }
+            break;
+
+        case SDL_EVENT_WINDOW_RESIZED:
+            if (event->window.windowID == windowId()) {
+                updateWindowSize();
+            }
+            break;
+
+        case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+            if (event->window.windowID == windowId()) {
+                updateWindowSize();
+            }
+            break;
+
+        default:
+            break;
     }
-    fprintf(stderr, "Drawable size: %dx%d\n", m_fbSize.width, m_fbSize.height);
 
-    fprintf(stderr, "OpenGL vendor: %s\n", glGetString(GL_VENDOR));
-    fprintf(stderr, "OpenGL renderer: %s\n", glGetString(GL_RENDERER));
-    fprintf(stderr, "OpenGL version: %s\n", glGetString(GL_VERSION));
-    fprintf(stderr, "OpenGL Shading Language version: %s\n",
-                    glGetString(GL_SHADING_LANGUAGE_VERSION));
+    return SDL_APP_CONTINUE;
+}
 
-    SDL_ShowWindow(m_window);
-    return mainLoop();
+SDL_AppResult GLlelu::iterate()
+{
+    SDL_GL_SwapWindow(m_window);
+    return SDL_APP_CONTINUE;
 }
 
 void GLlelu::windowName(std::string_view name)
@@ -192,12 +246,28 @@ bool GLlelu::windowGrab() const
     return m_mouseGrab;
 }
 
-void GLlelu::swapWindow()
-{
-    SDL_GL_SwapWindow(m_window);
-}
-
 unsigned int GLlelu::windowId() const
 {
     return SDL_GetWindowID(m_window);
+}
+
+void GLlelu::findGamepad()
+{
+    int numJoysticks;
+    SDL_JoystickID *joysticks = SDL_GetJoysticks(&numJoysticks);
+    if (joysticks) {
+        for (int i = 0; i < numJoysticks; ++i) {
+            if (SDL_IsGamepad(i)) {
+                m_gamepad = SDL_OpenGamepad(i);
+                m_gamepadId = SDL_GetJoystickID(SDL_GetGamepadJoystick(m_gamepad));
+                break;
+            }
+        }
+        SDL_free(joysticks);
+    }
+}
+
+SDL_Gamepad *GLlelu::gamepad() const
+{
+    return m_gamepad;
 }

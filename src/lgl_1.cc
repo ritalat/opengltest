@@ -1,4 +1,5 @@
-#include "gllelucamera.hh"
+#include "camera.hh"
+#include "gllelu.hh"
 #include "gllelu_main.hh"
 #include "path.hh"
 #include "shader.hh"
@@ -70,16 +71,16 @@ const glm::vec3 cubePositions[] = {
     glm::vec3(-1.3f,  1.0f, -1.5f)
 };
 
-class LGL1: public GLleluCamera
+class LGL1: public GLlelu
 {
 public:
     LGL1(int argc, char *argv[]);
     virtual ~LGL1();
-
-protected:
-    virtual Status render();
+    virtual SDL_AppResult event(SDL_Event *event);
+    virtual SDL_AppResult iterate();
 
 private:
+    Camera m_camera;
     Shader m_texturedShader;
     Texture m_texture0;
     Texture m_texture1;
@@ -88,13 +89,17 @@ private:
 };
 
 LGL1::LGL1(int argc, char *argv[]):
-    GLleluCamera(argc, argv),
+    GLlelu(argc, argv),
+    m_camera(this),
     m_texturedShader("textured.vert", "textured.frag"),
     m_texture0("lgl_container.jpg"),
     m_texture1("lgl_awesomeface.png"),
     m_VAO(0),
     m_VBO(0)
 {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
     m_texturedShader.use();
     m_texturedShader.setInt("texture0", 0);
     m_texturedShader.setInt("texture1", 1);
@@ -121,8 +126,16 @@ LGL1::~LGL1()
     glDeleteBuffers(1, &m_VBO);
 }
 
-Status LGL1::render()
+SDL_AppResult LGL1::event(SDL_Event *event)
 {
+    m_camera.event(event);
+    return GLlelu::event(event);
+}
+
+SDL_AppResult LGL1::iterate()
+{
+    m_camera.iterate();
+
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -130,8 +143,8 @@ Status LGL1::render()
     m_texture1.activate(1);
 
     m_texturedShader.use();
-    m_texturedShader.setMat4("view", view());
-    m_texturedShader.setMat4("projection", projection());
+    m_texturedShader.setMat4("view", m_camera.view());
+    m_texturedShader.setMat4("projection", m_camera.projection());
 
     glBindVertexArray(m_VAO);
     int ncubes = sizeof(cubePositions) / sizeof(glm::vec3);
@@ -146,9 +159,7 @@ Status LGL1::render()
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
-    swapWindow();
-
-    return Status::Ok;
+    return GLlelu::iterate();
 }
 
 GLLELU_MAIN_IMPLEMENTATION(LGL1)

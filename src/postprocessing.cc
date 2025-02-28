@@ -1,4 +1,5 @@
-#include "gllelucamera.hh"
+#include "camera.hh"
+#include "gllelu.hh"
 #include "gllelu_main.hh"
 #include "shader.hh"
 #include "shapes.hh"
@@ -30,18 +31,17 @@ const float floorPlane[] = {
     -1.0f, 0.0f,  1.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f
 };
 
-class PostProcessing: public GLleluCamera
+class PostProcessing: public GLlelu
 {
 public:
     PostProcessing(int argc, char *argv[]);
     virtual ~PostProcessing();
-
-protected:
-    virtual Status event(SDL_Event &event);
-    virtual Status render();
+    virtual SDL_AppResult event(SDL_Event *event);
+    virtual SDL_AppResult iterate();
     void recreateFramebuffer();
 
 private:
+    Camera m_camera;
     Shader m_ppShader;
     Shader m_sceneShader;
     Texture m_floorTexture;
@@ -58,7 +58,8 @@ private:
 };
 
 PostProcessing::PostProcessing(int argc, char *argv[]):
-    GLleluCamera(argc, argv),
+    GLlelu(argc, argv),
+    m_camera(this),
     m_ppShader("fullscreen.vert", "postprocessing.frag"),
     m_sceneShader("postprocessing_scene.vert", "postprocessing_scene.frag"),
     m_floorTexture("lgl_wall.jpg"),
@@ -72,14 +73,17 @@ PostProcessing::PostProcessing(int argc, char *argv[]):
     m_depthStencilRBO(0),
     m_currentEffect(EFFECT_NONE)
 {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
     m_ppShader.use();
     m_ppShader.setInt("texture0", 0);
     m_sceneShader.use();
     m_sceneShader.setInt("texture0", 0);
 
-    camera().position = glm::vec3(2.5f, 1.5f, 3.5f);
-    camera().pitch = -20.0f;
-    camera().yaw = -127.5f;
+    m_camera.data.position = glm::vec3(2.5f, 1.5f, 3.5f);
+    m_camera.data.pitch = -20.0f;
+    m_camera.data.yaw = -127.5f;
 
     glGenVertexArrays(1, &m_planeVAO);
     glBindVertexArray(m_planeVAO);
@@ -127,11 +131,11 @@ PostProcessing::~PostProcessing()
     glDeleteRenderbuffers(1, &m_depthStencilRBO);
 }
 
-Status PostProcessing::event(SDL_Event &event)
+SDL_AppResult PostProcessing::event(SDL_Event *event)
 {
-    switch (event.type) {
+    switch (event->type) {
         case SDL_EVENT_KEY_UP:
-            if (SDL_SCANCODE_RETURN == event.key.scancode) {
+            if (SDL_SCANCODE_RETURN == event->key.scancode) {
                 int tmp = static_cast<int>(m_currentEffect);
                 ++tmp;
                 if (tmp >= static_cast<int>(EFFECT_END))
@@ -140,26 +144,30 @@ Status PostProcessing::event(SDL_Event &event)
             }
             break;
         case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
-            if (event.window.windowID == windowId()) {
+            if (event->window.windowID == windowId()) {
                 recreateFramebuffer();
             }
             break;
         default:
             break;
     }
-    return Status::Ok;
+
+    m_camera.event(event);
+    return GLlelu::event(event);
 }
 
-Status PostProcessing::render()
+SDL_AppResult PostProcessing::iterate()
 {
+    m_camera.iterate();
+
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_sceneShader.use();
-    m_sceneShader.setMat4("view", view());
-    m_sceneShader.setMat4("projection", projection());
+    m_sceneShader.setMat4("view", m_camera.view());
+    m_sceneShader.setMat4("projection", m_camera.projection());
 
     m_floorTexture.activate(0);
 
@@ -195,9 +203,7 @@ Status PostProcessing::render()
     glBindVertexArray(m_dummyVAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 
-    swapWindow();
-
-    return Status::Ok;
+    return GLlelu::iterate();
 }
 
 void PostProcessing::recreateFramebuffer()

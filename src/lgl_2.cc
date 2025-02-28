@@ -1,4 +1,5 @@
-#include "gllelucamera.hh"
+#include "camera.hh"
+#include "gllelu.hh"
 #include "gllelu_main.hh"
 #include "path.hh"
 #include "shader.hh"
@@ -83,17 +84,16 @@ const glm::vec3 pointLightPositions[] = {
 
 const int numPointLights = sizeof(pointLightPositions) / sizeof(glm::vec3);
 
-class LGL2: public GLleluCamera
+class LGL2: public GLlelu
 {
 public:
     LGL2(int argc, char *argv[]);
     virtual ~LGL2();
-
-protected:
-    virtual Status event(SDL_Event &event);
-    virtual Status render();
+    virtual SDL_AppResult event(SDL_Event *event);
+    virtual SDL_AppResult iterate();
 
 private:
+    Camera m_camera;
     Shader m_lightingShader;
     Shader m_lightShader;
     Texture m_diffuseMap;
@@ -106,7 +106,8 @@ private:
 };
 
 LGL2::LGL2(int argc, char *argv[]):
-    GLleluCamera(argc, argv),
+    GLlelu(argc, argv),
+    m_camera(this),
     m_lightingShader("lighting.vert", "lighting.frag"),
     m_lightShader("light.vert", "light.frag"),
     m_diffuseMap("lgl_container2.png"),
@@ -117,6 +118,9 @@ LGL2::LGL2(int argc, char *argv[]):
     m_UBO(0),
     m_enableSpotLight(true)
 {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
     m_lightingShader.use();
     m_lightingShader.setInt("material.diffuse", 0);
     m_lightingShader.setInt("material.specular", 1);
@@ -157,8 +161,8 @@ LGL2::LGL2(int argc, char *argv[]):
     // https://wiki.ogre3d.org/-Point+Light+Attenuation
     LightUniformBuffer uboData {};
 
-    uboData.spotLight.position = glm::vec4(camera().position, 0.0f);
-    uboData.spotLight.direction = glm::vec4(camera().front, 0.0f);
+    uboData.spotLight.position = glm::vec4(m_camera.data.position, 0.0f);
+    uboData.spotLight.direction = glm::vec4(m_camera.data.front, 0.0f);
     uboData.spotLight.ambient = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
     uboData.spotLight.diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
     uboData.spotLight.specular = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
@@ -204,21 +208,25 @@ LGL2::~LGL2()
     glDeleteBuffers(1, &m_UBO);
 }
 
-Status LGL2::event(SDL_Event &event)
+SDL_AppResult LGL2::event(SDL_Event *event)
 {
-    switch (event.type) {
+    switch (event->type) {
         case SDL_EVENT_KEY_UP:
-            if (SDL_SCANCODE_RETURN == event.key.scancode)
+            if (SDL_SCANCODE_RETURN == event->key.scancode)
                 m_enableSpotLight = !m_enableSpotLight;
             break;
         default:
             break;
     }
-    return Status::Ok;
+
+    m_camera.event(event);
+    return GLlelu::event(event);
 }
 
-Status LGL2::render()
+SDL_AppResult LGL2::iterate()
 {
+    m_camera.iterate();
+
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -227,14 +235,14 @@ Status LGL2::render()
 
     m_lightingShader.use();
 
-    m_lightingShader.setMat4("view", view());
-    m_lightingShader.setMat4("projection", projection());
+    m_lightingShader.setMat4("view", m_camera.view());
+    m_lightingShader.setMat4("projection", m_camera.projection());
 
-    m_lightingShader.setVec3("viewPos", camera().position);
+    m_lightingShader.setVec3("viewPos", m_camera.data.position);
     m_lightingShader.setBool("enableSpotLight", m_enableSpotLight);
 
     glBindBuffer(GL_UNIFORM_BUFFER, m_UBO);
-    glm::vec4 spotLightPos[2] = { glm::vec4(camera().position, 0.0f), glm::vec4(camera().front, 0.0f) };
+    glm::vec4 spotLightPos[2] = { glm::vec4(m_camera.data.position, 0.0f), glm::vec4(m_camera.data.front, 0.0f) };
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(spotLightPos), &spotLightPos);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -255,8 +263,8 @@ Status LGL2::render()
 
     m_lightShader.use();
 
-    m_lightShader.setMat4("view", view());
-    m_lightShader.setMat4("projection", projection());
+    m_lightShader.setMat4("view", m_camera.view());
+    m_lightShader.setMat4("projection", m_camera.projection());
 
     glBindVertexArray(m_lightVAO);
     int nplights = sizeof(pointLightPositions) / sizeof(glm::vec3);
@@ -269,9 +277,7 @@ Status LGL2::render()
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
-    swapWindow();
-
-    return Status::Ok;
+    return GLlelu::iterate();
 }
 
 GLLELU_MAIN_IMPLEMENTATION(LGL2)

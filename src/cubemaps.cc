@@ -1,4 +1,5 @@
-#include "gllelucamera.hh"
+#include "camera.hh"
+#include "gllelu.hh"
 #include "gllelu_main.hh"
 #include "model.hh"
 #include "shader.hh"
@@ -65,16 +66,16 @@ const float skyboxVertices[] = {
      1.0f, -1.0f,  1.0f
 };
 
-class Cubemaps: public GLleluCamera
+class Cubemaps: public GLlelu
 {
 public:
     Cubemaps(int argc, char *argv[]);
     virtual ~Cubemaps();
-
-protected:
-    virtual Status render();
+    virtual SDL_AppResult event(SDL_Event *event);
+    virtual SDL_AppResult iterate();
 
 private:
+    Camera m_camera;
     Shader m_skyboxShader;
     Shader m_environmentMapShader;
     Model m_teapot;
@@ -84,7 +85,8 @@ private:
 };
 
 Cubemaps::Cubemaps(int argc, char *argv[]):
-    GLleluCamera(argc, argv),
+    GLlelu(argc, argv),
+    m_camera(this),
     m_skyboxShader("skybox.vert", "skybox.frag"),
     m_environmentMapShader("environment_map.vert", "environment_map.frag"),
     m_teapot("teapot.obj"),
@@ -92,6 +94,9 @@ Cubemaps::Cubemaps(int argc, char *argv[]):
     m_skyboxVAO(0),
     m_skyboxVBO(0)
 {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
     m_skyboxShader.use();
     m_skyboxShader.setInt("skybox", 0);
     m_environmentMapShader.use();
@@ -117,17 +122,25 @@ Cubemaps::~Cubemaps()
     glDeleteBuffers(1, &m_skyboxVBO);
 }
 
-Status Cubemaps::render()
+SDL_AppResult Cubemaps::event(SDL_Event *event)
 {
+    m_camera.event(event);
+    return GLlelu::event(event);
+}
+
+SDL_AppResult Cubemaps::iterate()
+{
+    m_camera.iterate();
+
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_skybox.activate(0);
 
     m_environmentMapShader.use();
-    m_environmentMapShader.setMat4("view", view());
-    m_environmentMapShader.setMat4("projection", projection());
-    m_environmentMapShader.setVec3("viewPos", camera().position);
+    m_environmentMapShader.setMat4("view", m_camera.view());
+    m_environmentMapShader.setMat4("projection", m_camera.projection());
+    m_environmentMapShader.setVec3("viewPos", m_camera.data.position);
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
@@ -143,8 +156,8 @@ Status Cubemaps::render()
     glDepthFunc(GL_LEQUAL);
 
     m_skyboxShader.use();
-    m_skyboxShader.setMat4("view", glm::mat4(glm::mat3(view())));
-    m_skyboxShader.setMat4("projection", projection());
+    m_skyboxShader.setMat4("view", glm::mat4(glm::mat3(m_camera.view())));
+    m_skyboxShader.setMat4("projection", m_camera.projection());
 
     glBindVertexArray(m_skyboxVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -152,9 +165,7 @@ Status Cubemaps::render()
 
     glDepthFunc(GL_LESS);
 
-    swapWindow();
-
-    return Status::Ok;
+    return GLlelu::iterate();
 }
 
 GLLELU_MAIN_IMPLEMENTATION(Cubemaps)

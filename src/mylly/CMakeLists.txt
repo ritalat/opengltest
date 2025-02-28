@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(SOURCES gllelu.cc
-            gllelucamera.cc
+set(SOURCES camera.cc
+            gllelu.cc
             himmeli.cc
             model.cc
             path.cc
@@ -10,9 +10,9 @@ set(SOURCES gllelu.cc
             texture.cc)
 
 set(HEADERS api_decl.hh
+            camera.hh
             gllelu.hh
             gllelu_main.hh
-            gllelucamera.hh
             himmeli.hh
             model.hh
             path.hh
